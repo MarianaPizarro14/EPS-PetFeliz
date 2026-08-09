@@ -1,0 +1,613 @@
+/* MisMascotas.css */
+
+.btn-add-pet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #059669;
+  color: var(--white);
+  border: none;
+  padding: 0.65rem 1.35rem;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-add-pet:hover {
+  background: #047857;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.38);
+}
+
+.btn-add-pet--lg {
+  padding: 0.75rem 1.6rem;
+  font-size: 0.92rem;
+  margin-top: 1rem;
+}
+
+
+/* ── PETS GRID ── */
+
+.pets-section {
+  margin-top: 1.5rem;
+}
+
+.pets-empty {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pets-empty__icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.12);
+  color: var(--green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.pets-empty__icon i {
+  font-size: 2.1rem;
+}
+
+
+.pets-empty h3 {
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  color: var(--dark);
+}
+
+.pets-empty p {
+  color: var(--gray-text);
+  max-width: 450px;
+  font-size: 0.9rem;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.pet-card-full {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pet-card-full:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.pet-card-full__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pet-card-full__photo-wrap {
+  position: relative;
+}
+
+.pet-card-full__photo-wrap img {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pet-card-full__status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue-accent, #2563EB);
+  color: var(--white);
+  border: 2px solid var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+
+.pet-card-full__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-icon-pet {
+  background: var(--gray-back);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-text);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-icon-pet--edit:hover {
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--green-dark);
+}
+
+.btn-icon-pet--delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.pet-card-full__name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+
+.pet-card-full__breed {
+  font-size: 0.82rem;
+  color: var(--gray-soft);
+  margin-bottom: 1rem;
+}
+
+.pet-card-full__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  background: var(--gray-back);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.pet-detail-tag {
+  display: flex;
+  flex-direction: column;
+}
+
+.pet-detail-tag__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray-soft);
+  letter-spacing: 0.03em;
+}
+
+.pet-detail-tag__val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-top: 0.15rem;
+}
+
+/* ── MODALES ── */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 999;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+.modal-box {
+  background: var(--white);
+  width: 100%;
+  max-width: 540px;
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modalIn 0.25s ease-out;
+  margin: auto;
+  position: relative;
+}
+
+
+.modal-box--sm {
+  max-width: 420px;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-box__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.modal-box__header h3 {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.modal-box__close {
+  background: none;
+  border: none;
+  color: var(--gray-soft);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+}
+
+.modal-box__close:hover {
+  color: var(--dark);
+}
+
+.modal-box__error {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pet-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pet-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pet-form__field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-text);
+}
+
+.pet-form__field input,
+.pet-form__field select {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--dark);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.pet-form__field input:focus,
+.pet-form__field select:focus {
+  border-color: var(--green-dark);
+}
+
+/* ── DATE PICKER MODERNO ── */
+
+.date-picker-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pet-date-input {
+  width: 100%;
+  padding-right: 2.5rem !important;
+  accent-color: var(--green-dark);
+  color-scheme: light;
+  font-family: inherit;
+}
+
+.pet-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+.date-picker-icon-wrap {
+  position: absolute;
+  right: 0.85rem;
+  pointer-events: none;
+  color: var(--green-dark);
+  display: flex;
+  align-items: center;
+}
+
+/* ── CARGA DE FOTO Y PREVISUALIZACIÓN ── */
+
+.pet-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.pet-upload-box {
+  margin-top: 0.25rem;
+}
+
+.pet-upload-dropzone {
+  display: block;
+  border: 2px dashed rgba(46, 204, 113, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background: rgba(46, 204, 113, 0.04);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.pet-upload-dropzone:hover,
+.pet-upload-dropzone--dragging {
+  border-color: var(--green-dark);
+  background: rgba(46, 204, 113, 0.12);
+  transform: scale(1.01);
+}
+
+.pet-upload-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-change-photo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  background: #ecfdf5;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.btn-change-photo:hover {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.pet-upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pet-upload-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+}
+
+.pet-upload-text {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.85rem;
+  color: var(--dark);
+  font-stretch: normal;
+  letter-spacing: 0.018em;
+  line-height: 1.45;
+}
+
+.pet-upload-text strong {
+  color: var(--green-dark);
+  font-weight: 700;
+  letter-spacing: 0.018em;
+}
+
+.pet-upload-hint {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.72rem;
+  color: var(--gray-soft);
+  letter-spacing: 0.015em;
+  line-height: 1.35;
+}
+
+
+.pet-upload-preview {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border: 3px solid var(--white);
+}
+
+.pet-upload-preview img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.btn-remove-photo {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: var(--white);
+  border: 2px solid var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-remove-photo:hover {
+  background: #b91c1c;
+}
+
+
+.modal-box__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-modal-secondary {
+  background: var(--gray-back);
+  color: var(--gray-text);
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-modal-primary {
+  background: var(--green-dark);
+  color: var(--white);
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-modal-danger {
+  background: #dc2626;
+  color: var(--white);
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .pet-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── TARJETA "AGREGAR NUEVA MASCOTA" EN LA CUADRÍCULA ── */
+.pet-card-add-new {
+  background: #ecfdf5;
+  border: 2px dashed #a7f3d0;
+  border-radius: var(--radius-lg, 20px);
+  padding: 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  min-height: 220px;
+  transition: all 0.2s ease;
+}
+
+.pet-card-add-new:hover {
+  background: #d1fae5;
+  border-color: #059669;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.15);
+}
+
+.pet-card-add-new__icon-wrap {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.pet-card-add-new:hover .pet-card-add-new__icon-wrap {
+  transform: scale(1.1);
+  background: #059669;
+  color: #ffffff;
+}
+
+.pet-card-add-new__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+
+.pet-card-add-new__sub {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.4;
+  max-width: 230px;
+}
+

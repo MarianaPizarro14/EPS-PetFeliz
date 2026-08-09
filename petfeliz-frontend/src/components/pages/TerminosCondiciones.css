@@ -1,0 +1,45 @@
+/* ── TÉRMINOS Y CONDICIONES ────────────────────────────────── */
+
+/* Reutiliza todas las clases .legal-* de PoliticaPrivacidad.css.
+   Este archivo solo añade los estilos exclusivos de esta página. */
+
+/* TERMS HERO — extiende .hero de hero.css */
+.terms-hero__inner {
+  max-width: 640px;
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+.terms-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.terms-hero__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.terms-hero__meta-item svg {
+  stroke: var(--green-dark);
+  flex-shrink: 0;
+}
+
+/* Oscurece el párrafo descriptor dentro del hero */
+.terms-hero.hero .hero__desc {
+  color: var(--dark) !important;
+  opacity: 0.7;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .terms-hero__meta {
+    gap: 1rem;
+  }
+}

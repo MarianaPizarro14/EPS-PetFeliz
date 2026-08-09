@@ -1,0 +1,495 @@
+/* Dashboard.css */
+
+.dash {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background: var(--gray-back);
+}
+
+/* ── SIDEBAR ── */
+
+.dash-side {
+    background: var(--white);
+    border-right: 1px solid rgba(0, 0, 0, .06);
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.dash-side__logo {
+    display: flex;
+    flex-direction: column;
+    padding: 0 .75rem 2rem;
+}
+
+.dash-side__logo-title {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--green-dark);
+}
+
+.dash-side__logo-sub {
+    font-size: .72rem;
+    color: var(--gray-soft);
+    font-weight: 600;
+}
+
+.dash-side__nav {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.dash-side__nav--bottom {
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    padding-top: 1rem;
+}
+
+.dash-side__link {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .75rem;
+    border-radius: var(--radius-sm);
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--gray-text);
+    transition: background .2s, color .2s;
+}
+
+.dash-side__link:hover {
+    background: var(--gray-back);
+    color: var(--dark);
+}
+
+.dash-side__link--active {
+    background: var(--blue-light, #EFF6FF);
+    color: var(--blue-accent, #2563EB);
+}
+
+
+/* ── MAIN / HEADER ── */
+
+.dash-main {
+    padding: 2.5rem clamp(1.5rem, 3vw, 3rem);
+}
+
+.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.dash-header__title {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.dash-header__subtitle {
+    font-size: .9rem;
+    color: var(--gray-text);
+    margin-top: .25rem;
+}
+
+.dash-header__right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.dash-header__bell {
+    background: none;
+    border: none;
+    color: var(--gray-text);
+    cursor: pointer;
+    display: flex;
+}
+
+.dash-header__user {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.dash-header__avatar {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    flex-shrink: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    overflow: hidden !important;
+}
+
+
+/* ── TOP GRID: CTA + MASCOTAS ── */
+
+.dash-top {
+    display: grid;
+    grid-template-columns: .9fr 1.6fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.dash-cta {
+    background: linear-gradient(-135deg, #2d7a52 20%, var(--green-dark) 80%);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+    cursor: pointer;
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(26, 92, 58, .3);
+    transition: transform .2s, box-shadow .2s;
+}
+
+.dash-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(26, 92, 58, .4);
+}
+
+.dash-cta__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .5rem;
+}
+
+.dash-cta__title {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.dash-cta__desc {
+    font-size: .82rem;
+    color: rgba(255, 255, 255, .85);
+    text-align: left;
+}
+
+.dash-pets {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.dash-pets__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.dash-pets__title {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--gray-text);
+}
+
+
+.dash-pets__link {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--green-dark);
+}
+
+
+.dash-pets__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.dash-pet-card {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    border: 1px solid rgba(0, 0, 0, .06);
+    border-radius: var(--radius-sm);
+    padding: .8rem;
+}
+
+.dash-pet-card__photo-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dash-pet-card__photo-wrap img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.dash-pet-card__status {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .6rem;
+    font-weight: 800;
+    color: var(--white);
+}
+
+.dash-pet-card__status--ok { background: var(--blue-accent, #2563EB); }
+
+.dash-pet-card__status--alerta { background: #f0ad4e; }
+
+.dash-pet-card__info h4 {
+    font-family: var(--font-head);
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+
+.dash-pet-card__info p {
+    font-size: .78rem;
+    color: var(--gray-soft);
+    margin-bottom: .35rem;
+}
+
+.dash-pet-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    color: #6C5E1B;
+
+    background: rgba(206, 188, 111, .2);
+    padding: .25rem .5rem;
+    border-radius: 100px;
+}
+
+/* ── APPOINTMENTS ── */
+
+.dash-appointments {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.dash-appointments__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.dash-appointments__header h3 {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.dash-tabs {
+    display: flex;
+    background: var(--gray-back);
+    border-radius: 100px;
+    padding: .25rem;
+    gap: .25rem;
+}
+
+.dash-tabs__btn {
+    border: none;
+    background: transparent;
+    padding: .45rem 1rem;
+    border-radius: 100px;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--gray-text);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+}
+
+.dash-tabs__btn--active {
+    background: var(--white);
+    color: var(--dark);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+
+.dash-appointments__list {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.dash-appointment-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, .06);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+}
+
+.dash-appointment-row__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 0, 0, .08);
+}
+
+.dash-appointment-row__month {
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--gray-soft);
+    text-transform: uppercase;
+}
+
+.dash-appointment-row__day {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--green-dark);
+}
+
+.dash-appointment-row__body {
+    flex: 1;
+}
+
+.dash-appointment-row__meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .3rem;
+}
+
+.dash-appointment-row__badge {
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: .2rem .5rem;
+    border-radius: 100px;
+}
+
+.dash-appointment-row__badge--chequeo {
+    background: rgba(46, 204, 113, .15);
+    color: #1a5c3a;
+}
+
+.dash-appointment-row__badge--vacunacion {
+    background: rgba(99, 215, 254, .2);
+    color: #006780;
+}
+
+.dash-appointment-row__hora {
+    font-size: .75rem;
+    color: var(--gray-soft);
+    font-weight: 600;
+}
+
+.dash-appointment-row__body h4 {
+    font-family: var(--font-head);
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: .2rem;
+}
+
+.dash-appointment-row__body p {
+    font-size: .78rem;
+    color: var(--gray-text);
+}
+
+.dash-appointment-row__actions {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.dash-appointment-row__edit {
+    background: none;
+    border: none;
+    color: var(--gray-soft);
+    cursor: pointer;
+    padding: .4rem;
+}
+
+.dash-appointment-row__edit:hover { color: var(--dark); }
+
+.btn-appointment {
+    background: var(--dark);
+    color: var(--white);
+    border: none;
+    padding: .6rem 1.25rem;
+    border-radius: 100px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .2s;
+}
+
+.btn-appointment:hover { transform: translateY(-1px); }
+
+/* ── FOOTER ── */
+
+.dash-footer {
+    text-align: center;
+    font-size: .78rem;
+    color: var(--gray-soft);
+    margin-top: 2.5rem;
+}
+
+/* Agregar esto a tu DashboardClient.css existente */
+
+.dash-side__link--support {
+  font-weight: 400;
+}
+
+.dash-side__link--logout {
+  /* resetea estilos por defecto de <button> */
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-weight: 700;
+}
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 1024px) {
+    .dash-top { grid-template-columns: 1fr; }
+    .dash-pets__grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+    .dash { grid-template-columns: 1fr; }
+    .dash-side { display: none; }
+}

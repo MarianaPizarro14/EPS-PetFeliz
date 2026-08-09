@@ -1,0 +1,98 @@
+/* src/components/pages/SoporteCliente.css */
+
+.soporte-cli-card {
+  background: var(--white, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-lg, 16px);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-card, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  max-width: 680px;
+  margin: 1.5rem auto 0 auto;
+}
+
+.soporte-cli-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+}
+
+.soporte-cli-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.soporte-cli-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.soporte-cli-btn-ws {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.9rem 2rem;
+  background-color: #25d366;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+}
+
+.soporte-cli-btn-ws:hover {
+  background-color: #1eb956;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+  color: #ffffff;
+}
+
+.soporte-cli-info-box {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  text-align: left;
+}
+
+.soporte-cli-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.soporte-cli-info-item i {
+  font-size: 1.1rem;
+  color: #0d9488;
+  margin-top: 0.2rem;
+}
+
+.soporte-cli-info-item strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.soporte-cli-info-item span {
+  font-size: 0.8rem;
+  color: #64748b;
+}

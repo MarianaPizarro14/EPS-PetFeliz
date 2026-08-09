@@ -1,0 +1,281 @@
+/* CustomDatePicker.css */
+
+.cdp-container {
+  position: relative;
+  width: 100%;
+  font-family: inherit;
+}
+
+/* ── Botón Trigger ── */
+.cdp-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: var(--white, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-sm, 10px);
+  font-size: 0.88rem;
+  color: var(--gray-soft, #94a3b8);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.cdp-trigger:hover {
+  border-color: #10b981;
+  background-color: #f8fafc;
+}
+
+.cdp-trigger--active,
+.cdp-trigger:focus-visible {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+  background-color: #ffffff;
+}
+
+.cdp-trigger--has-val {
+  color: var(--dark, #0f172a);
+  font-weight: 600;
+}
+
+.cdp-trigger__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdp-trigger__icon-wrap {
+  display: flex;
+  align-items: center;
+  color: #059669;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ── Popover / Dropdown ── */
+.cdp-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1050;
+  width: 310px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.1rem;
+  box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.18), 0 8px 15px -6px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  animation: cdpFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top left;
+}
+
+@keyframes cdpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Cabecera ── */
+.cdp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.cdp-selects {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cdp-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%3C059669' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  padding-right: 1.5rem;
+}
+
+.cdp-select:hover {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.cdp-select:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.cdp-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cdp-nav-btn:hover {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+/* ── Días de la Semana ── */
+.cdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  margin-bottom: 0.4rem;
+}
+
+.cdp-weekday {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0;
+}
+
+/* ── Rejilla de Días ── */
+.cdp-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cdp-day {
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.cdp-day--empty {
+  cursor: default;
+}
+
+.cdp-day:not(.cdp-day--empty):not(.cdp-day--disabled):hover {
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 700;
+}
+
+.cdp-day--today {
+  border: 1.5px solid #10b981;
+  color: #059669;
+  font-weight: 700;
+}
+
+.cdp-day--selected {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+}
+
+.cdp-day--disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ── Footer / Acciones ── */
+.cdp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cdp-action-btn {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cdp-action-btn--clear {
+  color: #64748b;
+}
+
+.cdp-action-btn--clear:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.cdp-action-btn--today {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.cdp-action-btn--today:hover {
+  background: #d1fae5;
+  color: #047857;
+}
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 480px) {
+  .cdp-popover {
+    width: 290px;
+    padding: 0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  @keyframes cdpFadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -8px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+  }
+}

@@ -1,0 +1,412 @@
+/* ── SERVICIOS PAGE ── */
+
+/* MAIN SECTION */
+
+.svc-main {
+  background: var(--gray-back);
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+/* PRICING BANNER */
+
+.svc-pricing-banner {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  background: #fffef18a;
+  border: 1px solid #F0EAA0;
+}
+
+.svc-pricing-banner__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .35rem;
+  padding: 1.5rem 2rem;
+}
+
+.svc-pricing-banner__item--afiliado {
+  border-right: 1px solid #F0EAA0;
+}
+
+.svc-pricing-banner__item--particular {
+  border-right: 1px solid #F0EAA0;
+}
+
+.svc-pricing-banner__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border-radius: 100px;
+  padding: .25rem .7rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  width: fit-content;
+  margin-bottom: .2rem;
+  border: 1px solid;
+}
+
+.svc-pricing-banner__item--afiliado .svc-pricing-banner__eyebrow {
+  background: #eaf7f0;
+  border-color: #b6e8ce;
+  color: #1a5c3a;
+}
+
+.svc-pricing-banner__item--particular .svc-pricing-banner__eyebrow {
+  background: #f2f2f2;
+  border-color: #d8d8d8;
+  color: #666;
+}
+
+.svc-pricing-banner__eyebrow-icon {
+  font-size: .7rem;
+}
+
+.svc-pricing-banner__item--afiliado .svc-pricing-banner__eyebrow-icon {
+  color: #1a5c3a;
+}
+
+.svc-pricing-banner__item--particular .svc-pricing-banner__eyebrow-icon {
+  color: #666;
+}
+
+.svc-pricing-banner__label {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.2;
+  display: block;
+  color: var(--dark);
+  margin: 0;
+}
+
+.svc-pricing-banner__desc {
+  font-size: .78rem;
+  line-height: 1.45;
+  color: #555;
+  margin: 0;
+}
+
+.svc-pricing-banner__divider {
+  display: none;
+}
+
+.svc-pricing-banner__cta-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+}
+
+.svc-pricing-banner__cta {
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: #006780 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 100px !important;
+  transition: opacity .2s, transform .2s !important;
+}
+
+.svc-pricing-banner__cta:hover {
+  opacity: .9 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* FILTERS */
+
+.svc-filters {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.svc-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem 1.25rem;
+  border-radius: 100px;
+  border: 1.5px solid transparent;
+  font-family: var(--font-body);
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.svc-filter-btn__icon {
+  font-size: .8rem;
+}
+
+/* Todos — gris neutro */
+.svc-filter-btn.filter-todos {
+  background: rgba(0, 0, 0, 0.05);
+  color: #444;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.svc-filter-btn.filter-todos:hover,
+.svc-filter-btn.filter-todos.active {
+  background: #1a5c3a;
+  border-color: #1a5c3a;
+  color: #fff;
+}
+
+.svc-filter-btn.filter-todos {
+  background: rgba(206, 188, 111, 0.15);
+  color: #6C5E1B;
+  border-color: rgba(206, 188, 111, 0.35);
+}
+
+/* Clínico — azul */
+.svc-filter-btn.filter-clinico {
+  background: rgba(0, 103, 128, 0.08);
+  color: #006780;
+  border-color: rgba(0, 103, 128, 0.2);
+}
+.svc-filter-btn.filter-clinico:hover,
+.svc-filter-btn.filter-clinico.active {
+  background: #006780;
+  border-color: #006780;
+  color: #fff;
+}
+
+/* Preventivo — verde */
+.svc-filter-btn.filter-preventivo {
+  background: rgba(0, 109, 65, 0.08);
+  color: #006D41;
+  border-color: rgba(0, 109, 65, 0.2);
+}
+.svc-filter-btn.filter-preventivo:hover,
+.svc-filter-btn.filter-preventivo.active {
+  background: #1a5c3a;
+  border-color: #1a5c3a;
+  color: #fff;
+}
+
+/* SERVICES GRID */
+
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* SERVICE CARD */
+
+.svc-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(0,0,0,.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform .25s, box-shadow .25s;
+}
+
+.svc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+}
+
+/* card top row: icon + badge side by side */
+.svc-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+/* BADGE — sólido verde oscuro */
+.svc-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: #1a5c3a;
+  color: #fff;
+  border-radius: 100px;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .3rem .8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.svc-card__badge-icon {
+  font-size: .65rem;
+}
+
+.svc-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.svc-card__name {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: .5rem;
+}
+
+.svc-card__desc {
+  font-size: .85rem;
+  color: var(--gray-text);
+  line-height: 1.65;
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+
+.svc-card__prices {
+  display: flex;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+
+.svc-card__price {
+  flex: 1;
+  border-radius: var(--radius-sm);
+  padding: .6rem .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.svc-card__price--afiliado {
+  background: rgba(0, 109, 65, 0.08);
+  border: 1px solid rgba(0, 109, 65, 0.15);
+}
+
+.svc-card__price--normal {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.svc-card__price-label {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.svc-card__price--afiliado .svc-card__price-label { color: #006D41; }
+.svc-card__price--normal .svc-card__price-label { color: var(--gray-soft); }
+
+.svc-card__price-value {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.svc-card__price--afiliado .svc-card__price-value { color: #006D41; }
+.svc-card__price--normal .svc-card__price-value { color: var(--dark); }
+
+/* PRICE APPROXIMATE NOTE */
+
+.svc-card__price-note {
+  font-size: .72rem;
+  color: var(--gray-soft);
+  font-style: italic;
+  margin-bottom: .75rem;
+  line-height: 1.4;
+}
+
+.svc-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .85rem;
+  font-weight: 800;
+  color: #006780;
+  transition: gap .2s, color .2s;
+  margin-top: auto;
+}
+
+.svc-card__link:hover {
+  color: #006D41;
+  gap: .7rem;
+}
+
+/* ICON COLOR VARIANTS */
+
+.svc-green  { background: rgba(0, 109, 65, 0.10);   color: #006D41; }
+.svc-blue   { background: rgba(0, 103, 128, 0.10);  color: #006780; }
+.svc-red    { background: rgba(220, 53, 69, 0.10);   color: #c0392b; }
+.svc-yellow { background: rgba(206, 188, 111, 0.18); color: #6C5E1B; }
+.svc-purple { background: rgba(108, 99, 255, 0.10);  color: #5a52d5; }
+.svc-orange { background: rgba(230, 126, 34, 0.12);  color: #c0582a; }
+
+/* EPS BANNER */
+
+.svc-eps-banner {
+  background: linear-gradient(-135deg, #2d7a52 30%, #1a5c3a 70%);
+  border-radius: var(--radius-lg);
+  padding: clamp(2rem, 4vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.svc-eps-banner__text h2 {
+  font-family: var(--font-head);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: .5rem;
+}
+
+.svc-eps-banner__text p {
+  font-size: .9rem;
+  color: rgba(255,255,255,.8);
+  line-height: 1.65;
+  max-width: 500px;
+}
+
+.svc-eps-banner .btn-primary {
+  background: var(--white);
+  color: #1a5c3a;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.svc-eps-banner .btn-primary:hover {
+  background: #ecfdf5;
+  color: #1a5c3a;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .svc-grid { grid-template-columns: repeat(2, 1fr); }
+  .svc-pricing-banner { grid-template-columns: 1fr 1fr; }
+  .svc-pricing-banner__cta-wrap { grid-column: 1 / -1; border-top: 1px solid #F0EAA0; justify-content: flex-start; }
+  .svc-eps-banner { flex-direction: column; text-align: center; }
+  .svc-eps-banner__text p { max-width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .svc-grid { grid-template-columns: 1fr; }
+  .svc-pricing-banner { grid-template-columns: 1fr; }
+  .svc-pricing-banner__item--afiliado { border-right: none; border-bottom: 1px solid #F0EAA0; }
+  .svc-pricing-banner__item--particular { border-right: none; border-bottom: 1px solid #F0EAA0; }
+  .svc-pricing-banner__cta-wrap { grid-column: unset; }
+}

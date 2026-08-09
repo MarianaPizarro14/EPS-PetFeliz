@@ -1,0 +1,204 @@
+/* ── POLÍTICA DE PRIVACIDAD ────────────────────────────────── */
+
+/* Reutiliza .hero, .hero__badge, .hero__title, .hero__desc de hero.css
+   (igual que TerminosCondiciones.css).
+   Este archivo añade los estilos exclusivos de esta página. */
+
+/* PRIVACY HERO — extiende .hero de hero.css */
+.privacy-hero__inner {
+  max-width: 640px;
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+.privacy-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.privacy-hero__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.privacy-hero__meta-item svg {
+  stroke: var(--green-dark);
+  flex-shrink: 0;
+}
+
+/* Oscurece el párrafo descriptor dentro del hero */
+.privacy-hero.hero .hero__desc {
+  color: var(--dark) !important;
+  opacity: 0.7;
+}
+
+/* BODY LAYOUT */
+.legal-body {
+  background: var(--gray-back);
+  padding: clamp(2rem, 4vw, 3.5rem) 0;
+}
+
+.legal-body__inner {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* SIDEBAR TOC */
+.legal-toc {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  padding: 1.5rem 1.25rem;
+  position: sticky;
+  top: 86px;
+}
+
+.legal-toc__heading {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-soft);
+  margin-bottom: 1rem;
+}
+
+.legal-toc__link {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--gray-text);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.2rem;
+  transition: background 0.15s, color 0.15s, font-weight 0.15s;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.legal-toc__link:hover {
+  background: #f8fafc;
+  color: var(--green-dark);
+}
+
+.legal-toc__link--active {
+  background: #ecfdf5;
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+/* SECTION CARDS */
+.legal-sections {
+  min-width: 0;
+}
+
+.legal-section-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  padding: clamp(1.5rem, 3vw, 2rem) clamp(1.5rem, 3vw, 2.25rem);
+  margin-bottom: 1.25rem;
+  scroll-margin-top: 86px;
+  box-shadow: var(--shadow-card);
+}
+
+.legal-section-card__title {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legal-section-card__num {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #ecfdf5;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  flex-shrink: 0;
+}
+
+.legal-section-card p {
+  font-size: 0.9rem;
+  color: var(--dark);
+  opacity: 0.75;
+  line-height: 1.75;
+  margin-bottom: 0.75rem;
+}
+
+.legal-section-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* LISTS */
+.legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.legal-list__item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.legal-list__bullet {
+  color: var(--green-accent);
+  font-weight: 900;
+  flex-shrink: 0;
+  line-height: 1.65;
+}
+
+.legal-list__text {
+  font-size: 0.9rem;
+  color: var(--dark);
+  opacity: 0.75;
+  line-height: 1.65;
+}
+
+/* BLOCKQUOTE */
+.legal-quote {
+  border-left: 3px solid var(--green-accent);
+  background: #ecfdf5;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--green-dark);
+  line-height: 1.6;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .privacy-hero__meta {
+    gap: 1rem;
+  }
+
+  .legal-body__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .legal-toc {
+    position: static;
+  }
+}

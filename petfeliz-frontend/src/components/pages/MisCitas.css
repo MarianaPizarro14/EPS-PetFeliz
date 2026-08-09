@@ -1,0 +1,359 @@
+/* MisCitas.css - Sistema de diseño PetFeliz */
+
+.citas-page-wrap {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--gray-back, #f8fafc);
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+.citas-main {
+  flex: 1;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem);
+  overflow-y: auto;
+}
+
+/* Container Blanco */
+.citas-card-box {
+  background: var(--white, #ffffff);
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
+  padding: 1.5rem;
+}
+
+/* Tabs Header */
+.citas-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1.5px solid #f1f5f9;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.citas-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 30px;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.citas-tab-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.citas-tab-btn--active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.citas-tab-badge {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.citas-tab-btn--active .citas-tab-badge {
+  background: #059669;
+  color: #ffffff;
+}
+
+/* Botón Agendar Cita */
+.btn-agendar-cita {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-agendar-cita:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+/* Listado de Citas */
+.citas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cita-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.1rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cita-card:hover {
+  border-color: #a7f3d0;
+  box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.08);
+}
+
+.cita-card__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cita-card__pet-avatar {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  max-width: 52px;
+  max-height: 52px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cita-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cita-card__header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cita-card__pet-name {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.cita-card__service-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.cita-card__details {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.82rem;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.cita-card__detail-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cita-card__detail-item i {
+  color: #94a3b8;
+}
+
+/* Badges de Estado */
+.cita-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+.cita-badge--confirmada {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.cita-badge--pendiente {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.cita-badge--cancelada {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* Botones de Acción */
+.cita-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-action-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-action-sm--secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-action-sm--secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-action-sm--outline {
+  background: #ffffff;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-action-sm--outline:hover {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.btn-action-sm--danger {
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.btn-action-sm--danger:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Estado Vacío */
+.citas-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.citas-empty-icon-wrap {
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  min-height: 90px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.15);
+}
+
+.citas-empty-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+}
+
+.citas-empty-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  max-width: 380px;
+  margin-bottom: 1.5rem;
+  line-height: 1.45;
+}
+
+/* Modales */
+.modal-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.modal-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.modal-detail-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.modal-detail-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cita-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cita-card__actions {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.75rem;
+  }
+  .modal-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

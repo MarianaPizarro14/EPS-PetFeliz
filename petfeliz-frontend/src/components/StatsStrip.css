@@ -1,0 +1,81 @@
+.stats-strip {
+  padding-block: 2.5rem;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+/* ── variante gold (HistoriasCuidadores) ── */
+.stats-strip--gold {
+  background: rgba(206, 188, 111, 0.22);
+  border-color: rgba(206, 188, 111, 0.35);
+}
+.stats-strip--gold .stats-strip__icon { background: rgba(108, 94, 27, .12); color: #6C5E1B; }
+.stats-strip--gold .stats-strip__num  { color: #3d3610; }
+.stats-strip--gold .stats-strip__label { color: #5a4e18; }
+.stats-strip--gold .stats-strip__item  { border-color: rgba(108, 94, 27, .15); }
+
+/* ── variante danger (Emergencias) ── */
+.stats-strip--danger {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.stats-strip--danger .stats-strip__icon { background: rgba(185, 28, 28, .10); color: #b91c1c; }
+.stats-strip--danger .stats-strip__num  { color: #b91c1c; }
+.stats-strip--danger .stats-strip__label { color: var(--gray-text); }
+.stats-strip--danger .stats-strip__item  { border-color: rgba(185, 28, 28, .12); }
+
+/* ── layout compartido ── */
+.stats-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  text-align: center;
+}
+
+.stats-strip__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 1rem;
+  border-right: 1px solid;
+}
+.stats-strip__item:last-child { border-right: none; }
+
+.stats-strip__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: .25rem;
+}
+
+.stats-strip__num {
+  font-family: var(--font-head);
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stats-strip__label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  max-width: 120px;
+}
+
+@media (max-width: 900px) {
+  .stats-strip__grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-strip__item { border-right: none; border-bottom: 1px solid; }
+  .stats-strip__item:nth-child(3),
+  .stats-strip__item:last-child { border-bottom: none; }
+}
+
+@media (max-width: 640px) {
+  .stats-strip__grid { grid-template-columns: 1fr 1fr; }
+}

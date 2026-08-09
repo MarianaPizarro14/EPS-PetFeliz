@@ -1,0 +1,363 @@
+/* ── KIT DE PRENSA ─────────────────────────────────────────── */
+
+/* Reutiliza .hero, .hero__badge, .hero__title, .hero__desc de hero.css
+   (igual que TerminosCondiciones.css y PoliticaPrivacidad.css).
+
+/* PRESS HERO — extiende .hero de hero.css */
+.press-hero__inner {
+  max-width: 640px;
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+.press-hero__title-accent {
+  color: var(--green-dark);
+}
+
+/* Oscurece el párrafo descriptor dentro del hero */
+.press-hero.hero .hero__desc {
+  color: var(--dark) !important;
+  opacity: 0.7;
+}
+
+/* STATS */
+.press-stats {
+  background: var(--gray-back);
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.press-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.25rem;
+}
+
+.press-stat-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.press-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.press-stat-card__num {
+  font-family: var(--font-head);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.press-stat-card__label {
+  font-size: 0.8rem;
+  color: var(--gray-text);
+  font-weight: 500;
+}
+
+/* QUIÉNES SOMOS */
+.press-about {
+  background: var(--white);
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.press-about__inner {
+  max-width: 820px;
+}
+
+.press-section-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--dark);
+  margin-bottom: 1.5rem;
+}
+
+.press-section-title .title-accent {
+  color: var(--green-dark);
+}
+
+.press-about__text {
+  font-size: 0.95rem;
+  color: var(--gray-text);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.press-about__quote {
+  border-left: 3px solid var(--green-accent);
+  background: #ecfdf5;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--green-dark);
+  line-height: 1.6;
+  margin-top: 1.5rem;
+}
+
+/* RECURSOS */
+.press-assets {
+  text-align: center;
+  background: var(--gray-back);
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.press-assets__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  text-align: left;
+  margin-top: 2.5rem;
+}
+
+.press-asset-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  padding: 1.25rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow-card);
+}
+
+.press-asset-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Icono con fondo de color */
+.press-asset-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  transition: transform 0.2s;
+}
+
+.press-asset-card:hover .press-asset-card__icon {
+  transform: scale(1.08);
+}
+
+.press-asset-card__icon--green {
+  background: rgba(0, 109, 65, 0.12);
+  color: #006D41;
+}
+
+.press-asset-card__icon--blue {
+  background: rgba(0, 103, 128, 0.12);
+  color: #006780;
+}
+
+.press-asset-card__icon--amber {
+  background: rgba(108, 94, 27, 0.12);
+  color: #6C5E1B;
+}
+
+.press-asset-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.press-asset-card__title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+  color: var(--dark);
+}
+
+.press-asset-card__desc {
+  font-size: 0.78rem;
+  color: var(--gray-soft);
+  line-height: 1.4;
+}
+
+/* Botón descarga */
+.press-asset-card__dl {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--gray-soft);
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.press-asset-card:hover .press-asset-card__dl {
+  background: #006D41;
+  color: var(--white);
+  border-color: #006D41;
+}
+
+/* ══════════════════════════════════════════════
+   HITOS RECIENTES — Timeline rediseñado
+   ══════════════════════════════════════════════ */
+
+.press-hitos {
+  background: var(--white);
+  padding: clamp(3rem, 6vw, 5rem) 0;
+}
+
+.press-hitos__inner {
+  max-width: 860px;
+}
+
+.press-hitos__header {
+  margin-bottom: 3rem;
+}
+
+/* Subtítulo debajo del h2 — mismo patrón que .section-header p */
+.press-hitos__subtitle {
+  font-size: 0.95rem;
+  color: var(--gray-text);
+  line-height: 1.7;
+  margin-top: 0.5rem;
+}
+
+/* Contenedor que envuelve línea + ítems */
+.press-hitos__timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Línea vertical continua */
+.press-hitos__line {
+  position: absolute;
+  left: 108px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--green-accent) 0%,
+    rgba(26, 92, 58, 0.15) 100%
+  );
+  border-radius: 2px;
+}
+
+/* Cada fila del timeline */
+.press-hito-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.press-hito-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Columna del año */
+.press-hito-item__year-col {
+  width: 88px;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+  text-align: right;
+  padding-right: 0;
+}
+
+.press-hito-item__year {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  letter-spacing: -0.02em;
+}
+
+/* Punto sobre la línea */
+.press-hito-item__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green-accent);
+  border: 3px solid var(--white);
+  box-shadow: 0 0 0 2px var(--green-dark);
+  flex-shrink: 0;
+  margin: 0.2rem 1.25rem 0 1.25rem;
+  transition: transform 0.2s;
+}
+
+.press-hito-item:hover .press-hito-item__dot {
+  transform: scale(1.3);
+}
+
+/* Tarjeta del hito */
+.press-hito-item__card {
+  flex: 1;
+  background: var(--gray-back);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(26, 92, 58, 0.08);
+  padding: 1rem 1.25rem;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.press-hito-item:hover .press-hito-item__card {
+  transform: translateX(4px);
+  box-shadow: 0 4px 20px rgba(26, 92, 58, 0.1);
+  border-color: rgba(26, 92, 58, 0.2);
+}
+
+/* Badge de categoría */
+.press-hito-item__tag {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-dark);
+  background: #d1fae5;
+  border-radius: 100px;
+  padding: 0.2rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.press-hito-item__text {
+  font-size: 0.9rem;
+  color: var(--gray-text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .press-stats__grid { grid-template-columns: repeat(2, 1fr); }
+
+  .press-hitos__line { display: none; }
+
+  .press-hito-item {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .press-hito-item__year-col {
+    width: auto;
+    text-align: left;
+    padding-left: 0;
+  }
+
+  .press-hito-item__dot { display: none; }
+}

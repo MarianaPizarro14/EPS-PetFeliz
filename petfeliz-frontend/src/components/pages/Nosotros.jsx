@@ -137,7 +137,7 @@ function Nosotros() {
           </div>
           <div className="page-hero__img-wrap">
             <img
-              src="/img/mujer_veterinaria_2.jpg"
+              src="https://res.cloudinary.com/dedroug6v/image/upload/v1786322769/veterinaria_nosotros_huyrjh.jpg"
               alt="Centro veterinario"
               className="page-hero__img"
               onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -152,14 +152,14 @@ function Nosotros() {
           <div className="historia__inner">
             <div className="historia__visual">
               <div className="historia__img-wrap">
-                <img src="/img/petfeliz_sitio.jpeg" alt="EPS PetFeliz Medellín" className="historia__img-card" />
+                <img src="https://res.cloudinary.com/dedroug6v/image/upload/v1786320797/petfeliz_sitio_hi2laz.jpg" alt="EPS PetFeliz Medellín" className="historia__img-card" />
                 <div className="historia__img-overlay">
                   <span>
                     <FontAwesomeIcon icon="fa-solid fa-location-dot" />
                     Nuestra clínica en Laureles
                   </span>
-                </div>
-              </div>
+  </div>
+</div>
               <div className="historia__year-badge">
                 <span className="year">2018</span>
                 <span className="year-label">Fundación</span>

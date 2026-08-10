@@ -12,9 +12,9 @@ const features = [
     description: 'Olvídate de las esperas. Agenda citas con tu especialista preferido en menos de 30 segundos.',
   },
   {
-    icon: "fa-regular fa-message",
-    title: 'Chat veterinario personalizado',
-    description: 'Haz consultas rápidas a nuestros técnicos certificados en cualquier momento, día o noche.',
+    icon: "fa-solid fa-file-invoice-dollar",
+    title: 'Pagos y facturación digital',
+    description: 'Paga tus servicios y descarga tus facturas y recibos desde la plataforma, sin filas ni papeleo.',
   },
 ]
 
@@ -24,7 +24,7 @@ function Tools() {
       <div className="container">
         <div className="tools__inner">
           <div className="tools__mockup-wrap">
-            <img src="/img/card_mascota.png" alt="App PetFeliz" className="tools__mockup-img" />
+            <img src="https://res.cloudinary.com/dedroug6v/image/upload/v1786320791/card_mascota_hltgme.png" alt="App PetFeliz" className="tools__mockup-img" />
           </div>
           <div className="tools__content">
             <h2>

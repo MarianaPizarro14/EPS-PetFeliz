@@ -117,7 +117,7 @@ export default function Contacto() {
               </div>
               <div>
                 <p className="ct-info__label">WhatsApp</p>
-                <a href="https://wa.me/57314570930" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 314 570 9302</a>
+                <a href="https://wa.me/573145709302" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 314 570 9302</a>
               </div>
             </div>
             <div className="ct-info__card">

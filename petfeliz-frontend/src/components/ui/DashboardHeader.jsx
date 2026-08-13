@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import { DEPARTAMENTOS_Y_CIUDADES_COLOMBIA } from '../../data/departamentosYCiudadesColombia'
+import { DEFAULT_USER_AVATAR } from '../../constants/images'
 import './DashboardHeader.css'
 
 
@@ -609,9 +610,9 @@ export default function DashboardHeader({
             </span>
             <img
               className="dash-header__avatar"
-              src={!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? '/img/vector_usuario.jpg' : usuario.foto}
+              src={!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? DEFAULT_USER_AVATAR : usuario.foto}
               alt={usuario?.nombreCompleto || usuario?.nombre || 'Usuario'}
-              onError={(e) => { e.target.onerror = null; e.target.src = '/img/vector_usuario.jpg' }}
+              onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
             />
             <i className="fa-solid fa-chevron-down dh-chevron-icon"></i>
           </button>
@@ -621,9 +622,9 @@ export default function DashboardHeader({
               <div className="dh-profile-card">
                 <img
                   className="dh-profile-card__avatar"
-                  src={!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? '/img/vector_usuario.jpg' : usuario.foto}
+                  src={!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? DEFAULT_USER_AVATAR : usuario.foto}
                   alt={usuario?.nombreCompleto || usuario?.nombre}
-                  onError={(e) => { e.target.onerror = null; e.target.src = '/img/vector_usuario.jpg' }}
+                  onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
                 />
                 <div className="dh-profile-card__info">
                   <strong>{usuario?.nombreCompleto || usuario?.nombre}</strong>
@@ -826,10 +827,10 @@ export default function DashboardHeader({
                   <label className="dh-field-label">Foto de Perfil Actual</label>
                   <div className="dh-photo-preview-wrap">
                     <img
-                      src={imagePreview || (!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? '/img/vector_usuario.jpg' : usuario.foto)}
+                      src={imagePreview || (!usuario?.foto || usuario?.foto === 'default.jpg' || usuario?.foto.includes('default.jpg') ? DEFAULT_USER_AVATAR : usuario.foto)}
                       alt="Vista previa de perfil"
                       className="dh-photo-preview-img"
-                      onError={(e) => { e.target.onerror = null; e.target.src = '/img/vector_usuario.jpg' }}
+                      onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
                     />
                   </div>
 

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
+import { DEFAULT_USER_AVATAR } from '../../constants/images'
 import './DashboardClient.css'
 import './ServiciosCliente.css'
 
 const FALLBACK_PET_IMG = '/img/card_mascota.png'
-const FALLBACK_USER_IMG = '/img/vector_usuario.jpg'
+const FALLBACK_USER_IMG = DEFAULT_USER_AVATAR
 
 // Helper de sanitización de URLs para evitar 404
 const getPhotoUrl = (url, fallback = FALLBACK_PET_IMG) => {

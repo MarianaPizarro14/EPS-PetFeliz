@@ -12,6 +12,19 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 
 library.add(fas, far, fab)
 
+// Interceptor global de fetch para saltar la advertencia de ngrok
+const originalFetch = window.fetch
+window.fetch = async (...args) => {
+  let [resource, config] = args
+  config = config || {}
+  const headers = new Headers(config.headers || {})
+  if (!headers.has('ngrok-skip-browser-warning')) {
+    headers.set('ngrok-skip-browser-warning', 'true')
+  }
+  config.headers = headers
+  return originalFetch(resource, config)
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

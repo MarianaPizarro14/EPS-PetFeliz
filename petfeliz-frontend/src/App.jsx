@@ -12,7 +12,7 @@ import PoliticaPrivacidad from './components/pages/PoliticaPrivacidad'
 import TerminosCondiciones from './components/pages/TerminosCondiciones'
 import HistoriasCuidadores from './components/pages/HistoriasCuidadores'
 import Emergencias from './components/pages/Emergencias'
-import Redespecialistas from './components/pages/Redespecialistas'
+import RedEspecialistas from './components/pages/RedEspecialistas'
 import Login from './components/pages/Login'
 import Register from './components/pages/Register'
 import ForgotPassword from './components/pages/ForgotPassword'
@@ -51,7 +51,7 @@ function AppContent() {
         <Route path="/terminos-condiciones"     element={<TerminosCondiciones />} />
         <Route path="/historias-cuidadores"     element={<HistoriasCuidadores />} />
         <Route path="/emergencias"              element={<Emergencias />} />
-        <Route path="/red-especialistas"        element={<Redespecialistas />} />
+        <Route path="/red-especialistas"        element={<RedEspecialistas />} />
         <Route path="/login"                    element={<Login />} />
         <Route path="/register"                 element={<Register />} />
         <Route path="/forgot-password"          element={<ForgotPassword />} />

@@ -458,13 +458,18 @@ function MisMascotas() {
       {/* ── MODAL DE CREACIÓN / EDICIÓN ── */}
       {showFormModal && (
         <div className="modal-backdrop">
-          <div className="modal-box">
+          <div className="modal-box pet-modal-box">
             <div className="modal-box__header">
-              <div>
-                <h3>{editingId ? 'Editar Mascota' : 'Registrar Nueva Mascota'}</h3>
-                <p className="modal-box__subtitle">Ingresa la información básica y datos de salud de tu compañero</p>
+              <div className="modal-box__title-group">
+                <div className="modal-box__badge">
+                  <Icon name="paw" style={{ color: '#059669', fontSize: '1.15rem' }} />
+                </div>
+                <div>
+                  <h3>{editingId ? 'Editar Mascota' : 'Registrar Nueva Mascota'}</h3>
+                  <p className="modal-box__subtitle">Apertura de Expediente Veterinario — PetFeliz EPS</p>
+                </div>
               </div>
-              <button className="modal-box__close" onClick={() => setShowFormModal(false)}>
+              <button className="modal-box__close" onClick={() => setShowFormModal(false)} aria-label="Cerrar modal">
                 <Icon name="close" />
               </button>
             </div>
@@ -473,63 +478,56 @@ function MisMascotas() {
 
             <form onSubmit={handleSubmitForm} className="pet-form">
               {/* ── SECCIÓN 1: FOTO Y DATOS PRINCIPALES ── */}
-              <div className="pet-form__section">
-                <div className="pet-form__field pet-form__field--full">
-                  <label>Foto de la Mascota</label>
-                  <div className="pet-upload-box">
-                    {imagePreview ? (
-                      <div className="pet-upload-preview-container">
-                        <div className="pet-upload-preview">
-                          <img src={imagePreview} alt="Vista previa de la foto" />
-                          <button
-                            type="button"
-                            className="btn-remove-photo"
-                            onClick={handleRemoveImage}
-                            title="Quitar foto"
-                          >
-                            <Icon name="close" width="14" height="14" />
-                          </button>
-                        </div>
-                        <label className="btn-change-photo">
-                          <input
-                            type="file"
-                            accept="image/png, image/jpeg, image/jpg, image/webp"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                          />
-                          Cambiar foto
-                        </label>
-                      </div>
-                    ) : (
-                      <label
-                        className={`pet-upload-dropzone ${isDragging ? 'pet-upload-dropzone--dragging' : ''}`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
+              <div className="pet-form__header-card">
+                <div className="pet-upload-avatar-wrap">
+                  {imagePreview ? (
+                    <div className="pet-avatar-preview">
+                      <img src={imagePreview} alt="Foto de la mascota" />
+                      <button
+                        type="button"
+                        className="btn-remove-avatar"
+                        onClick={handleRemoveImage}
+                        title="Quitar foto"
                       >
+                        <Icon name="close" style={{ fontSize: '0.75rem' }} />
+                      </button>
+                      <label className="btn-change-avatar-badge" title="Cambiar foto">
                         <input
                           type="file"
                           accept="image/png, image/jpeg, image/jpg, image/webp"
                           onChange={handleFileChange}
                           style={{ display: 'none' }}
                         />
-                        <div className="pet-upload-content">
-                          <div className="pet-upload-icon">
-                            <Icon name="camera" width="22" height="22" />
-                          </div>
-                          <p className="pet-upload-text">
-                            <strong>Selecciona una foto</strong> o arrástrala aquí desde tu dispositivo
-                          </p>
-                          <span className="pet-upload-hint">Formatos soportados: JPG, JPEG, PNG o WEBP (Máx. 5 MB)</span>
-                        </div>
+                        <Icon name="camera" style={{ fontSize: '0.75rem' }} />
                       </label>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <label
+                      className={`pet-avatar-dropzone ${isDragging ? 'pet-avatar-dropzone--dragging' : ''}`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      title="Subir foto de la mascota"
+                    >
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                      <div className="pet-avatar-icon-ring">
+                        <Icon name="camera" style={{ fontSize: '1.05rem' }} />
+                      </div>
+                      <span className="pet-avatar-upload-lbl">+ Foto</span>
+                    </label>
+                  )}
                 </div>
 
-                <div className="pet-form__row">
+                <div className="pet-form__main-fields">
                   <div className="pet-form__field">
-                    <label>Nombre de la Mascota *</label>
+                    <label>
+                      Nombre de la Mascota <span className="req-star">*</span>
+                    </label>
                     <input
                       type="text"
                       required
@@ -540,7 +538,9 @@ function MisMascotas() {
                   </div>
 
                   <div className="pet-form__field">
-                    <label>Fecha de Nacimiento</label>
+                    <label>
+                      Fecha de Nacimiento <span className="opt-tag">(Opcional)</span>
+                    </label>
                     <CustomDatePicker
                       value={formData.fecha_nacimiento}
                       onChange={(val) => setFormData({ ...formData, fecha_nacimiento: val })}
@@ -552,10 +552,16 @@ function MisMascotas() {
 
               {/* ── SECCIÓN 2: CLASIFICACIÓN Y RAZA ── */}
               <div className="pet-form__section">
-                <span className="pet-form__section-title">Clasificación y Raza</span>
+                <div className="pet-form__section-header">
+                  <span className="pet-form__section-title">Clasificación Veterinaria</span>
+                  <span className="pet-form__section-badge">Requerido</span>
+                </div>
+
                 <div className="pet-form__row">
                   <div className="pet-form__field">
-                    <label>Especie *</label>
+                    <label>
+                      Especie <span className="req-star">*</span>
+                    </label>
                     <select
                       value={formData.especie}
                       onChange={(e) => handleEspecieChange(e.target.value)}
@@ -569,7 +575,9 @@ function MisMascotas() {
                   </div>
 
                   <div className="pet-form__field">
-                    <label>Raza *</label>
+                    <label>
+                      Raza <span className="req-star">*</span>
+                    </label>
                     {!formData.especie ? (
                       <select disabled className="pet-select-disabled">
                         <option value="">Selecciona primero una especie</option>
@@ -604,8 +612,10 @@ function MisMascotas() {
                 {(formData.especie === 'Otro' ||
                   formData.raza === 'Otra (Especificar)' ||
                   !(RAZAS_POR_ESPECIE[formData.especie] || []).filter(r => r !== 'Otra (Especificar)').includes(formData.raza)) && (
-                  <div className="pet-form__field" style={{ marginTop: '0.75rem' }}>
-                    <label>Escribe la raza de tu mascota *</label>
+                  <div className="pet-form__field" style={{ marginTop: '0.5rem' }}>
+                    <label>
+                      Escribe la raza de tu mascota <span className="req-star">*</span>
+                    </label>
                     <input
                       type="text"
                       required
@@ -619,10 +629,16 @@ function MisMascotas() {
 
               {/* ── SECCIÓN 3: DETALLES FÍSICOS ── */}
               <div className="pet-form__section">
-                <span className="pet-form__section-title">Detalles Físicos</span>
+                <div className="pet-form__section-header">
+                  <span className="pet-form__section-title">Datos Físicos</span>
+                  <span className="pet-form__section-badge pet-form__section-badge--opt">Complementario</span>
+                </div>
+
                 <div className="pet-form__row">
                   <div className="pet-form__field">
-                    <label>Sexo</label>
+                    <label>
+                      Sexo <span className="opt-tag">(Opcional)</span>
+                    </label>
                     <select
                       value={formData.sexo}
                       onChange={(e) => setFormData({ ...formData, sexo: e.target.value })}
@@ -633,7 +649,9 @@ function MisMascotas() {
                   </div>
 
                   <div className="pet-form__field">
-                    <label>Peso (kg)</label>
+                    <label>
+                      Peso (kg) <span className="opt-tag">(Opcional)</span>
+                    </label>
                     <input
                       type="number"
                       step="0.1"

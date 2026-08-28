@@ -19,45 +19,6 @@ class NotificacionController extends Controller
             return response()->json(['notifications' => [], 'unreadCount' => 0], 200);
         }
 
-        $count = Notificacion::where('id_cliente', $cliente->id_cliente)->count();
-
-        // Si el cliente no tiene notificaciones iniciales en BD, las sembramos automáticamente
-        if ($count === 0) {
-            $defaultNotifs = [
-                [
-                    'id_cliente' => $cliente->id_cliente,
-                    'titulo' => 'Recordatorio de Cita',
-                    'mensaje' => 'Recuerda que tienes una cita de control programada pronto.',
-                    'leida' => false,
-                    'icono' => 'fa-regular fa-calendar-days',
-                    'tipo' => 'cita',
-                    'created_at' => now()->subHours(2),
-                ],
-                [
-                    'id_cliente' => $cliente->id_cliente,
-                    'titulo' => 'Seguridad de la Cuenta',
-                    'mensaje' => 'Tus datos de contacto e historial médico se encuentran protegidos.',
-                    'leida' => false,
-                    'icono' => 'fa-solid fa-shield-halved',
-                    'tipo' => 'seguridad',
-                    'created_at' => now()->subHours(5),
-                ],
-                [
-                    'id_cliente' => $cliente->id_cliente,
-                    'titulo' => 'Bienvenido a PetFeliz',
-                    'mensaje' => '¡Gracias por confiar en nuestra EPS veterinaria para el cuidado de tus mascotas!',
-                    'leida' => false,
-                    'icono' => 'fa-solid fa-paw',
-                    'tipo' => 'bienvenida',
-                    'created_at' => now()->subDays(1),
-                ],
-            ];
-
-            foreach ($defaultNotifs as $n) {
-                Notificacion::create($n);
-            }
-        }
-
         $notificaciones = Notificacion::where('id_cliente', $cliente->id_cliente)
             ->orderBy('id_notificacion', 'desc')
             ->get()

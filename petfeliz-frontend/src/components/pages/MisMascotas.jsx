@@ -460,7 +460,10 @@ function MisMascotas() {
         <div className="modal-backdrop">
           <div className="modal-box">
             <div className="modal-box__header">
-              <h3>{editingId ? 'Editar Mascota' : 'Registrar Nueva Mascota'}</h3>
+              <div>
+                <h3>{editingId ? 'Editar Mascota' : 'Registrar Nueva Mascota'}</h3>
+                <p className="modal-box__subtitle">Ingresa la información básica y datos de salud de tu compañero</p>
+              </div>
               <button className="modal-box__close" onClick={() => setShowFormModal(false)}>
                 <Icon name="close" />
               </button>
@@ -469,171 +472,179 @@ function MisMascotas() {
             {formError && <div className="modal-box__error">{formError}</div>}
 
             <form onSubmit={handleSubmitForm} className="pet-form">
-              {/* ── Carga y vista previa de foto desde dispositivo ── */}
-              <div className="pet-form__field pet-form__field--full">
-                <label>Foto de la Mascota</label>
-                <div className="pet-upload-box">
-                  {imagePreview ? (
-                    <div className="pet-upload-preview-container">
-                      <div className="pet-upload-preview">
-                        <img src={imagePreview} alt="Vista previa de la foto" />
-                        <button
-                          type="button"
-                          className="btn-remove-photo"
-                          onClick={handleRemoveImage}
-                          title="Quitar foto"
-                        >
-                          <Icon name="close" width="14" height="14" />
-                        </button>
+              {/* ── SECCIÓN 1: FOTO Y DATOS PRINCIPALES ── */}
+              <div className="pet-form__section">
+                <div className="pet-form__field pet-form__field--full">
+                  <label>Foto de la Mascota</label>
+                  <div className="pet-upload-box">
+                    {imagePreview ? (
+                      <div className="pet-upload-preview-container">
+                        <div className="pet-upload-preview">
+                          <img src={imagePreview} alt="Vista previa de la foto" />
+                          <button
+                            type="button"
+                            className="btn-remove-photo"
+                            onClick={handleRemoveImage}
+                            title="Quitar foto"
+                          >
+                            <Icon name="close" width="14" height="14" />
+                          </button>
+                        </div>
+                        <label className="btn-change-photo">
+                          <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            onChange={handleFileChange}
+                            style={{ display: 'none' }}
+                          />
+                          Cambiar foto
+                        </label>
                       </div>
-                      <label className="btn-change-photo">
+                    ) : (
+                      <label
+                        className={`pet-upload-dropzone ${isDragging ? 'pet-upload-dropzone--dragging' : ''}`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                      >
                         <input
                           type="file"
                           accept="image/png, image/jpeg, image/jpg, image/webp"
                           onChange={handleFileChange}
                           style={{ display: 'none' }}
                         />
-                        Cambiar foto
-                      </label>
-                    </div>
-                  ) : (
-                    <label
-                      className={`pet-upload-dropzone ${isDragging ? 'pet-upload-dropzone--dragging' : ''}`}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                    >
-                      <input
-                        type="file"
-                        accept="image/png, image/jpeg, image/jpg, image/webp"
-                        onChange={handleFileChange}
-                        style={{ display: 'none' }}
-                      />
-                      <div className="pet-upload-content">
-                        <div className="pet-upload-icon">
-                          <Icon name="camera" width="24" height="24" />
+                        <div className="pet-upload-content">
+                          <div className="pet-upload-icon">
+                            <Icon name="camera" width="22" height="22" />
+                          </div>
+                          <p className="pet-upload-text">
+                            <strong>Selecciona una foto</strong> o arrástrala aquí desde tu dispositivo
+                          </p>
+                          <span className="pet-upload-hint">Formatos soportados: JPG, JPEG, PNG o WEBP (Máx. 5 MB)</span>
                         </div>
-                        <p className="pet-upload-text">
-                          <strong>Selecciona una foto</strong> o arrástrala aquí desde tu dispositivo
-                        </p>
-                        <span className="pet-upload-hint">Formatos soportados: JPG, JPEG, PNG o WEBP (Máx. 5 MB)</span>
-                      </div>
-                    </label>
-                  )}
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pet-form__row">
+                  <div className="pet-form__field">
+                    <label>Nombre de la Mascota *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ej. Bruno, Nala"
+                      value={formData.nombre}
+                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="pet-form__field">
+                    <label>Fecha de Nacimiento</label>
+                    <CustomDatePicker
+                      value={formData.fecha_nacimiento}
+                      onChange={(val) => setFormData({ ...formData, fecha_nacimiento: val })}
+                      placeholder="Selecciona fecha de nacimiento"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="pet-form__field">
-                <label>Nombre de la Mascota *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="ej. Bruno, Nala"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                />
-              </div>
-
-              {/* ── Date Picker Moderno Estilizado (Reubicado en la parte superior del formulario) ── */}
-              <div className="pet-form__field">
-                <label>Fecha de Nacimiento</label>
-                <CustomDatePicker
-                  value={formData.fecha_nacimiento}
-                  onChange={(val) => setFormData({ ...formData, fecha_nacimiento: val })}
-                  placeholder="Selecciona fecha de nacimiento"
-                />
-              </div>
-
-              <div className="pet-form__row">
-                <div className="pet-form__field">
-                  <label>Especie *</label>
-                  <select
-                    value={formData.especie}
-                    onChange={(e) => handleEspecieChange(e.target.value)}
-                  >
-                    <option value="Canino">Canino (Perro)</option>
-                    <option value="Felino">Felino (Gato)</option>
-                    <option value="Ave">Ave</option>
-                    <option value="Roedor">Roedor</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-
-                <div className="pet-form__field">
-                  <label>Raza *</label>
-                  {!formData.especie ? (
-                    <select disabled className="pet-select-disabled">
-                      <option value="">Selecciona primero una especie</option>
-                    </select>
-                  ) : (
+              {/* ── SECCIÓN 2: CLASIFICACIÓN Y RAZA ── */}
+              <div className="pet-form__section">
+                <span className="pet-form__section-title">Clasificación y Raza</span>
+                <div className="pet-form__row">
+                  <div className="pet-form__field">
+                    <label>Especie *</label>
                     <select
-                      value={
-                        (RAZAS_POR_ESPECIE[formData.especie] || []).filter(r => r !== 'Otra (Especificar)').includes(formData.raza)
-                          ? formData.raza
-                          : 'Otra (Especificar)'
-                      }
-                      onChange={(e) => {
-                        const val = e.target.value
-                        if (val === 'Otra (Especificar)') {
-                          setFormData({ ...formData, raza: '' })
-                        } else {
-                          setFormData({ ...formData, raza: val })
-                        }
-                      }}
+                      value={formData.especie}
+                      onChange={(e) => handleEspecieChange(e.target.value)}
                     >
-                      {(RAZAS_POR_ESPECIE[formData.especie] || []).map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
+                      <option value="Canino">Canino (Perro)</option>
+                      <option value="Felino">Felino (Gato)</option>
+                      <option value="Ave">Ave</option>
+                      <option value="Roedor">Roedor</option>
+                      <option value="Otro">Otro</option>
                     </select>
-                  )}
+                  </div>
+
+                  <div className="pet-form__field">
+                    <label>Raza *</label>
+                    {!formData.especie ? (
+                      <select disabled className="pet-select-disabled">
+                        <option value="">Selecciona primero una especie</option>
+                      </select>
+                    ) : (
+                      <select
+                        value={
+                          (RAZAS_POR_ESPECIE[formData.especie] || []).filter(r => r !== 'Otra (Especificar)').includes(formData.raza)
+                            ? formData.raza
+                            : 'Otra (Especificar)'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val === 'Otra (Especificar)') {
+                            setFormData({ ...formData, raza: '' })
+                          } else {
+                            setFormData({ ...formData, raza: val })
+                          }
+                        }}
+                      >
+                        {(RAZAS_POR_ESPECIE[formData.especie] || []).map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
+
+                {/* Campo de texto libre condicional */}
+                {(formData.especie === 'Otro' ||
+                  formData.raza === 'Otra (Especificar)' ||
+                  !(RAZAS_POR_ESPECIE[formData.especie] || []).filter(r => r !== 'Otra (Especificar)').includes(formData.raza)) && (
+                  <div className="pet-form__field" style={{ marginTop: '0.75rem' }}>
+                    <label>Escribe la raza de tu mascota *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Escribe la raza de tu mascota"
+                      value={formData.raza === 'Otra (Especificar)' ? '' : formData.raza}
+                      onChange={(e) => setFormData({ ...formData, raza: e.target.value })}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Campo de texto libre condicional si selecciona "Otra (Especificar)" o ingresa una raza personalizada */}
-              {(formData.especie === 'Otro' ||
-                formData.raza === 'Otra (Especificar)' ||
-                !(RAZAS_POR_ESPECIE[formData.especie] || []).filter(r => r !== 'Otra (Especificar)').includes(formData.raza)) && (
-                <div className="pet-form__field">
-                  <label>Escribe la raza de tu mascota *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Escribe la raza de tu mascota"
-                    value={formData.raza === 'Otra (Especificar)' ? '' : formData.raza}
-                    onChange={(e) => setFormData({ ...formData, raza: e.target.value })}
-                  />
-                </div>
-              )}
+              {/* ── SECCIÓN 3: DETALLES FÍSICOS ── */}
+              <div className="pet-form__section">
+                <span className="pet-form__section-title">Detalles Físicos</span>
+                <div className="pet-form__row">
+                  <div className="pet-form__field">
+                    <label>Sexo</label>
+                    <select
+                      value={formData.sexo}
+                      onChange={(e) => setFormData({ ...formData, sexo: e.target.value })}
+                    >
+                      <option value="Macho">Macho</option>
+                      <option value="Hembra">Hembra</option>
+                    </select>
+                  </div>
 
-
-
-              <div className="pet-form__row">
-                <div className="pet-form__field">
-                  <label>Sexo</label>
-                  <select
-                    value={formData.sexo}
-                    onChange={(e) => setFormData({ ...formData, sexo: e.target.value })}
-                  >
-                    <option value="Macho">Macho</option>
-                    <option value="Hembra">Hembra</option>
-                  </select>
-                </div>
-
-                <div className="pet-form__field">
-                  <label>Peso (kg)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    placeholder="ej. 12.5"
-                    value={formData.peso}
-                    onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
-                  />
+                  <div className="pet-form__field">
+                    <label>Peso (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="ej. 12.5"
+                      value={formData.peso}
+                      onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
-
 
               <div className="modal-box__footer">
                 <button

@@ -9,7 +9,6 @@ const menuItems = [
   { to: '/dashboard-client/servicios', aliases: ['/servicios-cliente'], label: 'Servicios', icon: 'fa-solid fa-stethoscope' },
   { to: '/dashboard-client/pagos', aliases: ['/pagos'], label: 'Pagos y Facturación', icon: 'fa-regular fa-file-lines' },
   { to: '/dashboard-client/documentos', aliases: ['/documentos'], label: 'Documentos', icon: 'fa-regular fa-folder-open' },
-  { to: '/dashboard-client/soporte', aliases: ['/soporte'], label: 'Soporte', icon: 'fa-solid fa-headset' },
 ]
 
 export default function SidebarClient() {
@@ -43,7 +42,10 @@ export default function SidebarClient() {
     return false
   }
 
-  const isSupportActive = location.pathname === '/contacto' || location.pathname === '/soporte'
+  const isSupportActive =
+    location.pathname === '/dashboard-client/soporte' ||
+    location.pathname === '/soporte' ||
+    location.pathname === '/contacto'
 
   return (
     <aside className="dash-side">
@@ -81,7 +83,7 @@ export default function SidebarClient() {
 
       <div className="dash-side__nav dash-side__nav--bottom">
         <Link
-          to="/contacto"
+          to="/dashboard-client/soporte"
           className={`dash-side__link dash-side__link--support ${isSupportActive ? 'dash-side__link--active' : ''}`}
         >
           <i

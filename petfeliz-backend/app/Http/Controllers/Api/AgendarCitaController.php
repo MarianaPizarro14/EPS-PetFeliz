@@ -30,12 +30,13 @@ class AgendarCitaController extends Controller
 
                 $especialidades = [
                     1 => 'Medicina General', 2 => 'Medicina General', 3 => 'Medicina General',
-                    4 => 'Medicina General', 5 => 'Medicina General', 6 => 'Cirugía',
-                    7 => 'Cirugía', 8 => 'Dermatología', 9 => 'Dermatología', 10 => 'Dermatología',
-                    11 => 'Odontología', 12 => 'Odontología', 13 => 'Odontología', 14 => 'Cardiología',
-                    15 => 'Cardiología', 16 => 'Oftalmología', 17 => 'Oftalmología', 18 => 'Urgencias',
-                    19 => 'Urgencias', 20 => 'Desparasitación', 21 => 'Vacunación', 22 => 'Vacunación',
-                    23 => 'Consulta General', 24 => 'Cirugía', 25 => 'Exámenes', 26 => 'Dermatología', 27 => 'Odontología'
+                    4 => 'Medicina General', 5 => 'Medicina General', 6 => 'Dermatología',
+                    7 => 'Dermatología', 8 => 'Urgencias', 9 => 'Urgencias', 10 => 'Urgencias',
+                    11 => 'Desparasitación', 12 => 'Desparasitación', 13 => 'Desparasitación', 14 => 'Vacunación',
+                    15 => 'Vacunación', 16 => 'Médico Director', 17 => 'Médico Director', 18 => 'Médico Director',
+                    19 => 'Cirugía', 20 => 'Cirugía', 21 => 'Cirugía', 22 => 'Odontología',
+                    23 => 'Urgencias', 24 => 'Urgencias', 25 => 'Urgencias', 26 => 'Urgencias', 27 => 'Urgencias',
+                    28 => 'Medicina General'
                 ];
 
                 return [

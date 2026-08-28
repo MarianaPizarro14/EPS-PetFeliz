@@ -187,12 +187,23 @@ function AgendarCitaFlow() {
     loadInitialData()
   }, [])
 
-  // Al seleccionar servicio, filtrar médicos por la especialidad asociada
+  // Helper para buscar el servicio médico coincidente con una especialidad
+  const findMatchingService = (specName) => {
+    if (!specName || specName === 'Todas' || servicios.length === 0) return null
+    const lowerSpec = specName.toLowerCase()
+    return (
+      servicios.find((s) => {
+        const sName = s.nombre.toLowerCase()
+        return sName.includes(lowerSpec) || lowerSpec.includes(sName)
+      }) || servicios[0]
+    )
+  }
+
+  // Al seleccionar servicio desde las píldoras
   const handleSelectService = (service) => {
     setSelectedService(service)
     const expectedSpecs = SERVICE_SPECIALTY_MAP[service.nombre] || [service.nombre]
 
-    // Buscar si existe un médico de esa especialidad en BD
     const matchingVet = veterinarios.find((v) =>
       expectedSpecs.some((spec) => v.especialidad.toLowerCase().includes(spec.toLowerCase()) || spec.toLowerCase().includes(v.especialidad.toLowerCase()))
     )
@@ -202,6 +213,28 @@ function AgendarCitaFlow() {
       setSelectedVet(matchingVet)
     } else {
       setSpecialtyFilter('Todas')
+    }
+  }
+
+  // Al cambiar la especialidad desde el dropdown
+  const handleSpecialtyFilterChange = (spec) => {
+    setSpecialtyFilter(spec)
+    if (spec !== 'Todas') {
+      const sMatch = findMatchingService(spec)
+      if (sMatch) setSelectedService(sMatch)
+
+      const vetMatch = veterinarios.find((v) => v.especialidad.toLowerCase() === spec.toLowerCase())
+      if (vetMatch) setSelectedVet(vetMatch)
+    }
+  }
+
+  // Al seleccionar un veterinario directamente
+  const handleSelectVet = (vet) => {
+    setSelectedVet(vet)
+    if (vet.especialidad) {
+      setSpecialtyFilter(vet.especialidad)
+      const sMatch = findMatchingService(vet.especialidad)
+      if (sMatch) setSelectedService(sMatch)
     }
   }
 
@@ -814,7 +847,7 @@ function AgendarCitaFlow() {
                         <select
                           className="agendar-spec-filter"
                           value={specialtyFilter}
-                          onChange={(e) => setSpecialtyFilter(e.target.value)}
+                          onChange={(e) => handleSpecialtyFilterChange(e.target.value)}
                         >
                           {especialidadesDisponibles.map((spec) => (
                             <option key={spec} value={spec}>{spec}</option>
@@ -828,7 +861,7 @@ function AgendarCitaFlow() {
                         <div
                           key={v.id}
                           className={`agendar-vet-card ${selectedVet?.id === v.id ? 'agendar-vet-card--selected' : ''}`}
-                          onClick={() => setSelectedVet(v)}
+                          onClick={() => handleSelectVet(v)}
                         >
                           <img src={v.foto} alt={v.nombre} className="agendar-vet-card__avatar" />
                           <div className="agendar-vet-card__info">

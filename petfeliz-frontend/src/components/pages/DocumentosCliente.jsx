@@ -23,6 +23,10 @@ export default function DocumentosCliente() {
   const [cardMessages, setCardMessages] = useState({})
   const [errorGlobal, setErrorGlobal] = useState('')
 
+  // Control de campos faltantes y modal de perfil
+  const [missingFields, setMissingFields] = useState([])
+  const [openProfileTrigger, setOpenProfileTrigger] = useState(0)
+
   useEffect(() => {
     const fetchDatos = async () => {
       const token = localStorage.getItem('token')
@@ -74,7 +78,7 @@ export default function DocumentosCliente() {
     fetchDatos()
   }, [navigate])
 
-  // Helper para descargar PDF vía Blob o manejar respuestas 404 / sin datos
+  // Helper para descargar PDF vía Blob o manejar respuestas 404 / 422
   const handleDescargarPdf = async (url, defaultFilename, typeKey) => {
     const token = localStorage.getItem('token')
     if (!token) return
@@ -82,6 +86,9 @@ export default function DocumentosCliente() {
     try {
       setDownloadingType(typeKey)
       setCardMessages((prev) => ({ ...prev, [typeKey]: '' }))
+      if (typeKey === 'carne') {
+        setMissingFields([])
+      }
 
       const res = await fetch(url, {
         method: 'GET',
@@ -95,6 +102,13 @@ export default function DocumentosCliente() {
 
       if (contentType.includes('application/json') || !res.ok) {
         const errData = await res.json().catch(() => ({}))
+        
+        // Si el perfil está incompleto (status 422)
+        if (res.status === 422 && errData.perfil_incompleto) {
+          setMissingFields(errData.campos_faltantes || [])
+          return
+        }
+
         const msg = errData.message || 'No se encontraron datos para generar este documento.'
         setCardMessages((prev) => ({ ...prev, [typeKey]: msg }))
         return
@@ -137,6 +151,7 @@ export default function DocumentosCliente() {
           subtitle="Descarga recibos oficiales, constancias de atención, certificados de sanidad y tu carné digital EPS en PDF"
           usuario={usuario}
           onUserUpdated={setUsuario}
+          openProfileTrigger={openProfileTrigger}
         />
 
         {errorGlobal && (
@@ -176,7 +191,32 @@ export default function DocumentosCliente() {
                   </div>
                 </div>
 
-                {cardMessages.carne && (
+                {missingFields.length > 0 && (
+                  <div className="docs-cli-card-msg--warning">
+                    <div className="docs-cli-warning-title">
+                      <i className="fa-solid fa-triangle-exclamation"></i>
+                      <span>Perfil Incompleto para Generar Carnet</span>
+                    </div>
+                    <p className="docs-cli-warning-text">
+                      Para emitir tu Carnet Digital EPS debes completar el 100% de tu información personal en el perfil. Campos faltantes:
+                    </p>
+                    <ul className="docs-cli-missing-list">
+                      {missingFields.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      className="docs-cli-btn-complete-profile"
+                      onClick={() => setOpenProfileTrigger((prev) => prev + 1)}
+                    >
+                      <i className="fa-solid fa-user-pen"></i>
+                      <span>Completar Mi Perfil Ahora</span>
+                    </button>
+                  </div>
+                )}
+
+                {cardMessages.carne && missingFields.length === 0 && (
                   <div className="docs-cli-card-msg docs-cli-card-msg--info">
                     <i className="fa-solid fa-circle-info"></i>
                     <span>{cardMessages.carne}</span>
@@ -192,7 +232,7 @@ export default function DocumentosCliente() {
                   onClick={() =>
                     handleDescargarPdf(
                       `${import.meta.env.VITE_API_URL}/cliente/documentos/carne-eps/pdf`,
-                      `Carnet_EPS_PetFeliz_${usuario.nombre || 'Afiliado'}.pdf`,
+                      `Carnet_EPS_PetFeliz_${usuario?.nombre || 'Afiliado'}.pdf`,
                       'carne'
                     )
                   }

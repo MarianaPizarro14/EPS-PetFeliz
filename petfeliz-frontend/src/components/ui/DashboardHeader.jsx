@@ -82,6 +82,7 @@ export default function DashboardHeader({
   usuario,
   onUserUpdated,
   extraActions,
+  openProfileTrigger,
 }) {
   const navigate = useNavigate()
 
@@ -92,6 +93,13 @@ export default function DashboardHeader({
   // Modales
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [activeProfileTab, setActiveProfileTab] = useState('info') // 'info' | 'photo'
+
+  useEffect(() => {
+    if (openProfileTrigger) {
+      setShowProfileModal(true)
+      setActiveProfileTab('info')
+    }
+  }, [openProfileTrigger])
 
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [activeSettingsTab, setActiveSettingsTab] = useState('password') // 'password' | 'notifications' | 'security'

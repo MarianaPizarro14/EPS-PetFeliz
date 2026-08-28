@@ -806,51 +806,56 @@ function AgendarCitaFlow() {
                     </h3>
 
                     <div className="agendar-mini-calendar-box">
-                      {renderRealCalendar()}
+                      <div className="agendar-datetime-grid">
+                        {/* Columna Izquierda: Calendario y Leyenda */}
+                        <div className="agendar-datetime-cal-col">
+                          {renderRealCalendar()}
 
-                      {/* Leyenda de Disponibilidad del Calendario */}
-                      <div className="agendar-cal-legend">
-                        <span className="agendar-legend-item">
-                          <span className="agendar-legend-dot agendar-legend-dot--available"></span> Disponible
-                        </span>
-                        <span className="agendar-legend-item">
-                          <span className="agendar-legend-dot agendar-legend-dot--selected"></span> Seleccionado
-                        </span>
-                        <span className="agendar-legend-item">
-                          <span className="agendar-legend-dot agendar-legend-dot--disabled"></span> No disponible
-                        </span>
-                      </div>
-
-                      {/* Horarios Disponibles */}
-                      <div className="agendar-slots-container">
-                        <div className="agendar-slots-header">
-                          <span className="agendar-slots-label">HORARIOS DISPONIBLES</span>
-                          {selectedVet && <span className="agendar-slots-vet-name">Con {selectedVet.nombre}</span>}
+                          {/* Leyenda de Disponibilidad del Calendario */}
+                          <div className="agendar-cal-legend">
+                            <span className="agendar-legend-item">
+                              <span className="agendar-legend-dot agendar-legend-dot--available"></span> Disponible
+                            </span>
+                            <span className="agendar-legend-item">
+                              <span className="agendar-legend-dot agendar-legend-dot--selected"></span> Seleccionado
+                            </span>
+                            <span className="agendar-legend-item">
+                              <span className="agendar-legend-dot agendar-legend-dot--disabled"></span> No disponible
+                            </span>
+                          </div>
                         </div>
 
-                        {loadingHorarios ? (
-                          <p className="agendar-slots-loading">
-                            <i className="fa-solid fa-spinner fa-spin"></i> Consultando disponibilidad...
-                          </p>
-                        ) : horariosDisponibles.length > 0 ? (
-                          <div className="agendar-slots-row">
-                            {horariosDisponibles.map((h) => (
-                              <button
-                                key={h}
-                                type="button"
-                                className={`agendar-slot-pill ${selectedTime === h ? 'agendar-slot-pill--active' : ''}`}
-                                onClick={() => setSelectedTime(h)}
-                              >
-                                {h}
-                              </button>
-                            ))}
+                        {/* Columna Derecha: Horarios Disponibles */}
+                        <div className="agendar-datetime-slots-col">
+                          <div className="agendar-slots-header">
+                            <span className="agendar-slots-label">HORARIOS DISPONIBLES</span>
+                            {selectedVet && <span className="agendar-slots-vet-name">Con {selectedVet.nombre}</span>}
                           </div>
-                        ) : (
-                          <div className="agendar-slots-empty">
-                            <i className="fa-solid fa-circle-exclamation"></i>
-                            <span>No hay horarios disponibles para este médico en la fecha seleccionada. Por favor elige otra fecha o médico.</span>
-                          </div>
-                        )}
+
+                          {loadingHorarios ? (
+                            <p className="agendar-slots-loading">
+                              <i className="fa-solid fa-spinner fa-spin"></i> Consultando disponibilidad...
+                            </p>
+                          ) : horariosDisponibles.length > 0 ? (
+                            <div className="agendar-slots-row">
+                              {horariosDisponibles.map((h) => (
+                                <button
+                                  key={h}
+                                  type="button"
+                                  className={`agendar-slot-pill ${selectedTime === h ? 'agendar-slot-pill--active' : ''}`}
+                                  onClick={() => setSelectedTime(h)}
+                                >
+                                  {h}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="agendar-slots-empty">
+                              <i className="fa-solid fa-circle-exclamation"></i>
+                              <span>No hay horarios disponibles para este médico en la fecha seleccionada. Por favor elige otra fecha o médico.</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </>

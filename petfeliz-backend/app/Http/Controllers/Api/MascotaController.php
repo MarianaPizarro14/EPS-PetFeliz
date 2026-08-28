@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Mascota;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\CloudinaryService;
 
 class MascotaController extends Controller
 {
@@ -59,11 +60,9 @@ class MascotaController extends Controller
         $fotoUrl = is_string($request->foto_mascota) ? $request->foto_mascota : null;
 
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('mascotas', 'public');
-            $fotoUrl = asset('storage/' . $path);
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'mascotas');
         } elseif ($request->hasFile('foto_mascota')) {
-            $path = $request->file('foto_mascota')->store('mascotas', 'public');
-            $fotoUrl = asset('storage/' . $path);
+            $fotoUrl = CloudinaryService::upload($request->file('foto_mascota'), 'mascotas');
         }
 
         $mascota = Mascota::create([
@@ -135,11 +134,9 @@ class MascotaController extends Controller
         ]);
 
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('mascotas', 'public');
-            $data['foto_mascota'] = asset('storage/' . $path);
+            $data['foto_mascota'] = CloudinaryService::upload($request->file('foto'), 'mascotas');
         } elseif ($request->hasFile('foto_mascota')) {
-            $path = $request->file('foto_mascota')->store('mascotas', 'public');
-            $data['foto_mascota'] = asset('storage/' . $path);
+            $data['foto_mascota'] = CloudinaryService::upload($request->file('foto_mascota'), 'mascotas');
         } elseif ($request->has('foto_mascota') && is_string($request->foto_mascota)) {
             $data['foto_mascota'] = $request->foto_mascota;
         }

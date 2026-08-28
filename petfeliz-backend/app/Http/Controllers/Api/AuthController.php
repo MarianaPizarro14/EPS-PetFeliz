@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -139,8 +140,7 @@ class AuthController extends Controller
         if ($request->has('recordatorios_citas')) $cliente->recordatorios_citas = filter_var($request->recordatorios_citas, FILTER_VALIDATE_BOOLEAN);
 
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('usuarios', 'public');
-            $cliente->foto_perfil = asset('storage/' . $path);
+            $cliente->foto_perfil = CloudinaryService::upload($request->file('foto'), 'usuarios');
         }
 
         $cliente->save();

@@ -56,9 +56,10 @@ function AgendarCitaFlow() {
   const [selectedTime, setSelectedTime] = useState('10:30 AM')
   const [observacion, setObservacion] = useState('')
 
-  // Disponibilidad de horarios
+  // Disponibilidad de horarios y mes
   const [horariosDisponibles, setHorariosDisponibles] = useState([])
   const [loadingHorarios, setLoadingHorarios] = useState(false)
+  const [diasDisponiblesMap, setDiasDisponiblesMap] = useState({})
 
   // Reserva temporal & Concurrencia
   const [tokenReserva, setTokenReserva] = useState(null)
@@ -234,6 +235,31 @@ function AgendarCitaFlow() {
 
     fetchHorarios()
   }, [selectedVet, selectedDate])
+
+  // Consultar mapa de disponibilidad por día del mes para el médico seleccionado
+  useEffect(() => {
+    if (!selectedVet) return
+
+    const fetchDisponibilidadMes = async () => {
+      const token = localStorage.getItem('token')
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/agendar/disponibilidad-mes?id_veterinario=${selectedVet.id}&mes=${currentMonth + 1}&anio=${currentYear}`,
+          {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          setDiasDisponiblesMap(data.disponibilidad || {})
+        }
+      } catch (err) {
+        console.error('Error al cargar disponibilidad del mes:', err)
+      }
+    }
+
+    fetchDisponibilidadMes()
+  }, [selectedVet, currentMonth, currentYear])
 
   // Contador regresivo para la reserva de 10 minutos (Paso 2)
   useEffect(() => {
@@ -530,12 +556,19 @@ function AgendarCitaFlow() {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ]
 
-  // 3. CALENDARIO MENSUAL REAL Y MATEMÁTICAMENTE EXACTO (Lun-Dom)
+  // 3. CALENDARIO MENSUAL REAL Y MATEMÁTICAMENTE EXACTO (Lun-Dom) Con ventana de 3 meses
   const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate()
   const getFirstDayOfWeek = (y, m) => {
     const day = new Date(y, m, 1).getDay()
-    return day === 0 ? 6 : day - 1 // Ajustar a Lunes = 0, Domingo = 6
+    return day === 0 ? 6 : day - 1 // Lunes = 0, Domingo = 6
   }
+
+  // Ventana estricta de 3 meses (mes actual + 2 siguientes)
+  const minDate = new Date(today.getFullYear(), today.getMonth(), 1)
+  const maxDate = new Date(today.getFullYear(), today.getMonth() + 2, 1)
+
+  const isMinMonth = currentYear === minDate.getFullYear() && currentMonth === minDate.getMonth()
+  const isMaxMonth = currentYear === maxDate.getFullYear() && currentMonth === maxDate.getMonth()
 
   const renderRealCalendar = () => {
     const totalDays = getDaysInMonth(currentYear, currentMonth)
@@ -556,20 +589,33 @@ function AgendarCitaFlow() {
       const fullDate = `${currentYear}-${monthStr}-${dayStr}`
       const isSelected = selectedDate === fullDate
 
-      // Marcar domingos y días pasados como no disponibles
+      // Marcar domingos, días pasados o días con 0 cupos como deshabilitados
       const dayDate = new Date(currentYear, currentMonth, d)
       const isSunday = dayDate.getDay() === 0
       const isPast = dayDate < todayDate
-      const isUnavailable = isSunday || isPast
+      const availableSlotsCount = diasDisponiblesMap[fullDate] ?? (isSunday || isPast ? 0 : 8)
+      const hasSlots = availableSlotsCount > 0
+
+      const isUnavailable = isSunday || isPast || !hasSlots
 
       cells.push(
         <button
           key={fullDate}
           type="button"
           disabled={isUnavailable}
-          className={`agendar-cal-cell ${isSelected ? 'agendar-cal-cell--selected' : ''} ${isUnavailable ? 'agendar-cal-cell--disabled' : ''}`}
+          className={`agendar-cal-cell ${
+            isSelected
+              ? 'agendar-cal-cell--selected'
+              : !isUnavailable
+              ? 'agendar-cal-cell--available'
+              : 'agendar-cal-cell--disabled'
+          }`}
           onClick={() => !isUnavailable && setSelectedDate(fullDate)}
-          title={isUnavailable ? 'Día no disponible para consulta' : `Seleccionar ${d} de ${monthNames[currentMonth]}`}
+          title={
+            isUnavailable
+              ? 'Día no disponible para consulta con este médico'
+              : `Seleccionar ${d} de ${monthNames[currentMonth]} (${availableSlotsCount} cupos disponibles)`
+          }
         >
           {d}
         </button>
@@ -583,7 +629,9 @@ function AgendarCitaFlow() {
           <div className="agendar-cal-arrows">
             <button
               type="button"
+              disabled={isMinMonth}
               onClick={() => {
+                if (isMinMonth) return
                 if (currentMonth === 0) {
                   setCurrentMonth(11)
                   setCurrentYear((prev) => prev - 1)
@@ -591,13 +639,16 @@ function AgendarCitaFlow() {
                   setCurrentMonth((prev) => prev - 1)
                 }
               }}
-              title="Mes anterior"
+              title={isMinMonth ? 'No puedes ir a meses pasados' : 'Mes anterior'}
+              style={{ opacity: isMinMonth ? 0.35 : 1, cursor: isMinMonth ? 'not-allowed' : 'pointer' }}
             >
               <i className="fa-solid fa-chevron-left"></i>
             </button>
             <button
               type="button"
+              disabled={isMaxMonth}
               onClick={() => {
+                if (isMaxMonth) return
                 if (currentMonth === 11) {
                   setCurrentMonth(0)
                   setCurrentYear((prev) => prev + 1)
@@ -605,7 +656,8 @@ function AgendarCitaFlow() {
                   setCurrentMonth((prev) => prev + 1)
                 }
               }}
-              title="Mes siguiente"
+              title={isMaxMonth ? 'Límite de disponibilidad: 3 meses' : 'Mes siguiente'}
+              style={{ opacity: isMaxMonth ? 0.35 : 1, cursor: isMaxMonth ? 'not-allowed' : 'pointer' }}
             >
               <i className="fa-solid fa-chevron-right"></i>
             </button>

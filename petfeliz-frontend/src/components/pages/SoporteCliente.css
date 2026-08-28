@@ -13,16 +13,18 @@
 }
 
 .soporte-cli-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 20px;
-  background: #dcfce7;
-  color: #15803d;
-  font-size: 2.2rem;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+  color: #25d366;
+  font-size: 2.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem auto;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.15);
+  border: 1.5px solid #a3e635;
 }
 
 .soporte-cli-title {
@@ -45,22 +47,23 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 0.9rem 2rem;
-  background-color: #25d366;
+  padding: 0.95rem 2.2rem;
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
   color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
-  font-weight: 600;
-  border-radius: 12px;
+  font-weight: 700;
+  border-radius: 14px;
   text-decoration: none;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #16a34a;
 }
 
 .soporte-cli-btn-ws:hover {
-  background-color: #1eb956;
+  background: linear-gradient(135deg, #22c55e 0%, #0d9488 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.45);
   color: #ffffff;
 }
 

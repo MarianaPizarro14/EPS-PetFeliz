@@ -2,447 +2,415 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Carnet Digital de Afiliación - EPS PetFeliz</title>
+    <title>Certificado de Afiliación - EPS PetFeliz</title>
     <style>
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             color: #0f172a;
             margin: 0;
-            padding: 12px;
-            font-size: 11px;
+            padding: 24px 30px;
+            font-size: 9.5px;
             background-color: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100' viewBox='0 0 200 100'%3E%3Ctext x='20' y='60' fill='%2316a34a' fill-opacity='0.04' font-family='Arial' font-size='16' font-weight='bold' transform='rotate(-22 100 50)'%3EEPS PetFeliz%3C/text%3E%3C/svg%3E");
+            background-repeat: repeat;
         }
 
-        .card-container {
-            width: 530px;
+        .document-container {
+            width: 100%;
             margin: 0 auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 14px;
-            background-color: #ffffff;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
         }
 
-        /* ── HEADER INSTITUCIONAL ── */
-        .card-header {
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-bottom: 3px solid #16a34a;
-            color: #ffffff;
-        }
-
+        /* ── ENCABEZADO ── */
         .header-table {
             width: 100%;
             border-collapse: collapse;
+            border-bottom: 2px solid #166534;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .brand-logo-text {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            line-height: 1.1;
-            color: #ffffff;
+            line-height: 1;
         }
 
-        .brand-eps { color: #38bdf8; font-weight: bold; }
-        .brand-pet { color: #4ade80; font-weight: bold; }
-        .brand-feliz { color: #facc15; font-weight: bold; }
+        .brand-eps { color: #0284c7; }
+        .brand-pet { color: #16a34a; }
+        .brand-feliz { color: #d97706; }
 
         .brand-sub {
             font-size: 8px;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: bold;
             margin-top: 3px;
             letter-spacing: 0.5px;
-            text-transform: uppercase;
         }
 
-        .affiliate-badge {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+        .affiliate-badge-box {
+            border: 1.5px solid #166534;
+            border-radius: 6px;
             padding: 6px 12px;
+            background-color: #f0fdf4;
             text-align: right;
             display: inline-block;
         }
 
-        .affiliate-label {
+        .affiliate-badge-label {
             font-size: 7.5px;
-            color: #cbd5e1;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .affiliate-code {
-            font-size: 11.5px;
-            font-weight: bold;
-            color: #ffffff;
-            margin-top: 2px;
-        }
-
-        /* ── BODY ── */
-        .card-body {
-            padding: 16px 20px;
-            background-color: #fafdfb;
-        }
-
-        /* ── SECCIONES ── */
-        .section-header {
-            margin-bottom: 10px;
-            border-bottom: 1.5px solid #e2e8f0;
-            padding-bottom: 4px;
-        }
-
-        .section-title {
-            font-size: 10.5px;
-            font-weight: bold;
-            color: #166534;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        /* ── TITULAR & PLAN ── */
-        .titular-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 14px;
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 14px;
-        }
-
-        .titular-table td {
-            vertical-align: top;
-        }
-
-        .field-label {
-            font-size: 8px;
-            color: #64748b;
-            font-weight: bold;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .titular-name {
-            font-size: 12.5px;
-            font-weight: bold;
-            color: #0f172a;
-            margin-bottom: 3px;
-        }
-
-        .titular-doc {
-            font-size: 9.5px;
-            color: #475569;
-            font-weight: bold;
-        }
-
-        .status-pill {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 9px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-pill-active {
-            background-color: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
-        }
-
-        .status-pill-inactive {
-            background-color: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-        }
-
-        .plan-subtext {
-            font-size: 8.5px;
-            color: #64748b;
-            margin-top: 3px;
-        }
-
-        /* ── MASCOTAS UNIFORMES ── */
-        .pet-card {
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-left: 4px solid #16a34a;
-            border-radius: 8px;
-            padding: 9px 12px;
-            margin-bottom: 8px;
-        }
-
-        .pet-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .pet-badge-cell {
-            width: 28px;
-            vertical-align: middle;
-        }
-
-        .pet-badge {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .pet-name {
-            font-size: 11.5px;
-            font-weight: bold;
-            color: #0f172a;
-            margin-bottom: 2px;
-        }
-
-        .pet-meta {
-            font-size: 9px;
-            color: #475569;
-            margin-bottom: 2px;
-        }
-
-        .pet-chip {
-            font-size: 8.5px;
             color: #166534;
             font-weight: bold;
-        }
-
-        .no-pets {
-            text-align: center;
-            padding: 12px;
-            background-color: #ffffff;
-            border: 1px dashed #cbd5e1;
-            border-radius: 8px;
-            color: #64748b;
-            font-size: 9.5px;
-            margin-bottom: 10px;
-        }
-
-        /* ── EMERGENCIAS UNIFICADO ── */
-        .emergency-box {
-            background-color: #0f172a;
-            border-radius: 10px;
-            padding: 10px 14px;
-            margin-top: 12px;
-            color: #ffffff;
-        }
-
-        .emergency-title {
-            text-align: center;
-            font-size: 9.5px;
-            font-weight: bold;
-            color: #4ade80;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
-            margin-bottom: 8px;
         }
 
-        .emergency-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        .emergency-table td {
-            vertical-align: top;
-            padding: 0 4px;
-        }
-
-        .emergency-sede {
-            font-size: 8px;
+        .affiliate-badge-code {
+            font-size: 13px;
             font-weight: bold;
-            color: #94a3b8;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-        }
-
-        .emergency-phone {
-            font-size: 9.5px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        .emergency-tag {
-            font-size: 7.5px;
-            color: #38bdf8;
-            font-weight: bold;
+            color: #0f172a;
             margin-top: 1px;
         }
 
-        /* ── FOOTER BANNER INSTITUCIONAL ── */
-        .card-footer {
-            background-color: #166534;
-            color: #ffffff;
-            padding: 8px 16px;
+        /* ── TÍTULO PRINCIPAL ── */
+        .doc-title-main {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #166534;
+            text-transform: uppercase;
+            margin-top: 14px;
+            margin-bottom: 16px;
+            letter-spacing: 0.2px;
         }
 
-        .footer-table {
+        /* ── TEXTO DE CERTIFICACIÓN FORMAL ── */
+        .cert-statement {
+            font-size: 9.5px;
+            color: #334155;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .cert-title-big {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #0f172a;
+            text-transform: uppercase;
+            margin: 14px 0;
+            letter-spacing: 1px;
+        }
+
+        .cert-body-text {
+            font-size: 9.5px;
+            color: #334155;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        /* ── TABLA CLAVE / VALOR ── */
+        .kv-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 18px;
         }
 
-        .footer-text {
+        .kv-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 9.5px;
+            vertical-align: middle;
+        }
+
+        .kv-label {
+            font-weight: bold;
+            color: #475569;
+            width: 36%;
+            text-transform: uppercase;
+            font-size: 8.5px;
+        }
+
+        .kv-value {
+            color: #0f172a;
+            font-weight: bold;
+            width: 64%;
+        }
+
+        .text-accent {
+            color: #166534;
+            font-size: 10.5px;
+        }
+
+        .status-active {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .status-inactive {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+
+        /* ── SECCIONES SECUNDARIAS ── */
+        .sub-section-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #166534;
+            text-transform: uppercase;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 3px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* ── TABLA MASCOTAS ── */
+        .pets-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .pets-table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            text-align: left;
+            padding: 6px 8px;
+            font-size: 8.5px;
+            border-bottom: 1.5px solid #cbd5e1;
+            text-transform: uppercase;
+        }
+
+        .pets-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 9px;
+            vertical-align: middle;
+        }
+
+        .chip-code {
+            color: #166534;
+            font-weight: bold;
+        }
+
+        /* ── TABLA URGENCIAS 24/7 ── */
+        .urgencies-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-top: 8px;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .urgencies-table td {
+            padding: 8px 6px;
+            vertical-align: top;
+            width: 33.33%;
+        }
+
+        .urgency-sede {
             font-size: 8px;
-            color: #f0fdf4;
+            font-weight: bold;
+            color: #166534;
+            text-transform: uppercase;
+            margin-bottom: 2px;
         }
 
-        .footer-cta {
+        .urgency-phone {
+            font-size: 10px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .urgency-tag {
+            font-size: 7.5px;
+            color: #64748b;
+            margin-top: 1px;
+        }
+
+        /* ── PIE DE PÁGINA ── */
+        .cert-footer {
+            margin-top: 25px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+        }
+
+        .cert-legal-notice {
+            text-align: center;
             font-size: 9px;
             font-weight: bold;
-            text-align: right;
-            color: #ffffff;
+            color: #0f172a;
+            text-transform: uppercase;
+            margin-top: 14px;
+            padding: 8px;
+            background-color: #f1f5f9;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
         }
     </style>
 </head>
 <body>
 
-    <div class="card-container">
-        <!-- ── ENCABEZADO INSTITUCIONAL ── -->
-        <div class="card-header">
-            <table class="header-table">
-                <tr>
-                    <td style="vertical-align: middle;">
-                        <table style="border-collapse: collapse;">
-                            <tr>
-                                <td style="vertical-align: middle; padding-right: 10px;">
-                                    <img src="{{ public_path('img/paw-icon-white.svg') }}" width="26" height="26" alt="Huella PetFeliz">
-                                </td>
-                                <td style="vertical-align: middle;">
-                                    <div class="brand-logo-text">
-                                        <span class="brand-eps">EPS</span> <span class="brand-pet">Pet</span><span class="brand-feliz">Feliz</span>
-                                    </div>
-                                    <div class="brand-sub">Carnet Digital de Afiliación y Salud Veterinaria</div>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td style="width: 180px; text-align: right; vertical-align: middle;">
-                        <div class="affiliate-badge">
-                            <div class="affiliate-label">Código Afiliado</div>
-                            <div class="affiliate-code">EPS-PET-{{ str_pad($cliente->id_cliente ?? 1, 5, '0', STR_PAD_LEFT) }}</div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- ── CUERPO DEL CARNET ── -->
-        <div class="card-body">
-            
-            <!-- ── SECCIÓN 1: TITULAR Y ESTADO DE AFILIACIÓN ── -->
-            <div class="section-header">
-                <div class="section-title">
-                    <img src="{{ public_path('img/paw-icon.svg') }}" width="12" height="12" style="vertical-align: -1px; margin-right: 4px;" alt="Icon">
-                    Titular Responsable y Cobertura
-                </div>
-            </div>
-
-            <table class="titular-table">
-                <tr>
-                    <td style="width: 55%;">
-                        <div class="field-label">Titular de la Afiliación</div>
-                        <div class="titular-name">{{ $cliente_nombre }}</div>
-                        <div class="titular-doc">DOCUMENTO: {{ $cliente_doc }}</div>
-                    </td>
-                    <td style="width: 45%; text-align: right;">
-                        <div class="field-label" style="text-align: right;">Estado de Afiliación</div>
-                        @if($es_afiliado ?? true)
-                            <div class="status-pill status-pill-active">✓ AFILIADO EPS • ACTIVO</div>
-                            <div class="plan-subtext">Plan Integral Mascota</div>
-                        @else
-                            <div class="status-pill status-pill-inactive">NO AFILIADO • PARTICULAR</div>
-                            <div class="plan-subtext">Atención Particular Sin Cobertura</div>
-                        @endif
-                    </td>
-                </tr>
-            </table>
-
-            <!-- ── SECCIÓN 2: MASCOTAS BENEFICIARIAS ── -->
-            <div class="section-header">
-                <div class="section-title">
-                    <img src="{{ public_path('img/paw-icon.svg') }}" width="12" height="12" style="vertical-align: -1px; margin-right: 4px;" alt="Icon">
-                    Mascotas Aseguradas / Beneficiarias
-                </div>
-            </div>
-
-            @forelse($mascotas as $index => $mascota)
-                @php
-                    $nombreMascota = is_array($mascota) ? ($mascota['nombre'] ?? 'Mascota') : ($mascota->nombre ?? 'Mascota');
-                    $especieMascota = is_array($mascota) ? ($mascota['especie'] ?? 'S/D') : ($mascota->especie ?? 'S/D');
-                    $razaMascota = is_array($mascota) ? ($mascota['raza'] ?? 'Criollo / Mestizo') : ($mascota->raza ?? 'Criollo / Mestizo');
-                    $sexoMascota = is_array($mascota) ? ($mascota['sexo'] ?? 'Macho') : ($mascota->sexo ?? 'Macho');
-                    $chipMascota = is_array($mascota) ? ($mascota['chip'] ?? ('CHIP-PET-' . ($mascota['id'] ?? ($index + 1)))) : ('CHIP-PET-' . ($mascota->id_mascota ?? ($index + 1)));
-                @endphp
-
-                <div class="pet-card">
-                    <table class="pet-table">
+    <div class="document-container">
+        <!-- ── ENCABEZADO OFICIAL ── -->
+        <table class="header-table">
+            <tr>
+                <td style="vertical-align: middle;">
+                    <table style="border-collapse: collapse;">
                         <tr>
-                            <td class="pet-badge-cell">
-                                <div class="pet-badge">
-                                    <img src="{{ public_path('img/paw-icon.svg') }}" width="12" height="12" style="vertical-align: middle; margin-top: 4px;" alt="Paw">
-                                </div>
+                            <td style="vertical-align: middle; padding-right: 8px;">
+                                <img src="{{ public_path('img/paw-icon.svg') }}" width="28" height="28" alt="PetFeliz">
                             </td>
-                            <td style="vertical-align: middle; padding-left: 6px;">
-                                <div class="pet-name">PACIENTE: {{ mb_strtoupper($nombreMascota, 'UTF-8') }}</div>
-                                <div class="pet-meta">
-                                    Especie: {{ mb_strtoupper($especieMascota, 'UTF-8') }} • Raza: {{ mb_strtoupper($razaMascota, 'UTF-8') }} • Sexo: {{ mb_strtoupper($sexoMascota, 'UTF-8') }}
+                            <td style="vertical-align: middle;">
+                                <div class="brand-logo-text">
+                                    <span class="brand-eps">EPS</span>
+                                    <span class="brand-pet">Pet</span><span class="brand-feliz">Feliz</span>
                                 </div>
-                                <div class="pet-chip">Registro ID Chip: {{ $chipMascota }}</div>
+                                <div class="brand-sub">SALUD Y COBERTURA VETERINARIA S.A.S. • NIT 901.234.567-8</div>
                             </td>
                         </tr>
                     </table>
-                </div>
-            @empty
-                <div class="no-pets">
-                    No existen mascotas beneficiarias registradas bajo esta afiliación.
-                </div>
-            @endforelse
+                </td>
+                <td style="text-align: right; vertical-align: middle;">
+                    <div class="affiliate-badge-box">
+                        <div class="affiliate-badge-label">CÓDIGO DE AFILIADO</div>
+                        <div class="affiliate-badge-code">{{ $codigo_afiliado ?? ('EPS-PET-' . str_pad($cliente->id_cliente ?? 1, 5, '0', STR_PAD_LEFT)) }}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-            <!-- ── SECCIÓN 3: EMERGENCIAS Y URGENCIAS 24/7 ── -->
-            <div class="emergency-box">
-                <div class="emergency-title">LÍNEAS DE URGENCIAS VETERINARIAS 24/7</div>
-                <table class="emergency-table">
-                    <tr>
-                        <td style="width: 33%;">
-                            <div class="emergency-sede">Sede Laureles</div>
-                            <div class="emergency-phone">(604) 444-7389</div>
-                            <div class="emergency-tag">Urgencias 24/7</div>
-                        </td>
-                        <td style="width: 34%; border-left: 1px solid #334155; border-right: 1px solid #334155;">
-                            <div class="emergency-sede">Sede Itagüí</div>
-                            <div class="emergency-phone">(604) 372-9100</div>
-                            <div class="emergency-tag">Urgencias 24/7</div>
-                        </td>
-                        <td style="width: 33%;">
-                            <div class="emergency-sede">Sede Bello</div>
-                            <div class="emergency-phone">(604) 480-2211</div>
-                            <div class="emergency-tag">Atención General</div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
+        <!-- ── TÍTULO DEL CERTIFICADO ── -->
+        <div class="doc-title-main">
+            CERTIFICADO DE AFILIACIÓN AL PLAN DE BENEFICIOS VETERINARIOS DE EPS PETFELIZ
         </div>
 
-        <!-- ── PIE DE PÁGINA BANNER INSTITUCIONAL ── -->
-        <div class="card-footer">
-            <table class="footer-table">
+        <!-- ── TEXTO DE CERTIFICACIÓN FORMAL ── -->
+        <div class="cert-statement">
+            <strong>EPS PETFELIZ S.A.S.</strong> en desarrollo de su programa especial para la garantía del Plan de Cobertura en Salud Veterinaria denominado <strong>EPS PETFELIZ</strong>:
+        </div>
+
+        <div class="cert-title-big">
+            CERTIFICA
+        </div>
+
+        <div class="cert-body-text">
+            Que <strong>{{ $cliente_nombre }}</strong> identificado(a) con <strong>CÉDULA DE CIUDADANÍA</strong> número <strong>{{ $cliente_doc }}</strong> está registrado(a) en el Plan de Beneficios de <strong>EPS PETFELIZ</strong> con la siguiente información:
+        </div>
+
+        <!-- ── TABLA DE DATOS CLAVE / VALOR ── -->
+        <table class="kv-table">
+            <tr>
+                <td class="kv-label">TIPO Y NÚMERO DE IDENTIFICACIÓN</td>
+                <td class="kv-value">CC {{ $cliente_doc }}</td>
+            </tr>
+            <tr>
+                <td class="kv-label">NOMBRES Y APELLIDOS DEL TITULAR</td>
+                <td class="kv-value">{{ $cliente_nombre }}</td>
+            </tr>
+            <tr>
+                <td class="kv-label">CÓDIGO DE AFILIADO</td>
+                <td class="kv-value text-accent">{{ $codigo_afiliado ?? ('EPS-PET-' . str_pad($cliente->id_cliente ?? 1, 5, '0', STR_PAD_LEFT)) }}</td>
+            </tr>
+            <tr>
+                <td class="kv-label">TIPO DE AFILIADO / ROL</td>
+                <td class="kv-value">TITULAR RESPONSABLE</td>
+            </tr>
+            <tr>
+                <td class="kv-label">ESTADO DE LA AFILIACIÓN</td>
+                <td class="kv-value">
+                    @if($es_afiliado ?? true)
+                        <span class="status-active">TIENE DERECHO A COBERTURA INTEGRAL ACTIVA</span>
+                    @else
+                        <span class="status-inactive">SIN COBERTURA ACTIVA / PACIENTE PARTICULAR</span>
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td class="kv-label">CAUSA ESTADO DE LA AFILIACIÓN</td>
+                <td class="kv-value">PLAN INTEGRAL VETERINARIO MASCOTA</td>
+            </tr>
+            <tr>
+                <td class="kv-label">FECHA DE REGISTRO EN EPS PETFELIZ</td>
+                <td class="kv-value">{{ $fecha_ingreso ?? date('d/m/Y') }}</td>
+            </tr>
+            <tr>
+                <td class="kv-label">DATOS DE CONTACTO Y UBICACIÓN</td>
+                <td class="kv-value">TEL: {{ $telefono ?? 'N/A' }} • {{ $direccion ?? 'N/A' }} ({{ $ciudad ?? 'MEDELLÍN' }} - {{ $departamento ?? 'ANTIOQUIA' }})</td>
+            </tr>
+            <tr>
+                <td class="kv-label">CONTACTO DE EMERGENCIA</td>
+                <td class="kv-value">{{ $contacto_emergencia_nombre ?? 'NO REGISTRADO' }} • TEL: {{ $contacto_emergencia_telefono ?? 'N/A' }}</td>
+            </tr>
+        </table>
+
+        <!-- ── MASCOTAS BENEFICIARIAS ── -->
+        <div class="sub-section-title">MASCOTAS BENEFICIARIAS / PACIENTES ASEGURADOS</div>
+        <table class="pets-table">
+            <thead>
                 <tr>
-                    <td class="footer-text">
-                        Documento oficial emitido por EPS PetFeliz S.A.S. Presente este carnet digital en clínicas veterinarias aliadas.
+                    <th style="width: 25%;">NOMBRE PACIENTE</th>
+                    <th style="width: 35%;">ESPECIE / RAZA</th>
+                    <th style="width: 15%;">SEXO</th>
+                    <th style="width: 25%;">CÓDIGO CHIP REGISTRO</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($mascotas as $m)
+                    <tr>
+                        <td><strong>{{ $m['nombre'] }}</strong></td>
+                        <td>{{ $m['especie'] }} — {{ $m['raza'] }}</td>
+                        <td>{{ $m['sexo'] }}</td>
+                        <td><span class="chip-code">{{ $m['chip'] }}</span></td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #64748b;">No existen mascotas beneficiarias registradas en esta afiliación.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <!-- ── URGENCIAS 24/7 ── -->
+        <div class="sub-section-title">LÍNEAS DIRECTAS DE URGENCIAS VETERINARIAS 24/7</div>
+        <table class="urgencies-table">
+            <tr>
+                <td>
+                    <div class="urgency-sede">SEDE LAURELES</div>
+                    <div class="urgency-phone">(604) 444-7389</div>
+                    <div class="urgency-tag">Urgencias 24 Horas</div>
+                </td>
+                <td style="border-left: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1;">
+                    <div class="urgency-sede">SEDE ITAGÜÍ</div>
+                    <div class="urgency-phone">(604) 372-9100</div>
+                    <div class="urgency-tag">Urgencias 24 Horas</div>
+                </td>
+                <td>
+                    <div class="urgency-sede">SEDE BELLO</div>
+                    <div class="urgency-phone">(604) 480-2211</div>
+                    <div class="urgency-tag">Atención Médica General</div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- ── PIE DE PÁGINA ── -->
+        <div class="cert-footer">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td>
+                        <div style="font-weight: bold; color: #334155; font-size: 8.5px;">DIRECCIÓN DE AFILIACIONES Y AUDITORÍA MÉDICA VETERINARIA</div>
+                        <div style="font-size: 8.5px; color: #64748b; margin-top: 2px;">Fecha de generación: <strong>{{ $fecha_generacion ?? date('d/m/Y') }}</strong></div>
                     </td>
-                    <td class="footer-cta">
-                        Amor a un click
+                    <td style="text-align: right; vertical-align: bottom;">
+                        <div style="font-size: 8.5px; color: #166534; font-weight: bold;">EPS PetFeliz S.A.S. • Amor a un click</div>
                     </td>
                 </tr>
             </table>
+
+            <div class="cert-legal-notice">
+                ESTE DOCUMENTO CERTIFICA LA AFILIACIÓN VIGENTE ANTE EPS PETFELIZ S.A.S. Y LA COBERTURA DE SUS PACIENTES REGISTRADOS
+            </div>
         </div>
     </div>
 

@@ -630,7 +630,8 @@ function AgendarCitaFlow() {
                   <>
                     {/* 1. Selecciona tu Mascota */}
                     <h3 className="agendar-section-title">
-                      <i className="fa-solid fa-paw"></i> Selecciona tu Mascota
+                      <span className="agendar-section-num">1</span>
+                      <span>Selecciona tu Mascota</span>
                     </h3>
                     <div className="agendar-pets-grid">
                       {mascotas.map((m) => (
@@ -666,7 +667,8 @@ function AgendarCitaFlow() {
 
                     {/* 2. Seleccionar Servicio */}
                     <h3 className="agendar-section-title">
-                      <i className="fa-solid fa-stethoscope"></i> Seleccionar Servicio
+                      <span className="agendar-section-num">2</span>
+                      <span>Selecciona el Servicio</span>
                     </h3>
                     <div className="agendar-service-pills">
                       {servicios.map((s) => (
@@ -681,22 +683,28 @@ function AgendarCitaFlow() {
                       ))}
                     </div>
 
-                    {/* 3. Selecciona Un Veterinario */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                      <h3 className="agendar-section-title" style={{ margin: 0 }}>
-                        <i className="fa-solid fa-user-doctor"></i> Selecciona Un Veterinario
+                    {/* 3. Selecciona Un Veterinario con Filtro de Especialidad */}
+                    <div className="agendar-section-header-row">
+                      <h3 className="agendar-section-title">
+                        <span className="agendar-section-num">3</span>
+                        <span>Selecciona un Veterinario</span>
                       </h3>
 
-                      {/* Dropdown con TODAS las especialidades del equipo */}
-                      <select
-                        className="agendar-spec-filter"
-                        value={specialtyFilter}
-                        onChange={(e) => setSpecialtyFilter(e.target.value)}
-                      >
-                        {especialidadesDisponibles.map((spec) => (
-                          <option key={spec} value={spec}>{spec}</option>
-                        ))}
-                      </select>
+                      {/* Dropdown con Filtro y Etiqueta de Contexto */}
+                      <div className="agendar-filter-group">
+                        <label className="agendar-filter-lbl">
+                          <i className="fa-solid fa-filter"></i> Especialidad:
+                        </label>
+                        <select
+                          className="agendar-spec-filter"
+                          value={specialtyFilter}
+                          onChange={(e) => setSpecialtyFilter(e.target.value)}
+                        >
+                          {especialidadesDisponibles.map((spec) => (
+                            <option key={spec} value={spec}>{spec}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     <div className="agendar-vets-grid">
@@ -721,7 +729,7 @@ function AgendarCitaFlow() {
                       ))}
 
                       {filteredVets.length === 0 && (
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', gridColumn: '1 / -1' }}>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', gridColumn: '1 / -1', padding: '0.5rem 0' }}>
                           No hay veterinarios disponibles para esta especialidad.
                         </p>
                       )}
@@ -729,11 +737,25 @@ function AgendarCitaFlow() {
 
                     {/* 4. Selecciona Fecha y Hora */}
                     <h3 className="agendar-section-title">
-                      <i className="fa-regular fa-calendar-days"></i> Selecciona Fecha y Hora
+                      <span className="agendar-section-num">4</span>
+                      <span>Selecciona Fecha y Hora</span>
                     </h3>
 
                     <div className="agendar-mini-calendar-box">
                       {renderRealCalendar()}
+
+                      {/* Leyenda de Disponibilidad del Calendario */}
+                      <div className="agendar-cal-legend">
+                        <span className="agendar-legend-item">
+                          <span className="agendar-legend-dot agendar-legend-dot--available"></span> Disponible
+                        </span>
+                        <span className="agendar-legend-item">
+                          <span className="agendar-legend-dot agendar-legend-dot--selected"></span> Seleccionado
+                        </span>
+                        <span className="agendar-legend-item">
+                          <span className="agendar-legend-dot agendar-legend-dot--disabled"></span> No disponible
+                        </span>
+                      </div>
 
                       {/* Horarios Disponibles */}
                       <div className="agendar-slots-container">

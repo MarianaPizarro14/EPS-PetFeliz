@@ -128,8 +128,18 @@
             <tr>
                 <td class="info-label">Sexo / Peso:</td>
                 <td>{{ $mascota->sexo ?? 'Macho/Hembra' }} • {{ $mascota->peso ? $mascota->peso . ' kg' : 'N/A' }}</td>
+                <td class="info-label">Estado Afiliación:</td>
+                <td>
+                    @if($es_afiliado ?? true)
+                        <span style="color: #15803d; font-weight: bold;">✓ AFILIADO EPS</span>
+                    @else
+                        <span style="color: #b91c1c; font-weight: bold;">NO AFILIADO</span>
+                    @endif
+                </td>
+            </tr>
+            <tr>
                 <td class="info-label">Código Registro:</td>
-                <td>VAC-{{ $mascota->id_mascota }}-{{ date('Y') }}</td>
+                <td colspan="3">VAC-{{ $mascota->id_mascota }}-{{ date('Y') }}</td>
             </tr>
         </table>
 

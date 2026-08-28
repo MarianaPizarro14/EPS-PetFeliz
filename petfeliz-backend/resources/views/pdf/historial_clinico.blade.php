@@ -115,7 +115,15 @@
         </tr>
         <tr>
             <td class="info-label">Propietario Responsable:</td>
-            <td colspan="3">{{ $cliente_nombre }} (Doc: {{ $cliente_doc }})</td>
+            <td>{{ $cliente_nombre }} (Doc: {{ $cliente_doc }})</td>
+            <td class="info-label">Estado de Afiliación:</td>
+            <td>
+                @if($es_afiliado ?? true)
+                    <span style="color: #15803d; font-weight: bold;">✓ AFILIADO EPS (Cobertura Activa)</span>
+                @else
+                    <span style="color: #b91c1c; font-weight: bold;">NO AFILIADO (Paciente Particular)</span>
+                @endif
+            </td>
         </tr>
     </table>
 

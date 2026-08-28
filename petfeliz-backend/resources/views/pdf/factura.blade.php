@@ -140,6 +140,16 @@
             <td>{{ $cliente_doc }}</td>
         </tr>
         <tr>
+            <td class="info-label">Estado de Afiliación:</td>
+            <td>
+                @if($es_afiliado ?? true)
+                    <span style="color: #15803d; font-weight: bold;">✓ AFILIADO EPS (Cobertura Activa)</span>
+                @else
+                    <span style="color: #b91c1c; font-weight: bold;">NO AFILIADO (Atención Particular)</span>
+                @endif
+            </td>
+        </tr>
+        <tr>
             <td class="info-label">Mascota (Paciente):</td>
             <td>{{ $mascota_nombre }} ({{ $mascota_especie }} - {{ $mascota_raza }})</td>
         </tr>

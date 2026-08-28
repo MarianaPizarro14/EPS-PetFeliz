@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas del Flujo Completo de Agendar Cita (3 Pasos + Concurrencia)
     Route::get('/agendar/veterinarios', [AgendarCitaController::class, 'veterinarios']);
     Route::get('/agendar/horarios-disponibles', [AgendarCitaController::class, 'horariosDisponibles']);
+    Route::get('/agendar/disponibilidad-mes', [AgendarCitaController::class, 'disponibilidadMes']);
     Route::post('/agendar/reservar-slot', [AgendarCitaController::class, 'reservarSlot']);
     Route::post('/agendar/liberar-reserva', [AgendarCitaController::class, 'liberarReserva']);
     Route::post('/agendar/confirmar-pago', [AgendarCitaController::class, 'confirmarPago']);

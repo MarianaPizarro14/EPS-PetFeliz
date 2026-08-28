@@ -100,6 +100,77 @@ class AgendarCitaController extends Controller
     }
 
     /**
+     * Consultar cantidad de cupos disponibles por día en un mes específico para un médico (Ventana de 3 meses).
+     */
+    public function disponibilidadMes(Request $request)
+    {
+        $request->validate([
+            'id_veterinario' => 'required|integer',
+            'mes' => 'required|integer|min:1|max:12',
+            'anio' => 'required|integer',
+        ]);
+
+        $idVet = (int) $request->id_veterinario;
+        $mes = (int) $request->mes;
+        $anio = (int) $request->anio;
+
+        // Rango del mes solicitado
+        $start = Carbon::createFromDate($anio, $mes, 1)->startOfDay();
+        $end = $start->copy()->endOfMonth()->endOfDay();
+
+        // Limpiar reservas temporales expiradas
+        ReservaTemporal::where('expires_at', '<', now())->delete();
+
+        // Citas confirmadas / activas del médico en el mes
+        $citas = Cita::where('id_veterinario', $idVet)
+            ->whereBetween('fecha', [$start->toDateString(), $end->toDateString()])
+            ->where('id_estado', '!=', 3)
+            ->get(['fecha', 'hora']);
+
+        // Reservas temporales vigentes del médico en el mes
+        $reservas = ReservaTemporal::where('id_veterinario', $idVet)
+            ->whereBetween('fecha', [$start->toDateString(), $end->toDateString()])
+            ->where('expires_at', '>', now())
+            ->get(['fecha', 'hora']);
+
+        $ocupadosPorFecha = [];
+        foreach ($citas as $c) {
+            $ocupadosPorFecha[$c->fecha][] = $c->hora;
+        }
+        foreach ($reservas as $r) {
+            $ocupadosPorFecha[$r->fecha][] = $r->hora;
+        }
+
+        $todosLosSlotsCount = 8;
+        $todayDate = Carbon::today();
+        $disponibilidad = [];
+
+        $daysInMonth = $start->daysInMonth;
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $currentDay = Carbon::createFromDate($anio, $mes, $d)->startOfDay();
+            $dateStr = $currentDay->toDateString();
+
+            $isSunday = $currentDay->isSunday();
+            $isPast = $currentDay->lt($todayDate);
+
+            if ($isSunday || $isPast) {
+                $disponibilidad[$dateStr] = 0;
+            } else {
+                $ocupados = array_unique($ocupadosPorFecha[$dateStr] ?? []);
+                $disponibles = max(0, $todosLosSlotsCount - count($ocupados));
+                $disponibilidad[$dateStr] = $disponibles;
+            }
+        }
+
+        return response()->json([
+            'id_veterinario' => $idVet,
+            'mes' => $mes,
+            'anio' => $anio,
+            'disponibilidad' => $disponibilidad,
+        ], 200);
+    }
+
+    /**
      * Bloquear un slot de médico + fecha + hora por 10 minutos (Reserva Temporal).
      */
     public function reservarSlot(Request $request)

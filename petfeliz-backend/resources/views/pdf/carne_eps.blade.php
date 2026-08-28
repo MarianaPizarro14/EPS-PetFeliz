@@ -11,13 +11,35 @@
             padding: 24px 30px;
             font-size: 9.5px;
             background-color: #ffffff;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100' viewBox='0 0 200 100'%3E%3Ctext x='20' y='60' fill='%2316a34a' fill-opacity='0.04' font-family='Arial' font-size='16' font-weight='bold' transform='rotate(-22 100 50)'%3EEPS PetFeliz%3C/text%3E%3C/svg%3E");
-            background-repeat: repeat;
+        }
+
+        /* ── MARCA DE AGUA SIN USAR BACKGROUND-IMAGE (COMPATIBLE CON DOMPDF SIN EXTENSIÓN GD) ── */
+        .watermark-grid {
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            width: 110%;
+            height: 110%;
+            z-index: -1000;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .watermark-text {
+            font-size: 13px;
+            font-weight: bold;
+            color: #16a34a;
+            opacity: 0.05;
+            display: inline-block;
+            margin: 18px 24px;
+            transform: rotate(-22deg);
         }
 
         .document-container {
             width: 100%;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         /* ── ENCABEZADO ── */
@@ -73,7 +95,7 @@
         /* ── TÍTULO PRINCIPAL ── */
         .doc-title-main {
             text-align: center;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: bold;
             color: #166534;
             text-transform: uppercase;
@@ -251,6 +273,13 @@
     </style>
 </head>
 <body>
+
+    <!-- MARCA DE AGUA SUTIL (REPETIDA EN GRID SIN USAR GD EXTENSION) -->
+    <div class="watermark-grid">
+        @for ($i = 0; $i < 35; $i++)
+            <span class="watermark-text">EPS PetFeliz</span>
+        @endfor
+    </div>
 
     <div class="document-container">
         <!-- ── ENCABEZADO OFICIAL ── -->

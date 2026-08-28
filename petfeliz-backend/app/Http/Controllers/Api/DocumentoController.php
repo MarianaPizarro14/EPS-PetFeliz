@@ -213,17 +213,29 @@ class DocumentoController extends Controller
         });
 
         $esAfiliado = $cliente->es_afiliado ?? true;
+        $codigoAfiliado = 'EPS-PET-' . str_pad($cliente->id_cliente ?? 1, 5, '0', STR_PAD_LEFT);
+        $fechaGeneracion = date('d/m/Y');
+        $fechaIngreso = $cliente->created_at ? $cliente->created_at->format('d/m/Y') : date('d/m/Y');
 
         $data = [
             'cliente' => $cliente,
             'cliente_nombre' => $clienteNombre,
             'cliente_doc' => $clienteDoc,
+            'codigo_afiliado' => $codigoAfiliado,
+            'fecha_generacion' => $fechaGeneracion,
+            'fecha_ingreso' => $fechaIngreso,
+            'telefono' => $cliente->telefono ?? 'N/A',
+            'direccion' => $cliente->direccion ?? 'N/A',
+            'ciudad' => mb_strtoupper($cliente->ciudad ?? 'MEDELLÍN', 'UTF-8'),
+            'departamento' => mb_strtoupper($cliente->departamento ?? 'ANTIOQUIA', 'UTF-8'),
+            'contacto_emergencia_nombre' => mb_strtoupper($cliente->contacto_emergencia_nombre ?? 'NO REGISTRADO', 'UTF-8'),
+            'contacto_emergencia_telefono' => $cliente->contacto_emergencia_telefono ?? 'N/A',
             'es_afiliado' => $esAfiliado,
-            'estado_afiliacion' => $esAfiliado ? 'AFILIADO EPS • COBERTURA ACTIVA' : 'NO AFILIADO • PACIENTE PARTICULAR',
+            'estado_afiliacion' => $esAfiliado ? 'COBERTURA INTEGRAL ACTIVA' : 'NO AFILIADO / PARTICULAR',
             'mascotas' => $mascotasFormatted,
         ];
 
         $pdf = Pdf::loadView('pdf.carne_eps', $data);
-        return $pdf->download("Carnet_EPS_PetFeliz_{$cliente->id_cliente}.pdf");
+        return $pdf->download("Certificado_Afiliacion_EPS_PetFeliz_{$cliente->id_cliente}.pdf");
     }
 }

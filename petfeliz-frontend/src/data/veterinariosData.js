@@ -71,6 +71,7 @@ export const veterinariosData = [
   { id: 25, nombre: 'Dra. Melissa Duarte', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/melissa-duarte_surslq.jpg', especialidad: 'Urgencias' },
   { id: 26, nombre: 'Dr. Santiago Peláez', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/santiago-pelaez_xwhbhq.jpg', especialidad: 'Urgencias' },
   { id: 27, nombre: 'Dra. Camila Sepúlveda', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/camila-sepulveda_f3mf1g.jpg', especialidad: 'Urgencias' },
+  { id: 28, nombre: 'Dra. Laura Martínez', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/luisa-fernanda-mora_b8ix5z.jpg', especialidad: 'Medicina General' },
 ]
 
 export default veterinariosData

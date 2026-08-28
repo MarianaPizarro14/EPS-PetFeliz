@@ -22,6 +22,23 @@ class Pago extends Model
         'referencia_transaccion',
     ];
 
+    /**
+     * Boot logic: Al registrar el primer pago confirmado del cliente, asigna automáticamente fecha_afiliacion si aún es nula.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Pago $pago) {
+            if (($pago->estado === 'confirmado' || strtolower($pago->estado ?? '') === 'confirmado') && $pago->id_cliente) {
+                $cliente = Cliente::find($pago->id_cliente);
+                if ($cliente && empty($cliente->fecha_afiliacion)) {
+                    $fechaPago = $pago->created_at ? $pago->created_at->format('Y-m-d') : date('Y-m-d');
+                    $cliente->fecha_afiliacion = $fechaPago;
+                    $cliente->save();
+                }
+            }
+        });
+    }
+
     public function cita()
     {
         return $this->belongsTo(Cita::class, 'id_cita', 'id_cita');

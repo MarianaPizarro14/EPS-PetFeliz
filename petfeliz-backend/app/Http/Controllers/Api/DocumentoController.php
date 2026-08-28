@@ -215,7 +215,9 @@ class DocumentoController extends Controller
         $esAfiliado = $cliente->es_afiliado ?? true;
         $codigoAfiliado = 'EPS-PET-' . str_pad($cliente->id_cliente ?? 1, 5, '0', STR_PAD_LEFT);
         $fechaGeneracion = date('d/m/Y');
-        $fechaIngreso = $cliente->created_at ? $cliente->created_at->format('d/m/Y') : date('d/m/Y');
+        $fechaIngreso = $cliente->fecha_afiliacion 
+            ? $cliente->fecha_afiliacion->format('d/m/Y') 
+            : ($esAfiliado ? date('d/m/Y') : 'Pendiente de Afiliación');
 
         $data = [
             'cliente' => $cliente,

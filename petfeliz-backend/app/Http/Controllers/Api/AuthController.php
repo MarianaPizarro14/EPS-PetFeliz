@@ -118,10 +118,12 @@ class AuthController extends Controller
             'direccion' => 'nullable|string|max:200',
             'cedula' => 'nullable|string|max:50',
             'fecha_nacimiento' => 'nullable|date',
+            'fecha_afiliacion' => 'nullable|date',
             'departamento' => 'nullable|string|max:100',
             'ciudad' => 'nullable|string|max:100',
             'contacto_emergencia_nombre' => 'nullable|string|max:150',
             'contacto_emergencia_telefono' => 'nullable|string|max:50',
+            'es_afiliado' => 'nullable',
             'notificaciones_email' => 'nullable',
             'recordatorios_citas' => 'nullable',
             'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
@@ -132,6 +134,8 @@ class AuthController extends Controller
         if ($request->has('direccion')) $cliente->direccion = $request->direccion;
         if ($request->has('cedula')) $cliente->cedula = $request->cedula;
         if ($request->has('fecha_nacimiento')) $cliente->fecha_nacimiento = $request->fecha_nacimiento;
+        if ($request->has('fecha_afiliacion')) $cliente->fecha_afiliacion = $request->fecha_afiliacion;
+        if ($request->has('es_afiliado')) $cliente->es_afiliado = filter_var($request->es_afiliado, FILTER_VALIDATE_BOOLEAN);
         if ($request->has('departamento')) $cliente->departamento = $request->departamento;
         if ($request->has('ciudad')) $cliente->ciudad = $request->ciudad;
         if ($request->has('contacto_emergencia_nombre')) $cliente->contacto_emergencia_nombre = $request->contacto_emergencia_nombre;

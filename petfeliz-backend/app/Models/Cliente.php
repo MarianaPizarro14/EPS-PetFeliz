@@ -20,6 +20,7 @@ class Cliente extends Model
         'foto_perfil',
         'cedula',
         'fecha_nacimiento',
+        'fecha_afiliacion',
         'departamento',
         'ciudad',
         'contacto_emergencia_nombre',
@@ -33,6 +34,7 @@ class Cliente extends Model
         'notificaciones_email' => 'boolean',
         'recordatorios_citas' => 'boolean',
         'es_afiliado' => 'boolean',
+        'fecha_afiliacion' => 'date',
     ];
 
     /**

@@ -133,15 +133,27 @@
   margin-bottom: 0;
 }
 
-/* FILTRO DE ESPECIALIDAD CON ETIQUETA DE CONTEXTO */
+/* FILTRO DE ESPECIALIDAD CON ETIQUETA DE CONTEXTO Y FLECHA CUSTOM */
 .agendar-filter-group {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 0.35rem 0.75rem;
-  border-radius: 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+}
+
+.agendar-filter-group:hover {
+  border-color: #059669;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
+}
+
+.agendar-filter-group:focus-within {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
 }
 
 .agendar-filter-lbl {
@@ -152,6 +164,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  white-space: nowrap;
 }
 
 .agendar-filter-lbl i {
@@ -159,31 +172,36 @@
 }
 
 .agendar-spec-filter {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 1.6rem 0.2rem 0.4rem;
   border: none;
-  background: transparent;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23059669' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 0.2rem center;
   font-family: var(--font-body);
   font-size: 0.82rem;
   color: #0f172a;
   cursor: pointer;
   font-weight: 700;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
-/* SELECCIÓN DE MASCOTA */
+/* SELECCIÓN DE MASCOTA (CON MARGEN DE RESPIRO PARA BORDES) */
 .agendar-pets-grid {
   display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1.35rem;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
   overflow-x: auto;
-  padding-bottom: 0.35rem;
+  padding: 0.35rem 0.35rem 0.6rem 0.35rem;
+  margin-left: -0.35rem;
+  margin-right: -0.35rem;
 }
 
 .agendar-pet-card {
   width: 115px;
   min-width: 115px;
   background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  border: 2px solid #e2e8f0;
   border-radius: 14px;
   padding: 0.8rem 0.65rem;
   display: flex;
@@ -193,23 +211,25 @@
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .agendar-pet-card:hover {
-  border-color: #a7f3d0;
+  border-color: #34d399;
   background: #ffffff;
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
 }
 
 .agendar-pet-card--selected {
-  border-color: #059669;
-  background: #f0fdf4;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12);
+  border-color: #059669 !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.16) !important;
 }
 
 .agendar-pet-card--add {
   background: #f8fafc;
-  border: 1.5px dashed #cbd5e1;
+  border: 2px dashed #cbd5e1;
   justify-content: center;
 }
 
@@ -288,7 +308,7 @@
   box-shadow: 0 3px 10px rgba(5, 150, 105, 0.22);
 }
 
-/* GRILLA DE VETERINARIOS MÁS ANCHA Y SIN TRUNCADO */
+/* GRILLA DE VETERINARIOS (CON MARGEN DE RESPIRO PARA BORDES) */
 .agendar-vets-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -296,12 +316,14 @@
   margin-bottom: 1.35rem;
   max-height: 320px;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding: 0.35rem;
+  margin-left: -0.35rem;
+  margin-right: -0.35rem;
 }
 
 .agendar-vet-card {
   background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  border: 2px solid #e2e8f0;
   border-radius: 14px;
   padding: 0.75rem 0.85rem;
   display: flex;
@@ -311,18 +333,20 @@
   transition: all 0.2s ease;
   position: relative;
   min-height: 72px;
+  box-sizing: border-box;
 }
 
 .agendar-vet-card:hover {
-  border-color: #a7f3d0;
+  border-color: #34d399;
   background: #ffffff;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
 .agendar-vet-card--selected {
-  border: 2px solid #059669;
-  background: #f0fdf4;
-  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.16);
+  border: 2px solid #059669 !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.16) !important;
 }
 
 .agendar-vet-card__avatar {
@@ -376,18 +400,38 @@
   box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
 }
 
-/* CALENDARIO MENSUAL CLINICO CON LEYENDA */
+/* CALENDARIO MENSUAL Y LAYOUT EN 2 COLUMNAS LADO A LADO */
 .agendar-mini-calendar-box {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid #e2e8f0;
-  padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+  padding: 1.35rem 1.4rem;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+}
+
+.agendar-datetime-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.75rem;
+  align-items: flex-start;
+}
+
+.agendar-datetime-cal-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.agendar-datetime-slots-col {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #f1f5f9;
+  padding-left: 1.5rem;
+  min-height: 280px;
 }
 
 .agendar-real-cal {
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
   margin: 0 auto;
 }
 
@@ -543,9 +587,9 @@
 
 /* CONTENEDOR DE HORARIOS DISPONIBLES */
 .agendar-slots-container {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .agendar-slots-header {
@@ -929,5 +973,16 @@
   }
   .agendar-sidebar-summary {
     position: static;
+  }
+  .agendar-datetime-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .agendar-datetime-slots-col {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.25rem;
+    min-height: auto;
   }
 }

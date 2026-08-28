@@ -53,7 +53,8 @@ export default function PagosCliente() {
         setError('')
 
         const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
-        const [resMasc, resPagos] = await Promise.all([
+        const [resUser, resMasc, resPagos] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/me`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/mascotas`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/cliente/pagos`, { headers }),
         ])

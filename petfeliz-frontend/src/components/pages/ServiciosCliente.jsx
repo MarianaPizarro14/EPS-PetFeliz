@@ -77,7 +77,8 @@ export default function ServiciosCliente() {
         setError('')
 
         const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
-        const [resSrv, resMasc, resHist] = await Promise.all([
+        const [resUser, resSrv, resMasc, resHist] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/me`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/servicios`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/mascotas`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/cliente/historial-servicios`, { headers }),

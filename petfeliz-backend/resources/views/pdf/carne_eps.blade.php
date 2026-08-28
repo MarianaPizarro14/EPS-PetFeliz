@@ -47,49 +47,56 @@
             width: 100%;
             border-collapse: collapse;
             border-bottom: 2px solid #166534;
-            padding-bottom: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
+        }
+
+        .header-table td {
+            padding-bottom: 14px;
         }
 
         .brand-logo-text {
             font-size: 22px;
             font-weight: bold;
             line-height: 1;
+            color: #166534;
         }
 
-        .brand-eps { color: #0284c7; }
-        .brand-pet { color: #16a34a; }
-        .brand-feliz { color: #d97706; }
+        .brand-eps, .brand-pet, .brand-feliz {
+            color: #166534;
+            font-weight: bold;
+        }
 
         .brand-sub {
             font-size: 8px;
             color: #64748b;
             font-weight: bold;
-            margin-top: 3px;
+            margin-top: 4px;
             letter-spacing: 0.5px;
         }
 
         .affiliate-badge-box {
-            border: 1.5px solid #166534;
+            border: 1.5px solid #0284c7;
             border-radius: 6px;
-            padding: 6px 12px;
-            background-color: #f0fdf4;
+            padding: 6px 14px;
+            background-color: #f0f9ff;
             text-align: right;
             display: inline-block;
+            margin-bottom: 6px;
         }
 
         .affiliate-badge-label {
             font-size: 7.5px;
-            color: #166534;
+            color: #0284c7;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .affiliate-badge-code {
             font-size: 13px;
             font-weight: bold;
             color: #0f172a;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         /* ── TÍTULO PRINCIPAL ── */
@@ -288,13 +295,18 @@
                 <td style="vertical-align: middle;">
                     <table style="border-collapse: collapse;">
                         <tr>
-                            <td style="vertical-align: middle; padding-right: 8px;">
-                                <img src="{{ public_path('img/paw-icon.svg') }}" width="28" height="28" alt="PetFeliz">
+                            <td style="vertical-align: middle; padding-right: 10px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 512 512" style="vertical-align: middle;">
+                                    <path fill="#166534" d="M256 224c-70 0-130 55-130 135 0 40 32 75 75 75 24 0 45-12 55-30 10 18 31 30 55 30 43 0 75-35 75-75 0-80-60-135-130-135z"/>
+                                    <circle cx="110" cy="190" r="42" fill="#166534"/>
+                                    <circle cx="205" cy="115" r="46" fill="#166534"/>
+                                    <circle cx="307" cy="115" r="46" fill="#166534"/>
+                                    <circle cx="402" cy="190" r="42" fill="#166534"/>
+                                </svg>
                             </td>
                             <td style="vertical-align: middle;">
                                 <div class="brand-logo-text">
-                                    <span class="brand-eps">EPS</span>
-                                    <span class="brand-pet">Pet</span><span class="brand-feliz">Feliz</span>
+                                    <span class="brand-eps">EPS</span> <span class="brand-pet">PetFeliz</span>
                                 </div>
                                 <div class="brand-sub">SALUD Y COBERTURA VETERINARIA S.A.S. • NIT 901.234.567-8</div>
                             </td>

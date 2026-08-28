@@ -350,6 +350,45 @@ class AgendarCitaController extends Controller
 
         $vet = Veterinario::find($cita->id_veterinario);
         $pet = \App\Models\Mascota::find($cita->id_mascota);
+        $petNombre = $pet ? $pet->nombre : 'tu mascota';
+        $vetNombre = $vet ? $vet->nombre : 'Médico Asignado';
+
+        // Disparar notificaciones dinámicas en tiempo real (Campanita Web + Correos Electrónicos)
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            'Pago Exitoso Registrado',
+            "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$pago->referencia_transaccion}) para el servicio {$motivoFinal}.",
+            'fa-solid fa-credit-card',
+            'pago',
+            new \App\Mail\ConfirmacionPagoMail($cliente, [
+                'referencia' => $pago->referencia_transaccion,
+                'monto' => $monto,
+                'servicio' => $motivoFinal,
+                'metodo' => $metodoFinal,
+            ])
+        );
+
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            'Comprobante Digital Disponible',
+            "Se ha generado el comprobante electrónico para la atención de {$petNombre}.",
+            'fa-solid fa-file-invoice-dollar',
+            'factura',
+            new \App\Mail\NuevaFacturaMail($cliente, [
+                'id_pago' => $pago->id_pago,
+                'referencia' => $pago->referencia_transaccion,
+                'monto' => $monto,
+                'servicio' => $motivoFinal,
+            ])
+        );
+
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            '¡Cita Agendada Exitosamente!',
+            "Tu cita para {$petNombre} ha sido programada para el {$cita->fecha} a las {$cita->hora} con Dr(a). {$vetNombre}.",
+            'fa-regular fa-calendar-check',
+            'cita'
+        );
 
         return response()->json([
             'message' => '¡Cita confirmada y pagada con éxito!',

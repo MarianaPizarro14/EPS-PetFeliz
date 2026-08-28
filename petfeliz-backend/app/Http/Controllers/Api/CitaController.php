@@ -166,6 +166,17 @@ class CitaController extends Controller
         $cita->hora = $request->hora;
         $cita->save();
 
+        $pet = \App\Models\Mascota::find($cita->id_mascota);
+        $petNombre = $pet ? $pet->nombre : 'tu mascota';
+
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            'Cita Reprogramada',
+            "La cita para {$petNombre} ha sido reprogramada para el {$cita->fecha} a las {$cita->hora}.",
+            'fa-regular fa-clock',
+            'cita'
+        );
+
         return response()->json([
             'message' => 'Cita reprogramada exitosamente.',
             'cita' => $cita,
@@ -185,6 +196,17 @@ class CitaController extends Controller
 
         $cita->id_estado = 3; // 3 = Cancelada
         $cita->save();
+
+        $pet = \App\Models\Mascota::find($cita->id_mascota);
+        $petNombre = $pet ? $pet->nombre : 'tu mascota';
+
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            'Cita Cancelada',
+            "La cita para {$petNombre} del {$cita->fecha} ha sido cancelada.",
+            'fa-solid fa-calendar-xmark',
+            'cita'
+        );
 
         return response()->json([
             'message' => 'La cita ha sido cancelada.',

@@ -540,12 +540,21 @@
   margin: 0 auto;
 }
 
-.agendar-cal-cell:hover:not(.agendar-cal-cell--empty):not(.agendar-cal-cell--disabled) {
-  background: #f1f5f9;
-  color: #0f172a;
+/* Día Disponible (Anillo/Círculo Azul) */
+.agendar-cal-cell--available {
+  background: #eff6ff !important;
+  color: #1e40af !important;
+  border: 2px solid #2563eb !important;
+  font-weight: 700 !important;
+  border-radius: 50% !important;
 }
 
-/* Día Seleccionado */
+.agendar-cal-cell--available:hover {
+  background: #dbeafe !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* Día Seleccionado (Verde Esmeralda) */
 .agendar-cal-cell--selected {
   background: #059669 !important;
   color: #ffffff !important;
@@ -597,8 +606,8 @@
 }
 
 .agendar-legend-dot--available {
-  background: #ffffff;
-  border: 1.5px solid #64748b;
+  background: #eff6ff;
+  border: 2px solid #2563eb;
 }
 
 .agendar-legend-dot--selected {

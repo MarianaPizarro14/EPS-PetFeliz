@@ -26,9 +26,48 @@ class Cliente extends Model
         'contacto_emergencia_telefono',
         'notificaciones_email',
         'recordatorios_citas',
+        'es_afiliado',
     ];
 
+    protected $casts = [
+        'notificaciones_email' => 'boolean',
+        'recordatorios_citas' => 'boolean',
+        'es_afiliado' => 'boolean',
+    ];
 
+    /**
+     * Obtener el listado de campos obligatorios faltantes en el perfil del cliente.
+     */
+    public function getCamposFaltantes(): array
+    {
+        $camposDef = [
+            'nombre' => 'Nombre Completo',
+            'cedula' => 'Cédula / Documento de Identidad',
+            'telefono' => 'Teléfono de Contacto',
+            'direccion' => 'Dirección de Residencia',
+            'departamento' => 'Departamento',
+            'ciudad' => 'Ciudad / Municipio',
+            'contacto_emergencia_nombre' => 'Nombre Contacto de Emergencia',
+            'contacto_emergencia_telefono' => 'Teléfono Contacto de Emergencia',
+        ];
+
+        $faltantes = [];
+        foreach ($camposDef as $columna => $etiqueta) {
+            if (empty(trim((string) ($this->$columna ?? '')))) {
+                $faltantes[$columna] = $etiqueta;
+            }
+        }
+
+        return $faltantes;
+    }
+
+    /**
+     * Evaluar si el perfil del cliente está 100% completo.
+     */
+    public function esPerfilCompleto(): bool
+    {
+        return count($this->getCamposFaltantes()) === 0;
+    }
 
     public function usuario()
     {

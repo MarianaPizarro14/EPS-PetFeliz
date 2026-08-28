@@ -34,10 +34,15 @@ class DocumentoController extends Controller
         $cita = $pago->cita;
         $servicioNombre = $cita && $cita->servicio ? $cita->servicio->nombre : ($cita->motivo ?? 'Servicio Veterinario');
 
+        $esAfiliado = $cliente->es_afiliado ?? true;
+        $estadoAfiliacionTexto = $esAfiliado ? 'AFILIADO EPS' : 'NO AFILIADO';
+
         $data = [
             'pago' => $pago,
-            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : 'Cliente PetFeliz',
-            'cliente_doc' => $cliente->num_documento ?? ('DOC-' . $cliente->id_cliente),
+            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : ($cliente->nombre ?? 'Cliente PetFeliz'),
+            'cliente_doc' => $cliente->cedula ?? ($cliente->num_documento ?? ('DOC-' . $cliente->id_cliente)),
+            'es_afiliado' => $esAfiliado,
+            'estado_afiliacion' => $estadoAfiliacionTexto,
             'mascota_nombre' => $cita && $cita->mascota ? $cita->mascota->nombre : 'Mascota',
             'mascota_especie' => $cita && $cita->mascota ? $cita->mascota->especie : 'Canino',
             'mascota_raza' => $cita && $cita->mascota ? ($cita->mascota->raza ?? 'Criollo') : 'Criollo',
@@ -90,10 +95,14 @@ class DocumentoController extends Controller
             ];
         })->toArray();
 
+        $esAfiliado = $cliente->es_afiliado ?? true;
+
         $data = [
             'mascota' => $mascota,
-            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : 'Cliente PetFeliz',
-            'cliente_doc' => $cliente->num_documento ?? ('DOC-' . $cliente->id_cliente),
+            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : ($cliente->nombre ?? 'Cliente PetFeliz'),
+            'cliente_doc' => $cliente->cedula ?? ($cliente->num_documento ?? ('DOC-' . $cliente->id_cliente)),
+            'es_afiliado' => $esAfiliado,
+            'estado_afiliacion' => $esAfiliado ? 'AFILIADO EPS' : 'NO AFILIADO',
             'historial' => $historial,
         ];
 
@@ -140,10 +149,14 @@ class DocumentoController extends Controller
             ];
         })->toArray();
 
+        $esAfiliado = $cliente->es_afiliado ?? true;
+
         $data = [
             'mascota' => $mascota,
-            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : 'Cliente PetFeliz',
-            'cliente_doc' => $cliente->num_documento ?? ('DOC-' . $cliente->id_cliente),
+            'cliente_nombre' => $cliente->usuario ? ($cliente->usuario->nombreCompleto ?? $cliente->usuario->nombre) : ($cliente->nombre ?? 'Cliente PetFeliz'),
+            'cliente_doc' => $cliente->cedula ?? ($cliente->num_documento ?? ('DOC-' . $cliente->id_cliente)),
+            'es_afiliado' => $esAfiliado,
+            'estado_afiliacion' => $esAfiliado ? 'AFILIADO EPS' : 'NO AFILIADO',
             'vacunas' => $vacunas,
         ];
 
@@ -160,6 +173,17 @@ class DocumentoController extends Controller
 
         if (!$cliente) {
             return response()->json(['message' => 'Cliente no autorizado.'], 403);
+        }
+
+        // VALIDACIÓN: El perfil debe estar 100% completo antes de permitir generar el carnet
+        $faltantes = $cliente->getCamposFaltantes();
+        if (count($faltantes) > 0) {
+            return response()->json([
+                'message' => 'Debes completar el 100% de tu información personal antes de generar el Carnet Digital EPS.',
+                'perfil_incompleto' => true,
+                'campos_faltantes' => array_values($faltantes),
+                'campos_map' => $faltantes,
+            ], 422);
         }
 
         $mascotas = Mascota::where('id_cliente', $cliente->id_cliente)->get();
@@ -188,10 +212,14 @@ class DocumentoController extends Controller
             ];
         });
 
+        $esAfiliado = $cliente->es_afiliado ?? true;
+
         $data = [
             'cliente' => $cliente,
             'cliente_nombre' => $clienteNombre,
             'cliente_doc' => $clienteDoc,
+            'es_afiliado' => $esAfiliado,
+            'estado_afiliacion' => $esAfiliado ? 'AFILIADO EPS • COBERTURA ACTIVA' : 'NO AFILIADO • PACIENTE PARTICULAR',
             'mascotas' => $mascotasFormatted,
         ];
 

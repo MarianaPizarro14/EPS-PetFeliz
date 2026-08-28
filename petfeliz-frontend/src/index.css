@@ -143,15 +143,15 @@ ul { list-style: none; }
 .btn-outline-white {
     background: var(--white);
     color: var(--dark);
-    border: 1.5px solid #e0e0e0;
-    transition: transform .2s, box-shadow .2s, background .2s, color .2s, border-color .2s;
+    border: 1.5px solid #d0d0d0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .btn-outline-white:hover {
-    background: #6C5E1B;
-    border-color: #6C5E1B;
-    color: white;
+    background: #e6f4f1;
+    border-color: #006780;
+    color: #006780;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(108, 94, 27, .45);
+    box-shadow: 0 4px 14px rgba(0, 103, 128, 0.15);
 }
 
 .text-accent { color: #006D41; }
@@ -513,7 +513,8 @@ ul { list-style: none; }
     align-items: center;
     gap: .35rem;
     font-size: .85rem;
-    font-weight: 800;
+    font-weight: 600;
+    font-family: var(--font-head, 'Sora', sans-serif);
     transition: gap .2s;
 }
 .card-link:hover { gap: .6rem; }
@@ -735,10 +736,10 @@ ul { list-style: none; }
     box-shadow: 0 4px 16px rgba(0,0,0,.15) !important;
 }
 .cta-banner--danger .btn-outline-white:hover {
-    background: #6C5E1B !important;
-    border-color: #6C5E1B !important;
-    color: #ffffff !important;
-    box-shadow: 0 6px 20px rgba(108, 94, 27, .45);
+    background: #f8fafc !important;
+    border-color: #ffffff !important;
+    color: #991b1b !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 @keyframes em-urgente {

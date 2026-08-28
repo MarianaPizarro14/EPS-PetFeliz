@@ -260,6 +260,13 @@
   transform: scale(1.05);
 }
 
+.hc-card__img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 31, 22, 0.35) 0%, transparent 60%);
+  pointer-events: none;
+}
+
 .hc-card__categoria {
   position: absolute;
   top: .85rem;

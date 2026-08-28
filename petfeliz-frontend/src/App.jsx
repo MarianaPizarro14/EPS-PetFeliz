@@ -26,9 +26,16 @@ import MisCitas from './components/pages/MisCitas'
 import AgendarCitaFlow from './components/pages/AgendarCitaFlow'
 import ResetPassword from './components/pages/ResetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadores'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
-const APP_ROUTES = ['/dashboard-client', '/dashboard-cliente', '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', '/soporte', '/mis-mascotas', '/citas', '/agendar-cita']
+const APP_ROUTES = [
+  '/dashboard-client', '/dashboard-cliente', '/dashboard-client/servicios', 
+  '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
+  '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
+  '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
+  '/admin/historias', '/admin/historias-cuidadores'
+]
 
 function AppContent() {
   const { pathname } = useLocation()
@@ -56,6 +63,9 @@ function AppContent() {
         <Route path="/register"                 element={<Register />} />
         <Route path="/forgot-password"          element={<ForgotPassword />} />
         <Route path="/reset-password"           element={<ResetPassword />} />
+        <Route path="/admin/historias"          element={<AdminHistoriasCuidadores />} />
+        <Route path="/admin/historias/:id"      element={<AdminHistoriasCuidadores />} />
+        <Route path="/admin/historias-cuidadores" element={<AdminHistoriasCuidadores />} />
         <Route
           path="/dashboard-client"
           element={
@@ -161,7 +171,6 @@ function AppContent() {
           }
         />
       </Routes>
-
 
       {!hideChrome && <Footer />}
     </>

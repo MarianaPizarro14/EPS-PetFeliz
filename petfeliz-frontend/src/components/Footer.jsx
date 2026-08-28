@@ -34,7 +34,7 @@ function Footer() {
           <div>
             <div className="footer__col-title">Contáctenos</div>
             <div className="footer__social">
-              <a href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <a href="https://wa.me/573023783834" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                 <FontAwesomeIcon icon={faWhatsapp} />
               </a>
               <a href="https://www.instagram.com/epspetfeliz?igsh=MTRuOWdua3UyYnls" target="_blank" rel="noopener noreferrer" aria-label="Instagram">

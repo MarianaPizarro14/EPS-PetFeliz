@@ -1,0 +1,134 @@
+/* ─── MODAL DE SERVICIOS INTEGRALES ─── */
+
+.svc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 31, 22, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.svc-modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 540px;
+  width: 100%;
+  padding: 2.25rem;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: #1e293b;
+  text-align: center;
+}
+
+.svc-modal__close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.svc-modal__close-btn:hover {
+  background: #e2e8f0;
+  color: #0f2419;
+  transform: rotate(90deg);
+}
+
+.svc-modal__icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  margin: 0 auto 1.25rem auto;
+}
+
+.svc-modal__header {
+  margin-bottom: 1.25rem;
+}
+
+.svc-modal__badge {
+  display: inline-block;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #006780;
+  background: #e6f4f8;
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  margin-bottom: 0.6rem;
+}
+
+.svc-modal__header h2 {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #0f2419;
+  margin: 0;
+}
+
+.svc-modal__body {
+  margin-bottom: 1.75rem;
+  text-align: left;
+}
+
+.svc-modal__desc-short {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.svc-modal__desc-extended {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  font-size: 0.98rem;
+  color: #334155;
+  line-height: 1.75;
+}
+
+.svc-modal__desc-extended p {
+  margin: 0;
+}
+
+.svc-modal__footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.svc-modal__btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.75rem 2.5rem;
+  border-radius: 100px;
+  width: auto;
+  min-width: 140px;
+  cursor: pointer;
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import api from '../../api/axios'
 import Hero from '../Hero'
 import './Contacto.css'
 import CtaBanner from '../CtaBanner'
@@ -8,7 +9,8 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import {
   faEnvelope, faClock, faLocationDot, faPaw,
-  faChevronDown, faPaperPlane, faCheckCircle
+  faChevronDown, faPaperPlane, faCheckCircle,
+  faSpinner, faCircleExclamation
 } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
@@ -73,6 +75,9 @@ const faqs = [
 export default function Contacto() {
   const [openFaq, setOpenFaq] = useState(null)
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [errorBanner, setErrorBanner] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [sedeActiva, setSedeActiva] = useState(0)
   const [form, setForm] = useState({
     nombre: '', correo: '', asunto: '', mensaje: ''
@@ -80,11 +85,33 @@ export default function Contacto() {
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors({ ...fieldErrors, [e.target.name]: null })
+    }
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    setSent(true)
+    setLoading(true)
+    setErrorBanner('')
+    setFieldErrors({})
+
+    try {
+      const response = await api.post('/contacto', form)
+      if (response.data?.status === 'success') {
+        setSent(true)
+        setForm({ nombre: '', correo: '', asunto: '', mensaje: '' })
+      }
+    } catch (err) {
+      console.error('Error al enviar mensaje de contacto:', err)
+      if (err.response?.status === 422 && err.response?.data?.errors) {
+        setFieldErrors(err.response.data.errors)
+      } else {
+        setErrorBanner('No se pudo enviar el mensaje en este momento. Por favor verifica tu conexión e inténtalo nuevamente.')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -117,7 +144,7 @@ export default function Contacto() {
               </div>
               <div>
                 <p className="ct-info__label">WhatsApp</p>
-                <a href="https://wa.me/573145709302" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 314 570 9302</a>
+                <a href="https://wa.me/573023783834" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 302 378 3834</a>
               </div>
             </div>
             <div className="ct-info__card">
@@ -162,29 +189,62 @@ export default function Contacto() {
               <form className="ct-form" onSubmit={handleSubmit}>
                 <h2 className="ct-form__title">Envíanos un mensaje</h2>
 
+                {errorBanner && (
+                  <div style={{
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    color: '#991b1b',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '10px',
+                    fontSize: '0.9rem',
+                    marginBottom: '1.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <FontAwesomeIcon icon={faCircleExclamation} />
+                    <span>{errorBanner}</span>
+                  </div>
+                )}
+
                 <div className="ct-form__group">
                   <label className="ct-form__label" htmlFor="nombre">Nombre completo</label>
                   <input
                     id="nombre" name="nombre" type="text"
-                    className="ct-form__input" placeholder="Tu nombre"
+                    disabled={loading}
+                    className={`ct-form__input ${fieldErrors.nombre ? 'is-invalid' : ''}`}
+                    placeholder="Tu nombre"
                     value={form.nombre} onChange={handleChange} required
                   />
+                  {fieldErrors.nombre && (
+                    <span style={{ color: '#dc2626', fontSize: '0.82rem', marginTop: '0.25rem', display: 'block' }}>
+                      {fieldErrors.nombre[0]}
+                    </span>
+                  )}
                 </div>
 
                 <div className="ct-form__group">
                   <label className="ct-form__label" htmlFor="correo">Correo electrónico</label>
                   <input
                     id="correo" name="correo" type="email"
-                    className="ct-form__input" placeholder="tu@correo.com"
+                    disabled={loading}
+                    className={`ct-form__input ${fieldErrors.correo ? 'is-invalid' : ''}`}
+                    placeholder="tu@correo.com"
                     value={form.correo} onChange={handleChange} required
                   />
+                  {fieldErrors.correo && (
+                    <span style={{ color: '#dc2626', fontSize: '0.82rem', marginTop: '0.25rem', display: 'block' }}>
+                      {fieldErrors.correo[0]}
+                    </span>
+                  )}
                 </div>
 
                 <div className="ct-form__group">
                   <label className="ct-form__label" htmlFor="asunto">Asunto</label>
                   <select
                     id="asunto" name="asunto"
-                    className="ct-form__input ct-form__select"
+                    disabled={loading}
+                    className={`ct-form__input ct-form__select ${fieldErrors.asunto ? 'is-invalid' : ''}`}
                     value={form.asunto} onChange={handleChange} required
                   >
                     <option value="" disabled>Selecciona un asunto</option>
@@ -194,20 +254,39 @@ export default function Contacto() {
                     <option value="cita">Ayuda con mi cita</option>
                     <option value="otro">Otro</option>
                   </select>
+                  {fieldErrors.asunto && (
+                    <span style={{ color: '#dc2626', fontSize: '0.82rem', marginTop: '0.25rem', display: 'block' }}>
+                      {fieldErrors.asunto[0]}
+                    </span>
+                  )}
                 </div>
 
                 <div className="ct-form__group">
                   <label className="ct-form__label" htmlFor="mensaje">Mensaje</label>
                   <textarea
                     id="mensaje" name="mensaje"
-                    className="ct-form__input ct-form__textarea"
+                    disabled={loading}
+                    className={`ct-form__input ct-form__textarea ${fieldErrors.mensaje ? 'is-invalid' : ''}`}
                     placeholder="Cuéntanos en qué podemos ayudarte..."
                     rows={5} value={form.mensaje} onChange={handleChange} required
                   />
+                  {fieldErrors.mensaje && (
+                    <span style={{ color: '#dc2626', fontSize: '0.82rem', marginTop: '0.25rem', display: 'block' }}>
+                      {fieldErrors.mensaje[0]}
+                    </span>
+                  )}
                 </div>
 
-                <button type="submit" className="btn btn-primary ct-form__btn">
-                  Enviar mensaje <FontAwesomeIcon icon={faPaperPlane} />
+                <button type="submit" className="btn btn-primary ct-form__btn" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <FontAwesomeIcon icon={faSpinner} spin /> Enviando...
+                    </>
+                  ) : (
+                    <>
+                      Enviar mensaje <FontAwesomeIcon icon={faPaperPlane} />
+                    </>
+                  )}
                 </button>
               </form>
             )}
@@ -323,7 +402,13 @@ export default function Contacto() {
         title="¿Tienes más preguntas?"
         subtitle="Nuestro equipo está listo para ayudarte. Escríbenos y te respondemos en menos de 24 horas."
         buttons={[
-          { label: 'Escríbenos', href: 'mailto:petfelizeps@gmail.com', variant: 'btn-primary' },
+          {
+            label: 'Escríbenos',
+            href: 'https://wa.me/573023783834?text=Hola%2C%20quiero%20más%20información%20sobre%20PetFeliz',
+            variant: 'btn-primary',
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          },
           { label: 'Ver planes', href: '/planes', variant: 'btn-outline-white' },
         ]}
       />

@@ -27,7 +27,7 @@ export default function SoporteCliente() {
   }, [navigate])
 
   const whatsappUrl =
-    'https://wa.me/573145709302?text=Hola%2C%20tengo%20un%20problema%20en%20el%20panel%20de%20usuario%20de%20PetFeliz'
+    'https://wa.me/573023783834?text=Hola%2C%20tengo%20un%20problema%20en%20el%20panel%20de%20usuario%20de%20PetFeliz'
 
   return (
     <div className="dash">

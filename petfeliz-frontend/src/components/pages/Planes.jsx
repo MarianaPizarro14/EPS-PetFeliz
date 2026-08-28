@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -70,6 +71,7 @@ const spring = { type: "spring", stiffness: 280, damping: 24 };
 // ── COMPONENTE ──
 export default function Planes() {
   const [hovered, setHovered] = useState("none");
+  const navigate = useNavigate();
 
   const cardProps = (id) => {
     const isHovered  = hovered === id;
@@ -177,6 +179,7 @@ export default function Planes() {
                 className="planes-btn-primary"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/register')}
               >
                 Afiliarme ahora
               </motion.button>
@@ -223,6 +226,7 @@ export default function Planes() {
                 className="planes-btn-secondary"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/register')}
               >
                 Usar sin afiliación
               </motion.button>

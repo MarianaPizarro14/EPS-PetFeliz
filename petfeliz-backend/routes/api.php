@@ -10,12 +10,23 @@ use App\Http\Controllers\Api\NotificacionController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\DocumentoController;
+use App\Http\Controllers\Api\HistoriaCuidadorController;
+use App\Http\Controllers\Api\ContactoController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'forgot']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+Route::post('/contacto', [ContactoController::class, 'send']);
+
+// Rutas públicas de Historias de Cuidadores
+Route::get('/historias-cuidadores', [HistoriaCuidadorController::class, 'index']);
+Route::post('/historias-cuidadores', [HistoriaCuidadorController::class, 'store']);
+
+// Rutas de Administración de Historias de Cuidadores
+Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
+Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

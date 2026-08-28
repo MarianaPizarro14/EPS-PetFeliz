@@ -1,0 +1,549 @@
+/* ─── PANEL ADMINISTRATIVO: HISTORIAS DE CUIDADORES ─── */
+
+.zadmin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem 1.5rem;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: #1e293b;
+}
+
+/* Toast */
+.zadmin-toast {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+}
+
+.zadmin-toast--success {
+  background: #059669;
+}
+
+.zadmin-toast--error {
+  background: #dc2626;
+}
+
+/* Header */
+.zadmin-header {
+  margin-bottom: 2rem;
+}
+
+.zadmin-header__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #006780;
+  background: #e6f4f8;
+  padding: 0.35rem 0.85rem;
+  border-radius: 100px;
+  margin-bottom: 0.75rem;
+}
+
+.zadmin-header h1 {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 700;
+  font-size: 2rem;
+  color: #0f1f16;
+  margin-bottom: 0.5rem;
+}
+
+.zadmin-header p {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 1rem;
+  color: #64748b;
+  max-width: 680px;
+}
+
+/* Stats Grid / Filters */
+.zadmin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.zadmin-stat-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.zadmin-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.zadmin-stat-card.active {
+  border-color: #006780;
+  box-shadow: 0 8px 24px rgba(0, 103, 128, 0.12);
+  background: #fafcfd;
+}
+
+.zadmin-stat-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.zadmin-stat-card__icon--blue {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.zadmin-stat-card__icon--yellow {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.zadmin-stat-card__icon--green {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.zadmin-stat-card__icon--red {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.zadmin-stat-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.zadmin-stat-card__num {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f1f16;
+  line-height: 1.1;
+}
+
+.zadmin-stat-card__label {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+/* Table Box */
+.zadmin-table-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.zadmin-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.zadmin-table-toolbar h2 {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #0f1f16;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.zadmin-count-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.2rem 0.65rem;
+  border-radius: 100px;
+}
+
+.zadmin-btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.zadmin-btn-refresh:hover {
+  background: #f8fafc;
+}
+
+/* Table */
+.zadmin-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.zadmin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.zadmin-table th {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.85rem 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.zadmin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.zadmin-td-id {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.zadmin-chip-pet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f1f16;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.zadmin-tag-category {
+  font-size: 0.82rem;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.zadmin-td-extracto {
+  max-width: 260px;
+  color: #475569;
+  font-style: italic;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zadmin-td-date {
+  font-size: 0.82rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* Badges */
+.zadmin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 100px;
+}
+
+.zadmin-badge--pendiente {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.zadmin-badge--aprobado {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.zadmin-badge--rechazado {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Action Buttons */
+.zadmin-td-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action--view {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-action--view:hover {
+  background: #e2e8f0;
+  color: #0f1f16;
+}
+
+.btn-action--approve {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-action--approve:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.btn-action--reject {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.btn-action--reject:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* States */
+.zadmin-loading-state,
+.zadmin-empty-state {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #64748b;
+}
+
+.zadmin-empty-state h3 {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.zadmin-error-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Modal */
+.zadmin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 31, 22, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.zadmin-modal-box {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  padding: 2.25rem;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.zadmin-modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.zadmin-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f1f16;
+}
+
+.zadmin-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.zadmin-modal-id-badge {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.zadmin-modal-header h3 {
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #0f1f16;
+  margin: 0;
+  flex: 1;
+}
+
+.zadmin-modal-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.zadmin-meta-item label {
+  display: block;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.15rem;
+}
+
+.zadmin-meta-item span {
+  font-weight: 600;
+  color: #0f1f16;
+  font-size: 0.95rem;
+}
+
+.zadmin-modal-story-body label {
+  display: block;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f1f16;
+  margin-bottom: 0.5rem;
+}
+
+.zadmin-story-text {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.7;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.zadmin-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.zadmin-btn-modal-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-head, 'Sora', sans-serif);
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.text-right {
+  text-align: right;
+}

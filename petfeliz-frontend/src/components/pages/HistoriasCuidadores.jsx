@@ -1,17 +1,31 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { motion, AnimatePresence } from 'framer-motion'
-import CtaBanner from '../CtaBanner'
+import api from '../../api/axios'
 import Testimonial from '../Testimonial'
+import ZonaCuidadoresBanner from '../ZonaCuidadoresBanner'
 import './HistoriasCuidadores.css'
-import StatsStrip from '../StatsStrip'
-import { Link } from 'react-router-dom'
 
-/* ─── DATA ──── */
+/* ─── MAPEO DE IMÁGENES POR CATEGORÍA ─── */
 
-const historias = [
+const IMAGENES_CATEGORIAS = {
+  'Medicina General': 'https://res.cloudinary.com/dedroug6v/image/upload/v1787858920/pexels-martabranco-30784707_orn16z.jpg',
+  'Dermatología':     'https://res.cloudinary.com/dedroug6v/image/upload/v1787858920/pexels-mikhail-nilov-7468980_zdtnnw.jpg',
+  'Urgencias 24/7':   'https://res.cloudinary.com/dedroug6v/image/upload/v1787858914/pexels-mikhail-nilov-28123659_r4px3k.jpg',
+  'Urgencias':        'https://res.cloudinary.com/dedroug6v/image/upload/v1787858914/pexels-mikhail-nilov-28123659_r4px3k.jpg',
+  'Cirugía':          'https://res.cloudinary.com/dedroug6v/image/upload/v1787858917/pexels-juanjo-7121954_cqfv74.jpg',
+  'Vacunación':       'https://res.cloudinary.com/dedroug6v/image/upload/v1787858914/pexels-jorge-chan-515189442-16392319_njis6k.jpg',
+}
+
+const getImagenCategoria = (categoria) => {
+  return IMAGENES_CATEGORIAS[categoria] || IMAGENES_CATEGORIAS['Medicina General']
+}
+
+/* ─── DATA INICIAL ──── */
+
+const historiasIniciales = [
   {
-    id: 1,
+    id: 'demo-1',
     nombre: 'Camila Restrepo',
     ciudad: 'Laureles, Medellín',
     mascota: 'Luna',
@@ -26,7 +40,7 @@ const historias = [
     rating: 5,
   },
   {
-    id: 2,
+    id: 'demo-2',
     nombre: 'Jorge Salazar',
     ciudad: 'Itagüí',
     mascota: 'Manchas',
@@ -41,12 +55,12 @@ const historias = [
     rating: 5,
   },
   {
-    id: 3,
+    id: 'demo-3',
     nombre: 'Sofía Mejía',
     ciudad: 'Bello',
     mascota: 'Trueno',
     especie: 'Pastor alemán, 2 años',
-    categoria: 'Urgencias',
+    categoria: 'Urgencias 24/7',
     foto: '/img/cuidadores/sofia.jpg',
     avatar: '/img/cuidadores/sofia_avatar.jpg',
     extracto: 'Trueno ingirió algo tóxico un domingo a las 11 pm. En 20 minutos ya estábamos en la sede de urgencias. Esa noche entendí lo que significa contar con una red de verdad.',
@@ -56,53 +70,38 @@ const historias = [
     rating: 5,
   },
   {
-    id: 4,
-    nombre: 'Valentina Mendoza',
-    ciudad: 'Itagüí',
-    mascota: 'Galleta',
-    especie: 'Conejo holandés, 3 años',
-    categoria: 'Medicina General',
-    foto: '/img/cuidadores/valentina.jpg',
-    avatar: '/img/cuidadores/valentina_avatar.jpg',
-    extracto: 'Tenía miedo de que los veterinarios no supieran tratar a un conejo. Me sorprendió encontrar a alguien que realmente conocía a los animales exóticos.',
-    historia: `Galleta es un conejo holandés, y conseguir atención veterinaria de calidad para animales exóticos en el Área Metropolitana no es fácil. La mayoría de las clínicas atienden perros y gatos, pero cuando llegaba con Galleta, el nivel de conocimiento especializado era claramente limitado.\n\nEn PetFeliz me asignaron al Dr. Juan Pablo Vélez, que tiene formación adicional en medicina de pequeños mamíferos. La diferencia fue evidente desde la primera consulta: manejo cuidadoso, preguntas específicas sobre dieta de conejos, evaluación del desgaste dental.\n\nGalleta tiene ahora un esquema de chequeos cada cuatro meses. Su peso se mantiene estable y su digestión mejoró con los ajustes dietéticos que recomendó el doctor.`,
-    etiquetas: ['Exóticos', 'Conejo', 'Nutrición'],
+    id: 'demo-4',
+    nombre: 'Mateo Osorio',
+    ciudad: 'Envigado',
+    mascota: 'Simba',
+    especie: 'Gato criollo, 3 años',
+    categoria: 'Cirugía',
+    foto: '/img/cuidadores/mateo.jpg',
+    avatar: '/img/cuidadores/mateo_avatar.jpg',
+    extracto: 'La esterilización y cirugía de Simba fue impecable. Desde el protocolo prequirúrgico hasta el seguimiento en casa, el equipo nos dio 100% de tranquilidad.',
+    historia: `A Simba le diagnosticaron un problema articular que requería intervención quirúrgica preventiva. Como primerizo con gatos, el miedo a la anestesia y a la recuperación posoperatoria me tenía aterrorizado.\n\nEl cirujano de PetFeliz en la sede de Laureles nos explicó el procedimiento paso a paso con radiografías digitales. Todo el proceso quirúrgico se realizó bajo monitoreo estricto. La recuperación fue rápida y sin complicaciones gracias a las indicaciones del equipo posoperatorio.`,
+    etiquetas: ['Cirugía preventiva', 'Gato criollo', 'Ortopedia'],
     fecha: 'Febrero 2025',
     rating: 5,
   },
   {
-    id: 5,
-    nombre: 'Andrés Castillo',
-    ciudad: 'Laureles, Medellín',
-    mascota: 'Dante',
-    especie: 'Bulldog francés, 5 años',
-    categoria: 'Cirugía',
-    foto: '/img/cuidadores/andres.jpg',
-    avatar: '/img/cuidadores/andres_avatar.jpg',
-    extracto: 'La cirugía de paladar de Dante era inevitable. Gracias al plan, el proceso fue claro desde el presupuesto hasta el posoperatorio. Sin sorpresas.',
-    historia: `Los bulldogs franceses tienen problemas respiratorios estructurales conocidos. Dante resoplaba desde cachorro y a los 4 años el veterinario confirmó que necesitaba corrección de paladar blando elongado.\n\nLa noticia me angustió, sobre todo por los costos. Pedí cotizaciones en tres clínicas y los valores variaban enormemente sin claridad sobre qué incluía cada uno. Con PetFeliz fue diferente: me explicaron exactamente el procedimiento, los riesgos, el tiempo de recuperación y lo que cubría el plan.\n\nEl Dr. Camilo Arango realizó la cirugía en la sede de Laureles. El seguimiento posoperatorio duró tres semanas. Dante hoy respira con una facilidad que nunca tuvo.`,
-    etiquetas: ['Cirugía', 'Bulldog francés', 'Vías respiratorias'],
-    fecha: 'Diciembre 2024',
-    rating: 5,
-  },
-  {
-    id: 6,
-    nombre: 'Brisa Fernández',
-    ciudad: 'Laureles, Medellín',
-    mascota: 'Nube y Rocío',
-    especie: 'Gatas siamesas, 6 años',
+    id: 'demo-5',
+    nombre: 'Mariana Pizarro',
+    ciudad: 'Poblado, Medellín',
+    mascota: 'Kira',
+    especie: 'Perra beagle, 1 año',
     categoria: 'Vacunación',
-    foto: '/img/cuidadores/mariana.jpg',
+    foto: '/img/cuidadores/mariana_p.jpg',
     avatar: '/img/cuidadores/mariana_avatar.jpg',
-    extracto: 'Dos gatas, el doble de todo. Tener el historial de ambas en la misma app, con recordatorios automáticos, simplificó algo que antes era un caos de papeles.',
-    historia: `Nube y Rocío son hermanas y llegaron juntas a mi vida hace seis años. Lo que no imaginé es lo complejo que se vuelve gestionar la salud de dos animales: fechas de vacunación distintas, historiales médicos separados, dos carnets físicos que siempre perdía.\n\nCon PetFeliz todo está en la app. Perfiles separados para cada una, con su historial completo, alertas de vacunación y notas del veterinario. Cuando la Dra. Alejandra Patiño detectó que Rocío respondía mejor a cierta marca de biológico, quedó registrado y se aplica automáticamente en cada ciclo.\n\nEl año pasado ninguna de las dos tuvo que ir a urgencias. Eso no es coincidencia: es medicina preventiva bien ejecutada.`,
-    etiquetas: ['Gatos', 'Vacunación', 'Medicina preventiva'],
-    fecha: 'Abril 2025',
+    extracto: 'Completamos todo el esquema de vacunación y desparasitación de Kira sin olvidar ninguna fecha gracias a los recordatorios del sistema.',
+    historia: `Con un cachorro inquieto como Kira, mantener el calendario de vacunas al día puede ser caótico. Con la app de PetFeliz recibimos notificaciones preventivas antes de cada dosis.\n\nAcudimos a la sede de Itagüí para su última vacuna múltiple y antirrábica. La atención fue afectuosa, paciente y muy profesional. Kira ni siquiera sintió el pinchazo y nos entregaron su carné digital de vacunación actualizado en la plataforma.`,
+    etiquetas: ['Vacunación', 'Beagle', 'Esquema completo'],
+    fecha: 'Enero 2025',
     rating: 5,
-  },
+  }
 ]
 
-const categorias = ['Todas', 'Medicina General', 'Dermatología', 'Urgencias', 'Cirugía', 'Vacunación']
+const categorias = ['Todas', 'Medicina General', 'Dermatología', 'Urgencias 24/7', 'Cirugía', 'Vacunación']
 
 const stats = [
   { num: '+6.000', label: 'Mascotas afiliadas',         icon: 'fa-solid fa-paw' },
@@ -128,6 +127,8 @@ function StarRating({ rating }) {
 }
 
 function HistoriaCard({ historia, onClick }) {
+  const fotoBanner = getImagenCategoria(historia.categoria)
+
   return (
     <motion.article
       className="hc-card"
@@ -144,11 +145,11 @@ function HistoriaCard({ historia, onClick }) {
     >
       <div className="hc-card__img-wrap">
         <img
-          src={historia.foto}
+          src={fotoBanner}
           alt={`${historia.mascota}, mascota de ${historia.nombre}`}
           className="hc-card__img"
-          onError={e => { e.currentTarget.style.display = 'none' }}
         />
+        <div className="hc-card__img-overlay" />
         <span className="hc-card__categoria">{historia.categoria}</span>
       </div>
       <div className="hc-card__body">
@@ -189,6 +190,8 @@ function HistoriaCard({ historia, onClick }) {
 
 function Modal({ historia, onClose }) {
   if (!historia) return null
+  const fotoBanner = getImagenCategoria(historia.categoria)
+
   return (
     <AnimatePresence>
       <motion.div
@@ -215,10 +218,9 @@ function Modal({ historia, onClose }) {
 
           <div className="hc-modal__img-wrap">
             <img
-              src={historia.foto}
+              src={fotoBanner}
               alt={historia.mascota}
               className="hc-modal__img"
-              onError={e => { e.currentTarget.style.display = 'none' }}
             />
             <div className="hc-modal__img-overlay" />
             <div className="hc-modal__img-meta">
@@ -278,13 +280,51 @@ function Modal({ historia, onClose }) {
 /* ─── COMPONENTE PRINCIPAL ─── */
 
 function HistoriasCuidadores() {
+  const [listaHistorias, setListaHistorias] = useState(historiasIniciales)
   const [categoriaActiva, setCategoriaActiva] = useState('Todas')
   const [historiaAbierta, setHistoriaAbierta] = useState(null)
+  const [cargandoApi, setCargandoApi] = useState(true)
   const gridRef = useRef(null)
 
+  // Cargar historias aprobadas directamente de la API REST del backend Laravel
+  useEffect(() => {
+    const fetchHistoriasAprobadas = async () => {
+      setCargandoApi(true)
+      try {
+        const response = await api.get('/historias-cuidadores')
+        if (response.data?.status === 'success' && Array.isArray(response.data.data)) {
+          const apiHistorias = response.data.data.map(h => ({
+            id: `api-${h.id}`,
+            nombre: h.nombre_cuidador,
+            ciudad: 'Medellín, Antioquia',
+            mascota: h.nombre_mascota,
+            especie: h.nombre_mascota,
+            categoria: h.categoria,
+            foto: '/img/cuidadores/mariana.jpg',
+            avatar: '/img/cuidadores/mariana_avatar.jpg',
+            extracto: h.historia ? (h.historia.substring(0, 140) + (h.historia.length > 140 ? '...' : '')) : '',
+            historia: h.historia,
+            etiquetas: ['Comunidad PetFeliz', h.categoria],
+            fecha: new Date(h.created_at || Date.now()).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }),
+            rating: 5
+          }))
+
+          // Combinar historias traídas de la API al inicio del listado público
+          setListaHistorias([...apiHistorias, ...historiasIniciales])
+        }
+      } catch (err) {
+        console.error('Error al obtener historias aprobadas de la API:', err)
+      } finally {
+        setCargandoApi(false)
+      }
+    }
+
+    fetchHistoriasAprobadas()
+  }, [])
+
   const historiasFiltradas = categoriaActiva === 'Todas'
-    ? historias
-    : historias.filter(h => h.categoria === categoriaActiva)
+    ? listaHistorias
+    : listaHistorias.filter(h => h.categoria === categoriaActiva)
 
   const handleFiltro = (cat) => {
     setCategoriaActiva(cat)
@@ -310,14 +350,6 @@ function HistoriasCuidadores() {
                 familias de Medellín y el Área Metropolitana que encontraron en PetFeliz
                 algo más que un servicio veterinario.
               </p>
-            </div>
-            <div className="page-hero__img-wrap">
-              <img
-                src="/img/cuidadores/hero_cuidadores.jpg"
-                alt="Familia con su mascota en EPS PetFeliz"
-                className="page-hero__img"
-                onError={e => { e.currentTarget.style.display = 'none' }}
-              />
             </div>
           </div>
         </div>
@@ -386,48 +418,17 @@ function HistoriasCuidadores() {
         </div>
       </section>
 
-<Testimonial
-  quote="Tener un plan de salud para Trueno no es un lujo. Es la diferencia entre actuar a tiempo y lamentar haber esperado. PetFeliz nos dio esa red cuando más la necesitamos."
-  name="Sofía Mejía"
-  role="Cuidadora de Trueno · Bello, Antioquia"
-  avatar="/img/cuidadores/sofia_avatar.jpg"
-/>
+      <Testimonial
+        quote="Tener un plan de salud para Trueno no es un lujo. Es la diferencia entre actuar a tiempo y lamentar haber esperado. PetFeliz nos dio esa red cuando más la necesitamos."
+        name="Sofía Mejía"
+        role="Cuidadora de Trueno · Bello, Antioquia"
+        avatar="/img/cuidadores/sofia_avatar.jpg"
+      />
 
-      {/* COMPARTE TU HISTORIA */}
-      <section className="hc-comparte">
-        <div className="container">
-          <div className="hc-comparte__inner">
-            <div className="hc-comparte__text">
-              <h2>¿Tienes una historia <span className="text-accent">que contar</span>?</h2>
-              <p>
-                Si eres afiliado de PetFeliz y tu mascota vivió algo que vale la pena compartir,
-                queremos escucharte. Las mejores historias se publican aquí y en nuestras redes.
-              </p>
-              <div className="hc-comparte__ctas">
-                <a href="#" className="btn btn-primary">
-                  <FontAwesomeIcon icon="fa-solid fa-pen-to-square" />
-                  Compartir mi historia
-                </a>
-                <a href="#" className="btn btn-ghost">
-                  <FontAwesomeIcon icon="fa-solid fa-circle-question" />
-                  ¿Cómo funciona?
-                </a>
-              </div>
-            </div>
-            <div className="hc-comparte__visual">
-              <div className="hc-comparte__paws">
-                {['🐾', '🐾', '🐾', '🐾', '🐾', '🐾'].map((p, i) => (
-                  <span key={i} className={`hc-paw hc-paw--${i}`}>{p}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ZONA DE CUIDADORES / COMPARTE TU HISTORIA */}
+      <ZonaCuidadoresBanner />
 
-      <CtaBanner />
-
-      {/* MODAL */}
+      {/* MODAL DETALLE */}
       {historiaAbierta && (
         <Modal
           historia={historiaAbierta}

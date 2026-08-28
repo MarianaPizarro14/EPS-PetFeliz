@@ -263,12 +263,13 @@ function MisCitas() {
           usuario={usuario}
           onUserUpdated={setUsuario}
           extraActions={
-            <button type="button" className="btn-agendar-cita" onClick={() => navigate('/agendar-cita')}>
-              <i className="fa-solid fa-plus"></i>
-              <span>Agendar Nueva Cita</span>
-            </button>
+            citas.proximas.length > 0 ? (
+              <button type="button" className="btn-agendar-cita" onClick={() => navigate('/agendar-cita')}>
+                <i className="fa-solid fa-plus"></i>
+                <span>Agendar Nueva Cita</span>
+              </button>
+            ) : null
           }
-
         />
 
         <div className="citas-card-box">

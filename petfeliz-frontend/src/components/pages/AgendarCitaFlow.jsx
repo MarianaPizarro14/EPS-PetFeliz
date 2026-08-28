@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
+import CustomDatePicker from '../ui/CustomDatePicker'
 import { RAZAS_POR_ESPECIE } from '../../data/razasPorEspecie'
 import { veterinariosData, normalizarEspecialidad } from '../../data/veterinariosData'
 import './AgendarCitaFlow.css'
@@ -82,15 +83,18 @@ function AgendarCitaFlow() {
   const [showPetModal, setShowPetModal] = useState(false)
   const [showReceiptModal, setShowReceiptModal] = useState(false)
 
-  // Formulario rápido para crear mascota
+  // Formulario para crear mascota en modal
   const [newPetForm, setNewPetForm] = useState({
     nombre: '',
     especie: 'Canino',
-    raza: 'Criollo/Mestizo',
+    raza: RAZAS_POR_ESPECIE['Canino']?.[0] || 'Criollo/Mestizo',
     sexo: 'Macho',
     fecha_nacimiento: '',
     peso: '',
   })
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [isDragging, setIsDragging] = useState(false)
   const [savingPet, setSavingPet] = useState(false)
   const [petModalError, setPetModalError] = useState('')
 
@@ -374,6 +378,64 @@ function AgendarCitaFlow() {
     }
   }
 
+  // Manejadores para carga de foto en modal
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null)
+    setImagePreview(null)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleEspecieChange = (newEspecie) => {
+    const razasDisponibles = RAZAS_POR_ESPECIE[newEspecie] || []
+    setNewPetForm((prev) => ({
+      ...prev,
+      especie: newEspecie,
+      raza: razasDisponibles[0] || '',
+    }))
+  }
+
+  const handleOpenPetModal = () => {
+    setNewPetForm({
+      nombre: '',
+      especie: 'Canino',
+      raza: RAZAS_POR_ESPECIE['Canino']?.[0] || 'Criollo/Mestizo',
+      sexo: 'Macho',
+      fecha_nacimiento: '',
+      peso: '',
+    })
+    setSelectedFile(null)
+    setImagePreview(null)
+    setPetModalError('')
+    setShowPetModal(true)
+  }
+
   // Crear nueva mascota desde modal de Paso 1
   const handleCreatePetSubmit = async (e) => {
     e.preventDefault()
@@ -390,10 +452,11 @@ function AgendarCitaFlow() {
       const formData = new FormData()
       formData.append('nombre', newPetForm.nombre)
       formData.append('especie', newPetForm.especie)
-      formData.append('raza', newPetForm.raza)
+      formData.append('raza', newPetForm.raza || '')
       formData.append('sexo', newPetForm.sexo)
       if (newPetForm.fecha_nacimiento) formData.append('fecha_nacimiento', newPetForm.fecha_nacimiento)
       if (newPetForm.peso) formData.append('peso', newPetForm.peso)
+      if (selectedFile) formData.append('foto', selectedFile)
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/mascotas`, {
         method: 'POST',
@@ -407,6 +470,7 @@ function AgendarCitaFlow() {
       const data = await res.json()
       if (!res.ok) {
         setPetModalError(data.message || 'No se pudo guardar la mascota.')
+        setSavingPet(false)
         return
       }
 
@@ -658,7 +722,7 @@ function AgendarCitaFlow() {
                       {/* Botón "+ AGREGAR" */}
                       <div
                         className="agendar-pet-card agendar-pet-card--add"
-                        onClick={() => setShowPetModal(true)}
+                        onClick={handleOpenPetModal}
                       >
                         <i className="fa-solid fa-plus" style={{ fontSize: '1.1rem', color: '#94a3b8', marginBottom: '0.35rem' }}></i>
                         <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>+ AGREGAR</span>
@@ -1065,68 +1129,223 @@ function AgendarCitaFlow() {
         </div>
       </main>
 
-      {/* ── MODAL AGREGAR RÁPIDO NUEVA MASCOTA ── */}
+      {/* ── MODAL REGISTRAR NUEVA MASCOTA ── */}
       {showPetModal && (
-        <div className="dh-modal-backdrop">
-          <div className="dh-modal-box">
-            <div className="dh-modal-header">
-              <h3>Agregar Nueva Mascota</h3>
-              <button type="button" className="dh-modal-close" onClick={() => setShowPetModal(false)}>
+        <div className="modal-backdrop">
+          <div className="modal-box pet-modal-box">
+            <div className="modal-box__header">
+              <div className="modal-box__title-group">
+                <div className="modal-box__badge">
+                  <i className="fa-solid fa-paw" style={{ color: '#059669', fontSize: '1.15rem' }}></i>
+                </div>
+                <div>
+                  <h3>Registrar Nueva Mascota</h3>
+                  <p className="modal-box__subtitle">Apertura de Expediente Veterinario — PetFeliz EPS</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="modal-box__close"
+                onClick={() => setShowPetModal(false)}
+                aria-label="Cerrar modal"
+              >
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            {petModalError && <div className="dh-modal-alert dh-modal-alert--error">{petModalError}</div>}
+            {petModalError && <div className="modal-box__error">{petModalError}</div>}
 
-            <form onSubmit={handleCreatePetSubmit} className="dh-profile-form">
-              <div className="dh-form-field" style={{ marginBottom: '0.85rem' }}>
-                <label>Nombre de la Mascota *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="ej. Toby, Lupe"
-                  value={newPetForm.nombre}
-                  onChange={(e) => setNewPetForm({ ...newPetForm, nombre: e.target.value })}
-                />
-              </div>
-
-              <div className="dh-info-grid" style={{ marginBottom: '0.85rem' }}>
-                <div className="dh-form-field">
-                  <label>Especie</label>
-                  <select
-                    value={newPetForm.especie}
-                    onChange={(e) => {
-                      const esp = e.target.value
-                      const razas = RAZAS_POR_ESPECIE[esp] || []
-                      setNewPetForm({ ...newPetForm, especie: esp, raza: razas[0] || '' })
-                    }}
-                  >
-                    <option value="Canino">Perro / Canino</option>
-                    <option value="Felino">Gato / Felino</option>
-                    <option value="Ave">Ave</option>
-                    <option value="Roedor">Roedor</option>
-                    <option value="Otro">Otro</option>
-                  </select>
+            <form onSubmit={handleCreatePetSubmit} className="pet-form">
+              {/* ── SECCIÓN 1: FOTO Y DATOS PRINCIPALES ── */}
+              <div className="pet-form__header-card">
+                <div className="pet-upload-avatar-wrap">
+                  {imagePreview ? (
+                    <div className="pet-avatar-preview">
+                      <img src={imagePreview} alt="Foto de la mascota" />
+                      <button
+                        type="button"
+                        className="btn-remove-avatar"
+                        onClick={handleRemoveImage}
+                        title="Quitar foto"
+                      >
+                        <i className="fa-solid fa-xmark" style={{ fontSize: '0.75rem' }}></i>
+                      </button>
+                      <label className="btn-change-avatar-badge" title="Cambiar foto">
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/jpg, image/webp"
+                          onChange={handleFileChange}
+                          style={{ display: 'none' }}
+                        />
+                        <i className="fa-solid fa-camera" style={{ fontSize: '0.75rem' }}></i>
+                      </label>
+                    </div>
+                  ) : (
+                    <label
+                      className={`pet-avatar-dropzone ${isDragging ? 'pet-avatar-dropzone--dragging' : ''}`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      title="Subir foto de la mascota"
+                    >
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                      <div className="pet-avatar-icon-ring">
+                        <i className="fa-solid fa-camera" style={{ fontSize: '1.05rem' }}></i>
+                      </div>
+                      <span className="pet-avatar-upload-lbl">+ Foto</span>
+                    </label>
+                  )}
                 </div>
 
-                <div className="dh-form-field">
-                  <label>Raza</label>
-                  <select
-                    value={newPetForm.raza}
-                    onChange={(e) => setNewPetForm({ ...newPetForm, raza: e.target.value })}
-                  >
-                    {(RAZAS_POR_ESPECIE[newPetForm.especie] || []).map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
+                <div className="pet-form__main-fields">
+                  <div className="pet-form__field">
+                    <label>
+                      Nombre de la Mascota <span className="req-star">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ej. Bruno, Nala"
+                      value={newPetForm.nombre}
+                      onChange={(e) => setNewPetForm({ ...newPetForm, nombre: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="pet-form__field">
+                    <label>
+                      Fecha de Nacimiento <span className="opt-tag">(Opcional)</span>
+                    </label>
+                    <CustomDatePicker
+                      value={newPetForm.fecha_nacimiento}
+                      onChange={(val) => setNewPetForm({ ...newPetForm, fecha_nacimiento: val })}
+                      placeholder="Selecciona fecha de nacimiento"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="dh-modal-footer">
-                <button type="button" className="dh-btn-secondary" onClick={() => setShowPetModal(false)}>
+              {/* ── SECCIÓN 2: CLASIFICACIÓN Y RAZA ── */}
+              <div className="pet-form__section">
+                <div className="pet-form__section-header">
+                  <span className="pet-form__section-title">Clasificación Veterinaria</span>
+                  <span className="pet-form__section-badge">Requerido</span>
+                </div>
+
+                <div className="pet-form__row">
+                  <div className="pet-form__field">
+                    <label>
+                      Especie <span className="req-star">*</span>
+                    </label>
+                    <select
+                      value={newPetForm.especie}
+                      onChange={(e) => handleEspecieChange(e.target.value)}
+                    >
+                      <option value="Canino">Canino (Perro)</option>
+                      <option value="Felino">Felino (Gato)</option>
+                      <option value="Ave">Ave</option>
+                      <option value="Roedor">Roedor</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div className="pet-form__field">
+                    <label>
+                      Raza <span className="req-star">*</span>
+                    </label>
+                    <select
+                      value={
+                        (RAZAS_POR_ESPECIE[newPetForm.especie] || []).filter((r) => r !== 'Otra (Especificar)').includes(newPetForm.raza)
+                          ? newPetForm.raza
+                          : 'Otra (Especificar)'
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val === 'Otra (Especificar)') {
+                          setNewPetForm({ ...newPetForm, raza: '' })
+                        } else {
+                          setNewPetForm({ ...newPetForm, raza: val })
+                        }
+                      }}
+                    >
+                      {(RAZAS_POR_ESPECIE[newPetForm.especie] || []).map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Campo libre si especie es Otro o raza es Otra */}
+                {(newPetForm.especie === 'Otro' ||
+                  newPetForm.raza === 'Otra (Especificar)' ||
+                  !(RAZAS_POR_ESPECIE[newPetForm.especie] || []).filter((r) => r !== 'Otra (Especificar)').includes(newPetForm.raza)) && (
+                  <div className="pet-form__field" style={{ marginTop: '0.5rem' }}>
+                    <label>
+                      Escribe la raza de tu mascota <span className="req-star">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Escribe la raza de tu mascota"
+                      value={newPetForm.raza === 'Otra (Especificar)' ? '' : newPetForm.raza}
+                      onChange={(e) => setNewPetForm({ ...newPetForm, raza: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ── SECCIÓN 3: DETALLES FÍSICOS ── */}
+              <div className="pet-form__section">
+                <div className="pet-form__section-header">
+                  <span className="pet-form__section-title">Datos Físicos</span>
+                  <span className="pet-form__section-badge pet-form__section-badge--opt">Complementario</span>
+                </div>
+
+                <div className="pet-form__row">
+                  <div className="pet-form__field">
+                    <label>
+                      Sexo <span className="opt-tag">(Opcional)</span>
+                    </label>
+                    <select
+                      value={newPetForm.sexo}
+                      onChange={(e) => setNewPetForm({ ...newPetForm, sexo: e.target.value })}
+                    >
+                      <option value="Macho">Macho</option>
+                      <option value="Hembra">Hembra</option>
+                    </select>
+                  </div>
+
+                  <div className="pet-form__field">
+                    <label>
+                      Peso (kg) <span className="opt-tag">(Opcional)</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="ej. 12.5"
+                      value={newPetForm.peso}
+                      onChange={(e) => setNewPetForm({ ...newPetForm, peso: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-box__footer">
+                <button
+                  type="button"
+                  className="btn-modal-secondary"
+                  onClick={() => setShowPetModal(false)}
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="dh-btn-primary" disabled={savingPet}>
+                <button type="submit" className="btn-primary-pet" disabled={savingPet}>
                   {savingPet ? 'Guardando...' : 'Guardar Mascota'}
                 </button>
               </div>

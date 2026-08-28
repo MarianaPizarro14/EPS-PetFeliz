@@ -736,13 +736,19 @@ function AgendarCitaFlow() {
                       {renderRealCalendar()}
 
                       {/* Horarios Disponibles */}
-                      <div style={{ marginTop: '0.9rem' }}>
-                        <span className="agendar-slots-label">HORARIOS DISPONIBLES DE {selectedVet?.nombre?.toUpperCase()}</span>
+                      <div className="agendar-slots-container">
+                        <div className="agendar-slots-header">
+                          <span className="agendar-slots-label">HORARIOS DISPONIBLES</span>
+                          {selectedVet && <span className="agendar-slots-vet-name">Con {selectedVet.nombre}</span>}
+                        </div>
+
                         {loadingHorarios ? (
-                          <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.4rem' }}>Consultando horarios...</p>
-                        ) : (
+                          <p className="agendar-slots-loading">
+                            <i className="fa-solid fa-spinner fa-spin"></i> Consultando disponibilidad...
+                          </p>
+                        ) : horariosDisponibles.length > 0 ? (
                           <div className="agendar-slots-row">
-                            {(horariosDisponibles.length > 0 ? horariosDisponibles : ['08:00 AM', '09:30 AM', '10:30 AM', '11:00 AM', '02:30 PM', '04:00 PM']).map((h) => (
+                            {horariosDisponibles.map((h) => (
                               <button
                                 key={h}
                                 type="button"
@@ -752,6 +758,11 @@ function AgendarCitaFlow() {
                                 {h}
                               </button>
                             ))}
+                          </div>
+                        ) : (
+                          <div className="agendar-slots-empty">
+                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <span>No hay horarios disponibles para este médico en la fecha seleccionada. Por favor elige otra fecha o médico.</span>
                           </div>
                         )}
                       </div>
@@ -779,104 +790,114 @@ function AgendarCitaFlow() {
                         className={`agendar-payment-tab ${paymentMethod === 'card' ? 'agendar-payment-tab--active' : ''}`}
                         onClick={() => setPaymentMethod('card')}
                       >
-                        <i className="fa-solid fa-credit-card"></i> Tarjeta Débito/Crédito
-                      </button>
-                      <button
-                        type="button"
-                        className={`agendar-payment-tab ${paymentMethod === 'nequi' ? 'agendar-payment-tab--active' : ''}`}
-                        onClick={() => setPaymentMethod('nequi')}
-                      >
-                        <i className="fa-solid fa-mobile-screen-button"></i> Nequi / Daviplata
+                        <i className="fa-solid fa-credit-card"></i>
+                        <span>Tarjeta Crédito / Débito</span>
                       </button>
                       <button
                         type="button"
                         className={`agendar-payment-tab ${paymentMethod === 'pse' ? 'agendar-payment-tab--active' : ''}`}
                         onClick={() => setPaymentMethod('pse')}
                       >
-                        <i className="fa-solid fa-building-columns"></i> PSE
+                        <i className="fa-solid fa-building-columns"></i>
+                        <span>PSE (Débito Bancario)</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`agendar-payment-tab ${paymentMethod === 'nequi' ? 'agendar-payment-tab--active' : ''}`}
+                        onClick={() => setPaymentMethod('nequi')}
+                      >
+                        <i className="fa-solid fa-mobile-screen-button"></i>
+                        <span>Nequi / Daviplata</span>
                       </button>
                     </div>
 
                     {paymentMethod === 'card' && (
-                      <form onSubmit={handleConfirmarPago}>
-                        <div className="dh-info-grid" style={{ marginBottom: '1rem' }}>
-                          <div className="dh-form-field dh-form-field--full">
-                            <label>Nombre del Titular *</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="Nombre como aparece en la tarjeta"
-                              value={cardForm.titular}
-                              onChange={(e) => setCardForm({ ...cardForm, titular: e.target.value })}
-                            />
+                      <div className="agendar-payment-form">
+                        <div className="pet-form__field">
+                          <label>Nombre del Titular de la Tarjeta *</label>
+                          <input type="text" placeholder="Como aparece en la tarjeta" required />
+                        </div>
+                        <div className="pet-form__field">
+                          <label>Número de Tarjeta *</label>
+                          <input type="text" placeholder="0000 0000 0000 0000" maxLength="19" required />
+                        </div>
+                        <div className="pet-form__row">
+                          <div className="pet-form__field">
+                            <label>Fecha Exp. (MM/AA) *</label>
+                            <input type="text" placeholder="MM/AA" maxLength="5" required />
                           </div>
-
-                          <div className="dh-form-field dh-form-field--full">
-                            <label>Número de Tarjeta *</label>
-                            <input
-                              type="text"
-                              required
-                              maxLength="19"
-                              placeholder="0000 0000 0000 0000"
-                              value={cardForm.numero}
-                              onChange={(e) => setCardForm({ ...cardForm, numero: e.target.value })}
-                            />
-                          </div>
-
-                          <div className="dh-form-field">
-                            <label>Vencimiento (MM/AA) *</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="MM/AA"
-                              maxLength="5"
-                              value={cardForm.expiracion}
-                              onChange={(e) => setCardForm({ ...cardForm, expiracion: e.target.value })}
-                            />
-                          </div>
-
-                          <div className="dh-form-field">
-                            <label>CVV / CVC *</label>
-                            <input
-                              type="password"
-                              required
-                              maxLength="4"
-                              placeholder="123"
-                              value={cardForm.cvv}
-                              onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value })}
-                            />
+                          <div className="pet-form__field">
+                            <label>Código CVC *</label>
+                            <input type="password" placeholder="123" maxLength="4" required />
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', fontSize: '0.82rem', color: '#475569' }}>
-                          <input
-                            type="checkbox"
-                            id="guardarCard"
-                            checked={cardForm.guardar}
-                            onChange={(e) => setCardForm({ ...cardForm, guardar: e.target.checked })}
-                          />
-                          <label htmlFor="guardarCard">Guardar esta tarjeta para futuras compras</label>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.85rem' }}>
-                          <button type="button" className="btn-action-sm btn-action-sm--secondary" onClick={handleCancelarReserva}>
-                            Cancelar
+                        <div className="agendar-form-actions">
+                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
+                            ← Volver
                           </button>
-                          <button type="submit" className="btn-primary-pet" style={{ flex: 1 }} disabled={submitting}>
-                            {submitting ? 'Procesando Pago...' : `Pagar Ahora ${formatCOP(selectedService?.precio_base)}`}
+                          <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
+                            {submitting ? 'Procesando...' : `Pagar ${formatCOP(selectedService?.precio_base)}`}
                           </button>
                         </div>
-                      </form>
+                      </div>
                     )}
 
-                    {paymentMethod !== 'card' && (
-                      <div style={{ padding: '1.5rem 1rem', textAlign: 'center' }}>
-                        <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '1.25rem' }}>
-                          Serás redirigido a la plataforma oficial de <strong>{paymentMethod === 'nequi' ? 'Nequi / Daviplata' : 'PSE'}</strong> para autorizar la transacción.
+                    {paymentMethod === 'pse' && (
+                      <div className="agendar-payment-form">
+                        <div className="pet-form__field">
+                          <label>Selecciona tu Banco *</label>
+                          <select required defaultValue="">
+                            <option value="" disabled>-- Elige tu entidad financiera --</option>
+                            <option value="bancolombia">Bancolombia</option>
+                            <option value="banco_bogota">Banco de Bogotá</option>
+                            <option value="davivienda">Davivienda</option>
+                            <option value="bbva">BBVA Colombia</option>
+                            <option value="nequi">Nequi</option>
+                            <option value="rappipay">RappiPay</option>
+                          </select>
+                        </div>
+
+                        <div className="pet-form__row">
+                          <div className="pet-form__field">
+                            <label>Tipo de Cliente *</label>
+                            <select required defaultValue="natural">
+                              <option value="natural">Persona Natural</option>
+                              <option value="juridica">Persona Jurídica</option>
+                            </select>
+                          </div>
+
+                          <div className="pet-form__field">
+                            <label>Número de Documento *</label>
+                            <input type="text" placeholder="Número de C.C." required />
+                          </div>
+                        </div>
+
+                        <div className="agendar-form-actions">
+                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
+                            ← Volver
+                          </button>
+                          <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
+                            {submitting ? 'Procesando...' : 'Ir a PSE a Pagar'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {paymentMethod === 'nequi' && (
+                      <div className="agendar-payment-form">
+                        <div className="pet-form__field">
+                          <label>Número Celular Registrado *</label>
+                          <input type="tel" placeholder="300 000 0000" maxLength="10" required />
+                        </div>
+
+                        <p className="text-muted" style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1rem' }}>
+                          Recibirás una notificación en tu app móvil para autorizar la transacción de manera segura.
                         </p>
-                        <div style={{ display: 'flex', gap: '0.85rem' }}>
-                          <button type="button" className="btn-action-sm btn-action-sm--secondary" onClick={handleCancelarReserva}>
-                            Cancelar
+
+                        <div className="agendar-form-actions">
+                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
+                            ← Volver
                           </button>
                           <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
                             {submitting ? 'Procesando...' : `Continuar a ${paymentMethod === 'nequi' ? 'Nequi' : 'PSE'}`}
@@ -884,58 +905,72 @@ function AgendarCitaFlow() {
                         </div>
                       </div>
                     )}
-
-                    <div className="agendar-security-badges">
-                      <span><i className="fa-solid fa-lock" style={{ color: '#059669' }}></i> Cifrado 256-bit</span>
-                      <span><i className="fa-solid fa-shield-halved" style={{ color: '#059669' }}></i> PCI-DSS Compliant</span>
-                      <span><i className="fa-solid fa-check-double" style={{ color: '#059669' }}></i> Pago Seguro</span>
-                    </div>
                   </>
                 )}
               </div>
 
-              {/* Columna Derecha: Panel de Resumen Fijo Compacto */}
+              {/* Columna Derecha: Panel de Resumen Fijo Rediseñado */}
               <aside className="agendar-sidebar-summary">
-                <h3 className="agendar-summary-header">Resumen</h3>
+                <div className="agendar-summary-header-box">
+                  <div className="agendar-summary-badge">
+                    <i className="fa-solid fa-receipt"></i>
+                  </div>
+                  <div>
+                    <h3 className="agendar-summary-header">Resumen de Pago</h3>
+                    <p className="agendar-summary-subtitle">Expediente de Reserva Clínica</p>
+                  </div>
+                </div>
 
                 <div className="agendar-summary-list">
-                  <div className="agendar-summary-item">
-                    <i className="fa-solid fa-stethoscope"></i>
-                    <div>
-                      <span className="agendar-summary-label">SERVICIO</span>
-                      <strong className="agendar-summary-title">{selectedService?.nombre || 'Consulta'}</strong>
+                  <div className="agendar-summary-card">
+                    <div className="agendar-summary-card__icon agendar-summary-card__icon--blue">
+                      <i className="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <div className="agendar-summary-card__content">
+                      <span className="agendar-summary-label">SERVICIO MÉDICO</span>
+                      <strong className="agendar-summary-title">{selectedService?.nombre || 'Consulta General'}</strong>
                     </div>
                     <span className="agendar-summary-val">{formatCOP(selectedService?.precio_base)}</span>
                   </div>
 
-                  <div className="agendar-summary-item">
-                    <i className="fa-solid fa-paw"></i>
-                    <div>
-                      <span className="agendar-summary-label">PACIENTE</span>
+                  <div className="agendar-summary-card">
+                    <div className="agendar-summary-card__icon agendar-summary-card__icon--green">
+                      <i className="fa-solid fa-paw"></i>
+                    </div>
+                    <div className="agendar-summary-card__content">
+                      <span className="agendar-summary-label">PACIENTE ATENDIDO</span>
                       <strong className="agendar-summary-title">{selectedPet?.nombre || 'Mascota'}</strong>
                     </div>
                   </div>
 
-                  <div className="agendar-summary-item">
-                    <i className="fa-solid fa-user-doctor"></i>
-                    <div>
-                      <span className="agendar-summary-label">VETERINARIO</span>
-                      <strong className="agendar-summary-title">{selectedVet?.nombre || 'Médico'}</strong>
+                  <div className="agendar-summary-card">
+                    <div className="agendar-summary-card__icon agendar-summary-card__icon--teal">
+                      <i className="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <div className="agendar-summary-card__content">
+                      <span className="agendar-summary-label">MÉDICO VETERINARIO</span>
+                      <strong className="agendar-summary-title">{selectedVet?.nombre || 'Médico Asignado'}</strong>
+                      {selectedVet?.especialidad && <span className="agendar-summary-subspec">{selectedVet.especialidad}</span>}
                     </div>
                   </div>
 
-                  <div className="agendar-summary-item">
-                    <i className="fa-regular fa-calendar"></i>
-                    <div>
+                  <div className="agendar-summary-card">
+                    <div className="agendar-summary-card__icon agendar-summary-card__icon--amber">
+                      <i className="fa-regular fa-calendar-days"></i>
+                    </div>
+                    <div className="agendar-summary-card__content">
                       <span className="agendar-summary-label">FECHA Y HORA</span>
                       <strong className="agendar-summary-title">{formatSummaryDate()}</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="agendar-summary-total">
-                  <span>Total</span>
-                  <strong>{formatCOP(selectedService?.precio_base)}</strong>
+                <div className="agendar-summary-total-box">
+                  <div className="agendar-summary-total-info">
+                    <span className="agendar-summary-total-lbl">Total a pagar</span>
+                    <span className="agendar-summary-total-sub">Tarifa oficial EPS PetFeliz</span>
+                  </div>
+                  <strong className="agendar-summary-total-amount">{formatCOP(selectedService?.precio_base)}</strong>
                 </div>
 
                 {step === 1 && (
@@ -950,7 +985,8 @@ function AgendarCitaFlow() {
                 )}
 
                 <p className="agendar-summary-disclaimer">
-                  Al continuar, aceptas las políticas de reserva y cancelación
+                  <i className="fa-solid fa-lock" style={{ marginRight: '0.35rem', color: '#059669' }}></i>
+                  Al continuar aceptas nuestras políticas de agendamiento y reserva
                 </p>
               </aside>
             </div>

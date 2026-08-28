@@ -291,18 +291,18 @@
 
 .modal-box__header h3 {
   font-family: var(--font-head);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #0f172a;
-  line-height: 1.2;
+  color: #020617;
+  line-height: 1.25;
 }
 
 .modal-box__subtitle {
   font-family: var(--font-body);
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.86rem;
+  color: #475569;
   font-weight: 500;
-  margin-top: 0.15rem;
+  margin-top: 0.25rem;
 }
 
 .modal-box__close {

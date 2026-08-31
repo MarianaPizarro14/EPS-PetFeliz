@@ -39,6 +39,7 @@ export const veterinariosExtra = {
   25: { desc: 'Atención de urgencias matutinas y estabilización prequirúrgica.', sede: 'Todas las sedes', horario: '24/7 · Turno 06:00–12:00', gradient: 'linear-gradient(135deg,#fca5a5,#f87171)', icon: 'fa-solid fa-kit-medical' },
   26: { desc: 'Manejo de urgencias en horario de mayor afluencia y triage.', sede: 'Todas las sedes', horario: '24/7 · Turno 12:00–18:00', gradient: 'linear-gradient(135deg,#fca5a5,#f87171)', icon: 'fa-solid fa-kit-medical' },
   27: { desc: 'Estabilización de pacientes críticos en el cierre del día.', sede: 'Todas las sedes', horario: '24/7 · Turno 18:00–00:00', gradient: 'linear-gradient(135deg,#fca5a5,#f87171)', icon: 'fa-solid fa-kit-medical' },
+  28: { desc: 'Atención integral con calidez y trato cercano a cada paciente y su familia.', sede: 'Sede Bello', horario: 'Mar-Sab 8am-4pm', gradient: 'linear-gradient(135deg,#a8e4c4,#63D7FE)', icon: 'fa-solid fa-user-doctor' },
 }
 
 export default veterinariosExtra

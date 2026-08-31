@@ -54,9 +54,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cliente/historial-servicios', [CitaController::class, 'historialServicios']);
     Route::get('/clientes/{id}/historial-servicios', [CitaController::class, 'historialServicios']);
 
-    // Rutas de Pagos
+    // Rutas de Pagos y Afiliación
     Route::get('/cliente/pagos', [PagoController::class, 'index']);
     Route::get('/cliente/pagos/{id}', [PagoController::class, 'show']);
+    Route::get('/cliente/afiliacion', [PagoController::class, 'afiliacionInfo']);
+    Route::post('/cliente/afiliacion/pagar', [PagoController::class, 'pagarAfiliacion']);
 
     // Rutas de Documentos PDF
     Route::get('/cliente/documentos/factura/{id_pago}/pdf', [DocumentoController::class, 'facturaPdf']);

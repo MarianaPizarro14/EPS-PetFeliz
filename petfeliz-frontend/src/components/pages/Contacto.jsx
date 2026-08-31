@@ -92,8 +92,29 @@ export default function Contacto() {
 
   const handleSubmit = async e => {
     e.preventDefault()
-    setLoading(true)
     setErrorBanner('')
+    
+    // Validaciones rápidas en el cliente para respuesta instantánea
+    const errors = {}
+    if (!form.nombre.trim()) {
+      errors.nombre = ['El nombre completo es obligatorio.']
+    }
+    if (!form.correo.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo.trim())) {
+      errors.correo = ['Por favor ingresa un correo electrónico válido.']
+    }
+    if (!form.asunto) {
+      errors.asunto = ['Por favor selecciona un asunto.']
+    }
+    if (!form.mensaje.trim() || form.mensaje.trim().length < 10) {
+      errors.mensaje = ['El mensaje debe tener al menos 10 caracteres.']
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+
+    setLoading(true)
     setFieldErrors({})
 
     try {

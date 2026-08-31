@@ -46,16 +46,15 @@ class ContactoController extends Controller
         $cleanAsunto  = trim(strip_tags($request->asunto));
         $cleanMensaje = trim(strip_tags($request->mensaje));
 
-        // Correo del equipo comercial/soporte
-        $recipientEmail = env('CONTACT_RECIPIENT_EMAIL', env('EDITORIAL_TEAM_EMAIL', 'petfelizeps@gmail.com'));
+        // Correo del equipo de soporte de PetFeliz (petfelizeps@gmail.com)
+        $recipientEmail = env('CONTACT_RECIPIENT_EMAIL', 'petfelizeps@gmail.com');
 
         try {
             Mail::to($recipientEmail)->send(
                 new ContactoMail($cleanNombre, $cleanCorreo, $cleanAsunto, $cleanMensaje)
             );
         } catch (\Throwable $e) {
-            Log::error("Error al procesar mensaje de contacto de {$cleanCorreo}: " . $e->getMessage());
-            // En desarrollo se registra en log; si falla el SMTP se maneja limpiamente
+            Log::error("Error al enviar mensaje de contacto desde {$cleanCorreo}: " . $e->getMessage());
         }
 
         return response()->json([

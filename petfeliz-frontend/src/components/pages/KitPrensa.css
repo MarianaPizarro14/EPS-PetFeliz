@@ -125,15 +125,25 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
   box-shadow: var(--shadow-card);
+  text-decoration: none;
 }
 
-.press-asset-card:hover {
+.press-asset-card--available {
+  cursor: pointer;
+}
+
+.press-asset-card--available:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
   border-color: rgba(0, 0, 0, 0.12);
+}
+
+.press-asset-card--disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f9fafb;
 }
 
 /* Icono con fondo de color */
@@ -149,7 +159,7 @@
   transition: transform 0.2s;
 }
 
-.press-asset-card:hover .press-asset-card__icon {
+.press-asset-card--available:hover .press-asset-card__icon {
   transform: scale(1.08);
 }
 
@@ -175,7 +185,7 @@
 
 .press-asset-card__title {
   font-family: var(--font-head);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 0.2rem;
   color: var(--dark);
@@ -202,10 +212,23 @@
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-.press-asset-card:hover .press-asset-card__dl {
+.press-asset-card--available:hover .press-asset-card__dl {
   background: #006D41;
   color: var(--white);
   border-color: #006D41;
+}
+
+/* Badge Próximamente para tarjetas sin archivo */
+.press-asset-card__badge-soon {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════

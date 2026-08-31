@@ -21,12 +21,51 @@ const stats = [
 ]
 
 const assets = [
-  { icon: faPaw,       color: 'green', title: 'Logo EPS PetFeliz',  desc: 'SVG • PNG • Versiones en color y blanco' },
-  { icon: faPalette,   color: 'blue',  title: 'Paleta de colores',   desc: 'PDF • Brand guidelines completas' },
-  { icon: faCamera,    color: 'amber', title: 'Fotos de producto',   desc: 'ZIP • Alta resolución (300 DPI)' },
-  { icon: faFileLines, color: 'green', title: 'Ficha informativa',   desc: 'PDF • Una página • ES / EN' },
-  { icon: faVideo,     color: 'blue',  title: 'Video institucional', desc: 'MP4 • 1080p • 90 segundos' },
-  { icon: faUsers,     color: 'amber', title: 'Fotos del equipo',    desc: 'ZIP • Directivos y fundadores' },
+  {
+    icon: faPaw,
+    color: 'green',
+    title: 'Logo EPS PetFeliz',
+    desc: 'SVG • PNG • Versiones en color y blanco',
+    downloadUrl: 'https://drive.google.com/uc?export=download&id=1oo8BbtbU4ywONU_DbrcNzsXNMGdLDKuA',
+    available: true,
+  },
+  {
+    icon: faPalette,
+    color: 'blue',
+    title: 'Paleta de colores',
+    desc: 'PDF • Brand guidelines completas',
+    downloadUrl: 'https://drive.google.com/uc?export=download&id=1jahYZYVIidpy99CX-trGNNX1ade1rMjw',
+    available: true,
+  },
+  {
+    icon: faCamera,
+    color: 'amber',
+    title: 'Fotos de producto',
+    desc: 'ZIP • Alta resolución (300 DPI)',
+    available: false,
+  },
+  {
+    icon: faFileLines,
+    color: 'green',
+    title: 'Ficha informativa',
+    desc: 'PDF • Una página • ES / EN',
+    downloadUrl: 'https://drive.google.com/uc?export=download&id=1XHodCtMA0pcBQDrfo9gl77NXL1ebF12N',
+    available: true,
+  },
+  {
+    icon: faVideo,
+    color: 'blue',
+    title: 'Video institucional',
+    desc: 'MP4 • 1080p • 90 segundos',
+    available: false,
+  },
+  {
+    icon: faUsers,
+    color: 'amber',
+    title: 'Fotos del equipo',
+    desc: 'ZIP • Directivos y fundadores',
+    available: false,
+  },
 ]
 
 const hitos = [
@@ -122,18 +161,41 @@ function KitDePrensa() {
           <h2 className="press-section-title">Recursos <span className="title-accent">descargables</span></h2>
           <div className="press-assets__grid">
             {assets.map(a => (
-              <div className="press-asset-card" key={a.title}>
-                <div className={`press-asset-card__icon press-asset-card__icon--${a.color}`}>
-                  <FontAwesomeIcon icon={a.icon} />
+              a.available ? (
+                <a
+                  href={a.downloadUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="press-asset-card press-asset-card--available"
+                  key={a.title}
+                  title={`Descargar ${a.title}`}
+                >
+                  <div className={`press-asset-card__icon press-asset-card__icon--${a.color}`}>
+                    <FontAwesomeIcon icon={a.icon} />
+                  </div>
+                  <div className="press-asset-card__body">
+                    <div className="press-asset-card__title">{a.title}</div>
+                    <div className="press-asset-card__desc">{a.desc}</div>
+                  </div>
+                  <div className="press-asset-card__dl" aria-label={`Descargar ${a.title}`}>
+                    <FontAwesomeIcon icon={faDownload} />
+                  </div>
+                </a>
+              ) : (
+                <div className="press-asset-card press-asset-card--disabled" key={a.title}>
+                  <div className={`press-asset-card__icon press-asset-card__icon--${a.color}`}>
+                    <FontAwesomeIcon icon={a.icon} />
+                  </div>
+                  <div className="press-asset-card__body">
+                    <div className="press-asset-card__title">{a.title}</div>
+                    <div className="press-asset-card__desc">{a.desc}</div>
+                  </div>
+                  <span className="press-asset-card__badge-soon">
+                    Próximamente
+                  </span>
                 </div>
-                <div className="press-asset-card__body">
-                  <div className="press-asset-card__title">{a.title}</div>
-                  <div className="press-asset-card__desc">{a.desc}</div>
-                </div>
-                <div className="press-asset-card__dl">
-                  <FontAwesomeIcon icon={faDownload} />
-                </div>
-              </div>
+              )
             ))}
           </div>
         </div>

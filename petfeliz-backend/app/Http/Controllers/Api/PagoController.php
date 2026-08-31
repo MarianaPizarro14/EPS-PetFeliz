@@ -104,4 +104,154 @@ class PagoController extends Controller
             'veterinario_nombre' => $cita && $cita->veterinario ? $cita->veterinario->nombre : 'Dra. Laura Martínez',
         ], 200);
     }
+
+    /**
+     * Obtener el estado detallado de la afiliación del cliente, beneficios y lista de cuotas pagadas.
+     */
+    public function afiliacionInfo(Request $request)
+    {
+        $cliente = $request->user()->cliente;
+
+        if (!$cliente) {
+            return response()->json(['message' => 'Cliente no encontrado.'], 404);
+        }
+
+        $mascotas = \App\Models\Mascota::where('id_cliente', $cliente->id_cliente)->get();
+        $pagosAfiliacion = Pago::where('id_cliente', $cliente->id_cliente)
+            ->where(function($q) {
+                $q->where('tipo_cobertura', 'afiliacion')
+                  ->orWhere('tipo_cobertura', 'eps');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($pago) {
+                return [
+                    'id_pago' => $pago->id_pago,
+                    'fecha_pago' => $pago->created_at ? $pago->created_at->format('d/m/Y') : null,
+                    'monto' => (float) $pago->monto,
+                    'metodo_pago' => $pago->metodo_pago,
+                    'estado' => $pago->estado,
+                    'referencia' => $pago->referencia_transaccion,
+                    'concepto' => 'Plan Cobertura Integral EPS PetFeliz',
+                ];
+            });
+
+        $esAfiliado = (bool) ($cliente->es_afiliado ?? false);
+        $codigoAfiliado = 'EPS-PET-' . str_pad($cliente->id_cliente, 5, '0', STR_PAD_LEFT);
+        $fechaAfiliacionFormatted = $cliente->fecha_afiliacion ? $cliente->fecha_afiliacion->format('d/m/Y') : null;
+
+        return response()->json([
+            'cliente' => [
+                'id_cliente' => $cliente->id_cliente,
+                'nombre' => $cliente->nombre,
+                'cedula' => $cliente->cedula,
+                'es_afiliado' => $esAfiliado,
+                'codigo_afiliado' => $codigoAfiliado,
+                'fecha_afiliacion' => $fechaAfiliacionFormatted,
+                'perfil_completo' => $cliente->esPerfilCompleto(),
+                'campos_faltantes' => array_values($cliente->getCamposFaltantes()),
+            ],
+            'plan' => [
+                'nombre' => 'Plan Cobertura Integral EPS PetFeliz',
+                'precio_mensual' => 49900,
+                'beneficios' => [
+                    'Consultas veterinarias generales 100% cubiertas ($0 copago)',
+                    'Atención médica de Urgencias 24/7 en Laureles, Itagüí y Bello',
+                    'Descuentos de afiliado de hasta 40% en cirugías y laboratorio',
+                    'Generación y descarga del Certificado Oficial de Afiliación Digital',
+                ],
+            ],
+            'mascotas' => $mascotas->map(fn($m) => [
+                'id' => $m->id_mascota,
+                'nombre' => $m->nombre,
+                'especie' => $m->especie,
+                'raza' => $m->raza,
+                'sexo' => $m->sexo,
+                'foto' => $m->foto_mascota,
+            ]),
+            'historial_pagos_afiliacion' => $pagosAfiliacion,
+        ], 200);
+    }
+
+    /**
+     * Procesar la afiliación o renovación mensual del plan EPS.
+     */
+    public function pagarAfiliacion(Request $request)
+    {
+        $cliente = $request->user()->cliente;
+
+        if (!$cliente) {
+            return response()->json(['message' => 'Cliente no encontrado.'], 404);
+        }
+
+        $request->validate([
+            'metodo_pago' => 'nullable|string',
+        ]);
+
+        $metodoMap = [
+            'card' => 'Tarjeta de Crédito / Débito',
+            'pse' => 'PSE - Cuenta de Ahorros',
+            'nequi' => 'Nequi / Daviplata',
+        ];
+        $rawMetodo = $request->metodo_pago ?? 'card';
+        $metodoFinal = $metodoMap[$rawMetodo] ?? $rawMetodo;
+
+        $monto = 49900;
+        $referencia = 'TX-AFIL-' . strtoupper(\Illuminate\Support\Str::random(6)) . '-' . time();
+
+        $pago = Pago::create([
+            'id_cita' => null,
+            'id_cliente' => $cliente->id_cliente,
+            'monto' => $monto,
+            'tipo_cobertura' => 'afiliacion',
+            'metodo_pago' => $metodoFinal,
+            'estado' => 'confirmado',
+            'referencia_transaccion' => $referencia,
+        ]);
+
+        // Activar la afiliación en el cliente y fijar la fecha si aún no la tenía
+        $cliente->es_afiliado = true;
+        if (empty($cliente->fecha_afiliacion)) {
+            $cliente->fecha_afiliacion = date('Y-m-d');
+        }
+        $cliente->save();
+
+        // Disparar notificaciones dinámicas (Campanita Web + Correo)
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            '¡Afiliación Activa en EPS PetFeliz!',
+            "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$referencia}). Tu Cobertura Integral EPS se encuentra ACTIVA.",
+            'fa-solid fa-shield-halved',
+            'afiliacion',
+            new \App\Mail\ConfirmacionPagoMail($cliente, [
+                'referencia' => $referencia,
+                'monto' => $monto,
+                'servicio' => 'Suscripción Plan Cobertura Integral EPS PetFeliz',
+                'metodo' => $metodoFinal,
+            ])
+        );
+
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            'Comprobante de Afiliación Disponible',
+            "Se generó tu recibo electrónico de afiliación. Puedes consultar tu Certificado Digital en el menú Afiliación.",
+            'fa-solid fa-file-invoice-dollar',
+            'factura',
+            new \App\Mail\NuevaFacturaMail($cliente, [
+                'id_pago' => $pago->id_pago,
+                'referencia' => $referencia,
+                'monto' => $monto,
+                'servicio' => 'Suscripción Plan Cobertura Integral EPS PetFeliz',
+            ])
+        );
+
+        return response()->json([
+            'message' => '¡Pago de afiliación procesado con éxito! Tu Cobertura Integral EPS está activa.',
+            'pago' => $pago,
+            'cliente' => [
+                'es_afiliado' => true,
+                'fecha_afiliacion' => $cliente->fecha_afiliacion ? $cliente->fecha_afiliacion->format('d/m/Y') : date('d/m/Y'),
+            ],
+        ], 200);
+    }
 }

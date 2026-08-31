@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 const menuItems = [
   { to: '/dashboard-client', aliases: ['/dashboard-cliente'], label: 'Panel', icon: 'fa-solid fa-border-all' },
+  { to: '/dashboard-client/afiliacion', aliases: ['/afiliacion'], label: 'Afiliación', icon: 'fa-solid fa-id-card' },
   { to: '/mis-mascotas', aliases: [], label: 'Mis Mascotas', icon: 'fa-solid fa-paw' },
   { to: '/citas', aliases: [], label: 'Citas', icon: 'fa-regular fa-calendar-days' },
   { to: '/dashboard-client/servicios', aliases: ['/servicios-cliente'], label: 'Servicios', icon: 'fa-solid fa-stethoscope' },

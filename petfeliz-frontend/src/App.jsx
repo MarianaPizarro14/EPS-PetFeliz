@@ -21,6 +21,7 @@ import DashboardClient from './components/pages/DashboardClient'
 import ServiciosCliente from './components/pages/ServiciosCliente'
 import PagosCliente from './components/pages/PagosCliente'
 import DocumentosCliente from './components/pages/DocumentosCliente'
+import AfiliacionCliente from './components/pages/AfiliacionCliente'
 import SoporteCliente from './components/pages/SoporteCliente'
 import MisMascotas from './components/pages/MisMascotas'
 import MisCitas from './components/pages/MisCitas'
@@ -31,8 +32,8 @@ import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadore
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
-  '/dashboard-client', '/dashboard-cliente', '/dashboard-client/servicios', 
-  '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
+  '/dashboard-client', '/dashboard-cliente', '/dashboard-client/afiliacion', '/afiliacion',
+  '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
   '/admin/historias', '/admin/historias-cuidadores'
@@ -80,6 +81,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <DashboardClient />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard-client/afiliacion"
+          element={
+            <ProtectedRoute>
+              <AfiliacionCliente />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/afiliacion"
+          element={
+            <ProtectedRoute>
+              <AfiliacionCliente />
             </ProtectedRoute>
           }
         />

@@ -193,7 +193,7 @@ export default function Servicios() {
                     * El precio varía según el medicamento utilizado.
                   </p>
                 )}
-                <Link to="/contacto" className="svc-card__link">
+                <Link to="/login" className="svc-card__link">
                   Agendar cita <FontAwesomeIcon icon={faArrowRight} />
                 </Link>
               </div>

@@ -313,7 +313,11 @@ class AgendarCitaController extends Controller
         // Registrar Pago en la tabla `pagos`
         $monto = 70000;
         $tipoCobertura = 'particular';
-        if ($servicio) {
+
+        // Verificar si el cliente cuenta con afiliación activa y AL DÍA (sin mora)
+        $afiliadoAlDia = $cliente->es_afiliado && $cliente->estado_afiliacion === 'al_dia';
+
+        if ($servicio && $afiliadoAlDia) {
             if ($servicio->incluido_en_plan) {
                 $monto = 0;
                 $tipoCobertura = 'eps';
@@ -324,6 +328,10 @@ class AgendarCitaController extends Controller
                 $monto = $servicio->precio_base ?? 70000;
                 $tipoCobertura = 'particular';
             }
+        } else {
+            // Usuario no afiliado o en estado de MORA: cobro a precio regular/particular
+            $monto = $servicio ? ($servicio->precio_base ?? 70000) : 70000;
+            $tipoCobertura = 'particular';
         }
 
         $metodoMap = [

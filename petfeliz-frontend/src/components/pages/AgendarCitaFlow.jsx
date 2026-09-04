@@ -39,6 +39,7 @@ function AgendarCitaFlow() {
 
   // Datos base
   const [usuario, setUsuario] = useState({ nombre: '', foto: '' })
+  const [afiliacionInfo, setAfiliacionInfo] = useState(null)
   const [mascotas, setMascotas] = useState([])
   const [servicios, setServicios] = useState([])
   const [veterinarios, setVeterinarios] = useState(veterinariosData)
@@ -120,6 +121,15 @@ function AgendarCitaFlow() {
           if (!cardForm.titular && uData.nombreCompleto) {
             setCardForm((prev) => ({ ...prev, titular: uData.nombreCompleto }))
           }
+        }
+
+        // 1b. Estado de Afiliación (Vencimientos y Mora)
+        const resAfil = await fetch(`${import.meta.env.VITE_API_URL}/cliente/afiliacion`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        })
+        if (resAfil.ok) {
+          const aData = await resAfil.json()
+          setAfiliacionInfo(aData)
         }
 
         // 2. Mascotas
@@ -569,8 +579,23 @@ function AgendarCitaFlow() {
 
   // Formatear precio en COP
   const formatCOP = (val) => {
-    const num = parseInt(val || 70000)
+    const num = parseInt(val ?? 70000)
     return `$${num.toLocaleString('es-CO')}`
+  }
+
+  const clienteData = afiliacionInfo?.cliente
+  const esAfiliado = Boolean(clienteData?.es_afiliado)
+  const isEnMora = clienteData?.estado_mora === 'en_mora'
+  const diasMora = clienteData?.dias_mora || 0
+
+  // Cálculo del precio final según afiliación y mora
+  const getPrecioCitaCalculado = (srv) => {
+    if (!srv) return 70000
+    if (!esAfiliado || isEnMora) {
+      return Number(srv.precio_base) || 70000
+    }
+    if (srv.incluido_en_plan) return 0
+    return Number(srv.precio_afiliado) || Number(srv.precio_base) || 70000
   }
 
   // Formatear minutos y segundos
@@ -778,6 +803,57 @@ function AgendarCitaFlow() {
               </div>
             </div>
           </div>
+
+          {/* ── ALERTA DE MORA EN AFILIACIÓN ── */}
+          {isEnMora && step < 3 && (
+            <div
+              className="dh-modal-alert dh-modal-alert--error"
+              style={{
+                marginBottom: '1.25rem',
+                display: 'flex',
+                justify: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+                background: '#fef2f2',
+                border: '1.5px solid #fca5a5',
+                padding: '1rem 1.25rem',
+                borderRadius: '12px',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#991b1b', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                  <span>¡Tu mensualidad de afiliación está VENCIDA ({diasMora} {diasMora === 1 ? 'día' : 'días'} de mora)!</span>
+                </div>
+                <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.85rem', color: '#7f1d1d' }}>
+                  Al tener la cuota vencida, las citas médicas se cobrarán a <strong>Tarifa Regular / Particular ({formatCOP(selectedService?.precio_base)})</strong>. Puedes ponértela al día ahora mismo en el módulo de Afiliación.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0.55rem 1.1rem',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  boxShadow: '0 4px 10px rgba(220, 38, 38, 0.25)',
+                }}
+                onClick={() => navigate('/afiliacion')}
+              >
+                <i className="fa-solid fa-credit-card"></i>
+                <span>Pagar Afiliación Ahora</span>
+              </button>
+            </div>
+          )}
 
           {/* ── ALERTA DE ERROR GENERAL ── */}
           {errorMsg && (
@@ -1161,9 +1237,17 @@ function AgendarCitaFlow() {
                 <div className="agendar-summary-total-box">
                   <div className="agendar-summary-total-info">
                     <span className="agendar-summary-total-lbl">Total a pagar</span>
-                    <span className="agendar-summary-total-sub">Tarifa oficial EPS PetFeliz</span>
+                    <span className="agendar-summary-total-sub">
+                      {isEnMora
+                        ? 'Tarifa Particular por Mora en Afiliación'
+                        : esAfiliado
+                        ? 'Tarifa Afiliado EPS'
+                        : 'Tarifa Particular (Sin Afiliación)'}
+                    </span>
                   </div>
-                  <strong className="agendar-summary-total-amount">{formatCOP(selectedService?.precio_base)}</strong>
+                  <strong className="agendar-summary-total-amount">
+                    {formatCOP(getPrecioCitaCalculado(selectedService))}
+                  </strong>
                 </div>
 
                 {step === 1 && (

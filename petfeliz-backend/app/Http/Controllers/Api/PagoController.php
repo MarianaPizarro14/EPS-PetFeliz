@@ -136,9 +136,21 @@ class PagoController extends Controller
                 ];
             });
 
+        // Verificar si la afiliación expiró superando el mes de gracia
+        if ($cliente->es_afiliado && $cliente->estado_afiliacion === 'desafiliado') {
+            $cliente->es_afiliado = false;
+            $cliente->save();
+        }
+
         $esAfiliado = (bool) ($cliente->es_afiliado ?? false);
         $codigoAfiliado = 'EPS-PET-' . str_pad($cliente->id_cliente, 5, '0', STR_PAD_LEFT);
         $fechaAfiliacionFormatted = $cliente->fecha_afiliacion ? $cliente->fecha_afiliacion->format('d/m/Y') : null;
+
+        $fechaVencimientoObj = $cliente->fecha_vencimiento ? \Carbon\Carbon::parse($cliente->fecha_vencimiento) : null;
+        $fechaVencimientoFormatted = $fechaVencimientoObj ? $fechaVencimientoObj->format('d/m/Y') : null;
+
+        $fechaLimiteGraciaObj = $cliente->fecha_limite_gracia ? \Carbon\Carbon::parse($cliente->fecha_limite_gracia) : null;
+        $fechaLimiteGraciaFormatted = $fechaLimiteGraciaObj ? $fechaLimiteGraciaObj->format('d/m/Y') : null;
 
         return response()->json([
             'cliente' => [
@@ -146,6 +158,11 @@ class PagoController extends Controller
                 'nombre' => $cliente->nombre,
                 'cedula' => $cliente->cedula,
                 'es_afiliado' => $esAfiliado,
+                'estado_mora' => $cliente->estado_afiliacion,
+                'dias_mora' => $cliente->dias_mora,
+                'fecha_ultimo_pago' => $cliente->fecha_ultimo_pago,
+                'fecha_vencimiento' => $fechaVencimientoFormatted,
+                'fecha_limite_gracia' => $fechaLimiteGraciaFormatted,
                 'codigo_afiliado' => $codigoAfiliado,
                 'fecha_afiliacion' => $fechaAfiliacionFormatted,
                 'perfil_completo' => $cliente->esPerfilCompleto(),

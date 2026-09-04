@@ -21,6 +21,11 @@
   color: #ffffff;
 }
 
+.afil-status-card--mora {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%);
+  color: #ffffff;
+}
+
 .afil-status-card--inactive {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #ffffff;

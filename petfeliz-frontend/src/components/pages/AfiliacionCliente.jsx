@@ -188,55 +188,93 @@ export default function AfiliacionCliente() {
           ) : (
             <>
               {/* ── BANNER DE ESTADO DE AFILIACIÓN ── */}
-              <div className={`afil-status-card ${esAfiliado ? 'afil-status-card--active' : 'afil-status-card--inactive'}`}>
-                <div className="afil-status-header">
-                  <div className="afil-status-badge">
-                    <i className={`fa-solid ${esAfiliado ? 'fa-shield-halved' : 'fa-circle-exclamation'}`}></i>
-                    <span>{esAfiliado ? 'COBERTURA INTEGRAL ACTIVA' : 'SIN COBERTURA ACTIVA (PACIENTE PARTICULAR)'}</span>
-                  </div>
+              {(() => {
+                const isEnMora = cliente?.estado_mora === 'en_mora'
+                const cardClass = !esAfiliado
+                  ? 'afil-status-card--inactive'
+                  : isEnMora
+                  ? 'afil-status-card--mora'
+                  : 'afil-status-card--active'
 
-                  {esAfiliado && (
-                    <div className="afil-code-badge">
-                      <span className="afil-code-label">CÓDIGO AFILIADO</span>
-                      <strong className="afil-code-val">{cliente?.codigo_afiliado}</strong>
+                return (
+                  <div className={`afil-status-card ${cardClass}`}>
+                    <div className="afil-status-header">
+                      <div className="afil-status-badge">
+                        <i className={`fa-solid ${!esAfiliado ? 'fa-circle-exclamation' : isEnMora ? 'fa-triangle-exclamation' : 'fa-shield-halved'}`}></i>
+                        <span>
+                          {!esAfiliado
+                            ? 'SIN COBERTURA ACTIVA (PACIENTE PARTICULAR)'
+                            : isEnMora
+                            ? `MENSUALIDAD VENCIDA (${cliente?.dias_mora || 1} ${cliente?.dias_mora === 1 ? 'DÍA' : 'DÍAS'} DE MORA)`
+                            : 'COBERTURA INTEGRAL ACTIVA'}
+                        </span>
+                      </div>
+
+                      {esAfiliado && (
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                          <div className="afil-code-badge">
+                            <span className="afil-code-label">PRÓXIMO VENCIMIENTO</span>
+                            <strong className="afil-code-val" style={{ fontSize: '0.95rem' }}>
+                              {cliente?.fecha_vencimiento || 'Al día'}
+                            </strong>
+                          </div>
+                          <div className="afil-code-badge">
+                            <span className="afil-code-label">CÓDIGO AFILIADO</span>
+                            <strong className="afil-code-val">{cliente?.codigo_afiliado}</strong>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="afil-status-body">
-                  <div className="afil-status-info">
-                    <h2>{esAfiliado ? 'Tu plan de cobertura está vigente' : '¡Afíliate ahora y protege a tu mascota!'}</h2>
-                    <p>
-                      {esAfiliado
-                        ? `Registrado oficialmente desde el ${cliente?.fecha_afiliacion || 'fecha de alta'}. Todas tus mascotas cuentan con atención preferencial y urgencias 24/7.`
-                        : 'Elige la modalidad que mejor se adapte a tu hogar y obtén consultas veterinarias sin copago, urgencias 24 horas y hasta 40% de descuento en tratamientos desde $39.900/mes.'}
-                    </p>
-                  </div>
+                    <div className="afil-status-body">
+                      <div className="afil-status-info">
+                        <h2>
+                          {!esAfiliado
+                            ? '¡Afíliate ahora y protege a tu mascota!'
+                            : isEnMora
+                            ? 'Tu mensualidad de afiliación está vencida'
+                            : 'Tu plan de cobertura está vigente'}
+                        </h2>
+                        <p>
+                          {!esAfiliado
+                            ? 'Elige la modalidad que mejor se adapte a tu hogar y obtén consultas veterinarias sin copago, urgencias 24 horas y hasta 40% de descuento en tratamientos desde $39.900/mes.'
+                            : isEnMora
+                            ? `Tu fecha de pago fue el ${cliente?.fecha_vencimiento || 'reciente'}. Cuentas con un periodo de gracia hasta el ${cliente?.fecha_limite_gracia} para realizar tu pago antes de perder la cobertura.`
+                            : `Registrado oficialmente desde el ${cliente?.fecha_afiliacion || 'fecha de alta'}. Tu próximo vencimiento es el ${cliente?.fecha_vencimiento}.`}
+                        </p>
+                      </div>
 
-                  <div className="afil-status-actions">
-                    {esAfiliado ? (
-                      <button
-                        type="button"
-                        className="afil-btn afil-btn--secondary"
-                        style={{ background: '#ffffff', color: '#0369a1', fontWeight: 700 }}
-                        onClick={() => handleOpenCheckout('familiar')}
-                      >
-                        <i className="fa-solid fa-arrows-rotate"></i>
-                        <span>Renovar Mensualidad ($69.900)</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="afil-btn afil-btn--pay-now"
-                        onClick={() => handleOpenCheckout('individual')}
-                      >
-                        <i className="fa-solid fa-bolt"></i>
-                        <span>Afiliarme desde $39.900/mes</span>
-                      </button>
-                    )}
+                      <div className="afil-status-actions">
+                        {esAfiliado ? (
+                          <button
+                            type="button"
+                            className="afil-btn afil-btn--secondary"
+                            style={{
+                              background: isEnMora ? '#fef2f2' : '#ffffff',
+                              color: isEnMora ? '#991b1b' : '#0369a1',
+                              fontWeight: 700,
+                              borderColor: isEnMora ? '#fca5a5' : 'transparent',
+                            }}
+                            onClick={() => handleOpenCheckout('familiar')}
+                          >
+                            <i className={`fa-solid ${isEnMora ? 'fa-credit-card' : 'fa-arrows-rotate'}`}></i>
+                            <span>{isEnMora ? 'Pagar / Ponerme al Día ($69.900)' : 'Renovar Mensualidad ($69.900)'}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="afil-btn afil-btn--pay-now"
+                            onClick={() => handleOpenCheckout('individual')}
+                          >
+                            <i className="fa-solid fa-bolt"></i>
+                            <span>Afiliarme desde $39.900/mes</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                )
+              })()}
 
               {/* ── SECCIÓN SI EL USUARIO NO ESTÁ AFILIADO: 2 PLANES DISPONIBLES ── */}
               {!esAfiliado && (

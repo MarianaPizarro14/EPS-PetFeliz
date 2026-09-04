@@ -157,8 +157,10 @@ export default function ServiciosCliente() {
   }
 
   const formatPrecio = (valor) => {
-    if (!valor || isNaN(valor)) return 'Incluido en plan'
-    return `$${Number(valor).toLocaleString('es-CO')}`
+    if (valor === null || valor === undefined || isNaN(valor)) return '$0'
+    const num = Number(valor)
+    if (num === 0) return 'Incluido en plan'
+    return `$${num.toLocaleString('es-CO')}`
   }
 
   return (
@@ -270,9 +272,11 @@ export default function ServiciosCliente() {
                           <div className="servicios-cli-item__meta">
                             <div className="servicios-cli-item__price">
                               <span className="servicios-cli-item__price-val">
-                                {srv.precio_afiliado ? formatPrecio(srv.precio_afiliado) : formatPrecio(srv.precio_base)}
+                                {srv.incluido_en_plan || Number(srv.precio_afiliado) === 0
+                                  ? 'Incluido en plan'
+                                  : formatPrecio(srv.precio_afiliado)}
                               </span>
-                              {srv.precio_base && srv.precio_afiliado && (
+                              {Boolean(srv.precio_base && Number(srv.precio_base) > 0) && (
                                 <span className="servicios-cli-item__price-sub">
                                   Regular: {formatPrecio(srv.precio_base)}
                                 </span>

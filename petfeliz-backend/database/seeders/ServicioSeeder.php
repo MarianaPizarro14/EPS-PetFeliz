@@ -17,8 +17,8 @@ class ServicioSeeder extends Seeder
                 'id_servicio' => 1,
                 'nombre' => 'Consulta General',
                 'descripcion' => 'Evaluación integral del estado de salud de tu mascota con diagnóstico y plan de tratamiento personalizado.',
-                'precio_base' => 70000.00,
-                'precio_afiliado' => 0.00,
+                'precio_base' => 70000.00, // Precio regular/particular sin afiliación (confirmar si $70.000 o $100.000)
+                'precio_afiliado' => 0.00, // Cobertura total EPS ($0 COP)
                 'incluido_en_plan' => true,
                 'activo' => true,
                 'limite_mensual_incluido' => 3,

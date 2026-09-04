@@ -7,8 +7,8 @@ export const serviciosData = [
     id_servicio: 1,
     nombre: 'Consulta General',
     descripcion: 'Evaluación integral del estado de salud de tu mascota con diagnóstico y plan de tratamiento personalizado.',
-    precio_base: 70000,
-    precio_afiliado: 0,
+    precio_base: 70000, // Precio regular/particular sin afiliación (confirmar si $70.000 o $100.000)
+    precio_afiliado: 0, // Incluido en plan EPS ($0 COP)
     incluido_en_plan: true,
     activo: true,
     foto: null,

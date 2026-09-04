@@ -30,13 +30,18 @@ export default function AfiliacionCliente() {
   const [afiliacionData, setAfiliacionData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [downloadingCert, setDownloadingCert] = useState(false)
+
+  // Selección de plan para alta / renovación (default 'individual' = 39900, 'familiar' = 69900)
+  const [selectedPlanType, setSelectedPlanType] = useState('familiar')
 
   // Estado del Modal de Pago / Renovación
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [selectedMetodo, setSelectedMetodo] = useState('card')
   const [submittingPayment, setSubmittingPayment] = useState(false)
   const [paymentSuccessMsg, setPaymentSuccessMsg] = useState('')
+
+  // Estado del Modal de Recibo de Pago
+  const [selectedReceipt, setSelectedReceipt] = useState(null)
 
   const fetchAfiliacion = async () => {
     const token = localStorage.getItem('token')
@@ -78,42 +83,10 @@ export default function AfiliacionCliente() {
     fetchAfiliacion()
   }, [navigate])
 
-  // Descarga del Certificado EPS
-  const handleDownloadCertificado = async () => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-
-    try {
-      setDownloadingCert(true)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/cliente/documentos/carne-eps/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (res.status === 422) {
-        alert('Debes completar el 100% de los datos obligatorios en tu perfil antes de generar el certificado.')
-        return
-      }
-
-      if (!res.ok) {
-        alert('Error al generar el Certificado de Afiliación PDF.')
-        return
-      }
-
-      const blob = await res.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `Certificado_Afiliacion_EPS_${afiliacionData?.cliente?.codigo_afiliado || 'PetFeliz'}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      console.error('Error al descargar carnet:', err)
-      alert('Error de red al intentar descargar el certificado.')
-    } finally {
-      setDownloadingCert(false)
-    }
+  // Abrir Modal de Checkout fijando el plan
+  const handleOpenCheckout = (planType = 'familiar') => {
+    setSelectedPlanType(planType)
+    setShowPaymentModal(true)
   }
 
   // Confirmación del pago de suscripción
@@ -121,6 +94,8 @@ export default function AfiliacionCliente() {
     e.preventDefault()
     const token = localStorage.getItem('token')
     if (!token) return
+
+    const montoCalculado = selectedPlanType === 'individual' ? 39900 : 69900
 
     try {
       setSubmittingPayment(true)
@@ -133,7 +108,11 @@ export default function AfiliacionCliente() {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
-        body: JSON.stringify({ metodo_pago: selectedMetodo }),
+        body: JSON.stringify({
+          metodo_pago: selectedMetodo,
+          monto: montoCalculado,
+          tipo_plan: selectedPlanType,
+        }),
       })
 
       const data = await res.json()
@@ -143,12 +122,26 @@ export default function AfiliacionCliente() {
         return
       }
 
+      const pagoCreado = data.pago
+
       setPaymentSuccessMsg('¡Pago procesado con éxito! Tu Cobertura Integral EPS PetFeliz se encuentra activa.')
       setTimeout(() => {
         setShowPaymentModal(false)
         setPaymentSuccessMsg('')
         fetchAfiliacion()
-      }, 1800)
+
+        // Abrir automáticamente el recibo de pago recién generado
+        if (pagoCreado) {
+          setSelectedReceipt({
+            referencia: pagoCreado.referencia_transaccion,
+            concepto: selectedPlanType === 'individual' ? 'Plan Mascota Individual EPS' : 'Plan Grupo Familiar EPS',
+            fecha_pago: new Date().toLocaleDateString('es-CO'),
+            metodo_pago: selectedMetodo === 'card' ? 'Tarjeta Crédito / Débito' : selectedMetodo === 'pse' ? 'PSE - Cuenta de Ahorros' : 'Nequi / Daviplata',
+            monto: montoCalculado,
+            estado: 'confirmado',
+          })
+        }
+      }, 1600)
     } catch (err) {
       console.error('Error al procesar pago:', err)
       alert('Fallo de red al conectar con la pasarela de pagos.')
@@ -158,10 +151,14 @@ export default function AfiliacionCliente() {
   }
 
   const cliente = afiliacionData?.cliente
-  const plan = afiliacionData?.plan
   const mascotas = afiliacionData?.mascotas || []
   const historialPagos = afiliacionData?.historial_pagos_afiliacion || []
-  const esAfiliado = cliente?.es_afiliado ?? false
+  
+  // Determinación estricta de afiliación mediante el campo booleano `es_afiliado` del modelo Cliente
+  const esAfiliado = Boolean(cliente?.es_afiliado)
+
+  const getMontoPlanActual = () => (selectedPlanType === 'individual' ? 39900 : 69900)
+  const getNombrePlanActual = () => (selectedPlanType === 'individual' ? 'Mascota Individual' : 'Grupo Familiar (Multi-mascota)')
 
   return (
     <div className="dash">
@@ -170,7 +167,7 @@ export default function AfiliacionCliente() {
       <main className="dash-main">
         <DashboardHeader
           title="Gestión de Afiliación EPS"
-          subtitle="Consulta el estado de tu cobertura, beneficios del plan y certificados oficiales"
+          subtitle="Consulta el estado de tu cobertura, beneficios del plan y recibos electrónicos de suscripción"
           usuario={usuario}
           onUserUpdated={setUsuario}
         />
@@ -208,88 +205,139 @@ export default function AfiliacionCliente() {
 
                 <div className="afil-status-body">
                   <div className="afil-status-info">
-                    <h2>{esAfiliado ? 'Tu plan de cobertura está vigente' : 'Afíliate hoy a EPS PetFeliz'}</h2>
+                    <h2>{esAfiliado ? 'Tu plan de cobertura está vigente' : '¡Afíliate ahora y protege a tu mascota!'}</h2>
                     <p>
                       {esAfiliado
                         ? `Registrado oficialmente desde el ${cliente?.fecha_afiliacion || 'fecha de alta'}. Todas tus mascotas cuentan con atención preferencial y urgencias 24/7.`
-                        : 'Accede a consultas veterinarias con $0 copago, urgencias 24 horas y hasta 40% de descuento en exámenes y procedimientos.'}
+                        : 'Elige la modalidad que mejor se adapte a tu hogar y obtén consultas veterinarias sin copago, urgencias 24 horas y hasta 40% de descuento en tratamientos desde $39.900/mes.'}
                     </p>
                   </div>
 
                   <div className="afil-status-actions">
                     {esAfiliado ? (
-                      <>
-                        <button
-                          type="button"
-                          className="afil-btn afil-btn--primary"
-                          onClick={handleDownloadCertificado}
-                          disabled={downloadingCert}
-                        >
-                          <i className="fa-solid fa-file-pdf"></i>
-                          <span>{downloadingCert ? 'Generando PDF...' : 'Descargar Certificado PDF'}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className="afil-btn afil-btn--secondary"
-                          onClick={() => setShowPaymentModal(true)}
-                        >
-                          <i className="fa-solid fa-arrows-rotate"></i>
-                          <span>Renovar Mensualidad ($49.900)</span>
-                        </button>
-                      </>
+                      <button
+                        type="button"
+                        className="afil-btn afil-btn--secondary"
+                        style={{ background: '#ffffff', color: '#0369a1', fontWeight: 700 }}
+                        onClick={() => handleOpenCheckout('familiar')}
+                      >
+                        <i className="fa-solid fa-arrows-rotate"></i>
+                        <span>Renovar Mensualidad ($69.900)</span>
+                      </button>
                     ) : (
                       <button
                         type="button"
                         className="afil-btn afil-btn--pay-now"
-                        onClick={() => setShowPaymentModal(true)}
+                        onClick={() => handleOpenCheckout('individual')}
                       >
                         <i className="fa-solid fa-bolt"></i>
-                        <span>Afiliarme Ahora ($49.900 COP / mes)</span>
+                        <span>Afiliarme desde $39.900/mes</span>
                       </button>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* ── DETALLES DEL PLAN Y BENEFICIOS ── */}
-              <div className="afil-grid">
-                <div className="afil-card">
-                  <div className="afil-card-title">
-                    <i className="fa-solid fa-stethoscope"></i>
-                    <h3>{plan?.nombre || 'Plan Cobertura Integral EPS PetFeliz'}</h3>
+              {/* ── SECCIÓN SI EL USUARIO NO ESTÁ AFILIADO: 2 PLANES DISPONIBLES ── */}
+              {!esAfiliado && (
+                <div style={{ marginBottom: '2.5rem' }}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                      Planes de Cobertura Disponibles
+                    </h3>
+                    <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0.25rem 0 0 0' }}>
+                      Selecciona el tipo de afiliación adecuado para tu familia y dale a tu mascota la mejor salud veterinaria:
+                    </p>
                   </div>
 
-                  <div className="afil-price-tag">
-                    <span className="afil-price-val">${(plan?.precio_mensual || 49900).toLocaleString('es-CO')}</span>
-                    <span className="afil-price-period">/ mes por grupo familiar</span>
-                  </div>
-
-                  <ul className="afil-benefits-list">
-                    {(plan?.beneficios || []).map((b, idx) => (
-                      <li key={idx}>
-                        <i className="fa-solid fa-circle-check"></i>
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {!esAfiliado && (
-                    <div style={{ marginTop: '1.5rem' }}>
+                  <div className="afil-plans-grid">
+                    {/* PLAN 1: MASCOTA INDIVIDUAL */}
+                    <div className="afil-plan-card">
+                      <span className="afil-plan-badge" style={{ background: '#0284c7' }}>
+                        Ideal 1 Mascota
+                      </span>
+                      <div className="afil-plan-header">
+                        <h3>Mascota Individual</h3>
+                        <p>Cobertura médica integral para 1 mascota registrada.</p>
+                      </div>
+                      <div className="afil-plan-price-box">
+                        <span className="afil-plan-amount">$39.900</span>
+                        <span className="afil-plan-period">/ mes</span>
+                      </div>
+                      <ul className="afil-benefits-list" style={{ marginBottom: '1.5rem', flex: 1 }}>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Consultas veterinarias generales $0 copago</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Atención de Urgencias 24/7 preferencial</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Hasta 40% descuento en cirugías y laboratorio</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Generación de Carné Digital Oficial</span>
+                        </li>
+                      </ul>
                       <button
                         type="button"
                         className="afil-btn afil-btn--pay-now"
                         style={{ width: '100%', justifyContent: 'center' }}
-                        onClick={() => setShowPaymentModal(true)}
+                        onClick={() => handleOpenCheckout('individual')}
                       >
-                        <i className="fa-solid fa-credit-card"></i>
-                        <span>Adquirir Plan EPS</span>
+                        <i className="fa-solid fa-cart-shopping"></i>
+                        <span>Afiliar Mascota Individual ($39.900 COP)</span>
                       </button>
                     </div>
-                  )}
-                </div>
 
-                {/* ── PACIENTES BENEFICIARIOS REGISTRADOS ── */}
+                    {/* PLAN 2: GRUPO FAMILIAR */}
+                    <div className="afil-plan-card afil-plan-card--featured">
+                      <span className="afil-plan-badge">Recomendado Familiar</span>
+                      <div className="afil-plan-header">
+                        <h3>Grupo Familiar</h3>
+                        <p>Protección completa para TODAS las mascotas de tu hogar.</p>
+                      </div>
+                      <div className="afil-plan-price-box">
+                        <span className="afil-plan-amount">$69.900</span>
+                        <span className="afil-plan-period">/ mes por grupo</span>
+                      </div>
+                      <ul className="afil-benefits-list" style={{ marginBottom: '1.5rem', flex: 1 }}>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Cobertura 100% para todas tus mascotas registradas</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Atención de urgencias 24/7 ilimitada para el hogar</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Descuentos máximos de afiliado en todos los servicios</span>
+                        </li>
+                        <li>
+                          <i className="fa-solid fa-circle-check"></i>
+                          <span>Carnés digitales individuales para cada mascota</span>
+                        </li>
+                      </ul>
+                      <button
+                        type="button"
+                        className="afil-btn afil-btn--pay-now"
+                        style={{ width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #0284c7 0%, #006780 100%)' }}
+                        onClick={() => handleOpenCheckout('familiar')}
+                      >
+                        <i className="fa-solid fa-crown"></i>
+                        <span>Afiliar Grupo Familiar ($69.900 COP)</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── DETALLES DE PACIENTES REGISTRADOS ── */}
+              <div className="afil-grid">
                 <div className="afil-card">
                   <div className="afil-card-title">
                     <i className="fa-solid fa-paw"></i>
@@ -333,14 +381,42 @@ export default function AfiliacionCliente() {
                     </div>
                   )}
                 </div>
+
+                <div className="afil-card">
+                  <div className="afil-card-title">
+                    <i className="fa-solid fa-notes-medical"></i>
+                    <h3>Resumen de Cobertura de tu Plan</h3>
+                  </div>
+
+                  <ul className="afil-benefits-list" style={{ marginTop: '1rem' }}>
+                    <li>
+                      <i className="fa-solid fa-circle-check"></i>
+                      <span>Consultas veterinarias generales $0 copago</span>
+                    </li>
+                    <li>
+                      <i className="fa-solid fa-circle-check"></i>
+                      <span>Atención de urgencias 24 horas disponible</span>
+                    </li>
+                    <li>
+                      <i className="fa-solid fa-circle-check"></i>
+                      <span>Descuentos preferenciales de afiliado en tratamientos</span>
+                    </li>
+                    <li>
+                      <i className="fa-solid fa-circle-check"></i>
+                      <span>Acceso directo a programación de citas online</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               {/* ── HISTORIAL DE PAGOS DE AFILIACIÓN ── */}
               {esAfiliado && (
                 <div className="afil-card" style={{ marginTop: '1.5rem' }}>
-                  <div className="afil-card-title">
-                    <i className="fa-solid fa-receipt"></i>
-                    <h3>Historial de Cuotas de Afiliación</h3>
+                  <div className="afil-card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <i className="fa-solid fa-receipt"></i>
+                      <h3>Historial de Cuotas de Afiliación</h3>
+                    </div>
                   </div>
 
                   {historialPagos.length === 0 ? (
@@ -358,6 +434,7 @@ export default function AfiliacionCliente() {
                             <th>Método Pago</th>
                             <th>Monto</th>
                             <th>Estado</th>
+                            <th>Comprobante</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -374,6 +451,17 @@ export default function AfiliacionCliente() {
                                   <span>{p.estado === 'confirmado' ? 'Confirmado' : p.estado}</span>
                                 </span>
                               </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="afil-btn afil-btn--secondary"
+                                  style={{ padding: '0.3rem 0.65rem', fontSize: '0.78rem' }}
+                                  onClick={() => setSelectedReceipt(p)}
+                                >
+                                  <i className="fa-solid fa-receipt"></i>
+                                  <span>Ver Recibo</span>
+                                </button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -387,12 +475,12 @@ export default function AfiliacionCliente() {
         </div>
       </main>
 
-      {/* ── MODAL PASARELA DE PAGO REUTILIZABLE ── */}
+      {/* ── MODAL PASARELA DE PAGO / CHECKOUT ── */}
       {showPaymentModal && (
         <div className="pagos-modal-overlay">
           <div className="pagos-modal-card" style={{ maxWidth: '520px' }}>
             <div className="pagos-modal-header">
-              <h3>Checkout - Plan Cobertura Integral EPS</h3>
+              <h3>Checkout - Plan EPS PetFeliz</h3>
               <button
                 type="button"
                 className="pagos-modal-close"
@@ -413,12 +501,12 @@ export default function AfiliacionCliente() {
                   <>
                     <div className="afil-checkout-summary">
                       <div className="afil-checkout-row">
-                        <span>Concepto:</span>
-                        <strong>Suscripción Mensual Plan EPS PetFeliz</strong>
+                        <span>Modalidad Seleccionada:</span>
+                        <strong>{getNombrePlanActual()}</strong>
                       </div>
                       <div className="afil-checkout-row">
                         <span>Monto a Cancelar:</span>
-                        <strong className="afil-checkout-price">$49.900 COP</strong>
+                        <strong className="afil-checkout-price">${getMontoPlanActual().toLocaleString('es-CO')} COP</strong>
                       </div>
                     </div>
 
@@ -479,7 +567,7 @@ export default function AfiliacionCliente() {
                       ) : (
                         <>
                           <i className="fa-solid fa-lock"></i>
-                          <span>Pagar $49.900 COP</span>
+                          <span>Pagar ${getMontoPlanActual().toLocaleString('es-CO')} COP</span>
                         </>
                       )}
                     </button>
@@ -496,6 +584,76 @@ export default function AfiliacionCliente() {
                 )}
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL RECIBO DE PAGO COMPROBANTE DE AFILIACIÓN ── */}
+      {selectedReceipt && (
+        <div className="pagos-modal-overlay">
+          <div className="afil-receipt-card">
+            <div className="afil-receipt-header">
+              <div className="afil-receipt-logo">
+                <i className="fa-solid fa-shield-cat"></i>
+                <span>EPS PetFeliz</span>
+              </div>
+              <span className="afil-receipt-title">Comprobante Oficial de Transacción EPS</span>
+            </div>
+
+            <div className="afil-receipt-grid">
+              <div className="afil-receipt-field">
+                <label>Referencia:</label>
+                <span>{selectedReceipt.referencia}</span>
+              </div>
+              <div className="afil-receipt-field">
+                <label>Fecha de Emisión:</label>
+                <span>{selectedReceipt.fecha_pago || new Date().toLocaleDateString('es-CO')}</span>
+              </div>
+              <div className="afil-receipt-field">
+                <label>Afiliado / Titular:</label>
+                <span>{cliente?.nombre || usuario?.name || 'Cliente EPS'}</span>
+              </div>
+              <div className="afil-receipt-field">
+                <label>Código Afiliado:</label>
+                <span>{cliente?.codigo_afiliado || 'EPS-PET-0001'}</span>
+              </div>
+              <div className="afil-receipt-field">
+                <label>Concepto:</label>
+                <span>{selectedReceipt.concepto || 'Suscripción Mensual Plan EPS'}</span>
+              </div>
+              <div className="afil-receipt-field">
+                <label>Método de Pago:</label>
+                <span>{selectedReceipt.metodo_pago || 'Tarjeta / PSE'}</span>
+              </div>
+            </div>
+
+            <div className="afil-receipt-total-box">
+              <div>
+                <span style={{ fontSize: '0.78rem', color: '#0369a1', fontWeight: 600, display: 'block' }}>TOTAL CANCELADO:</span>
+                <span style={{ fontSize: '0.78rem', color: '#15803d', fontWeight: 600 }}>Estado: Confirmado</span>
+              </div>
+              <span className="afil-receipt-total-val">
+                ${(Number(selectedReceipt.monto) || 69900).toLocaleString('es-CO')} COP
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="afil-btn afil-btn--primary"
+                onClick={() => window.print()}
+              >
+                <i className="fa-solid fa-print"></i>
+                <span>Imprimir / Guardar Recibo</span>
+              </button>
+              <button
+                type="button"
+                className="afil-btn afil-btn--secondary"
+                onClick={() => setSelectedReceipt(null)}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

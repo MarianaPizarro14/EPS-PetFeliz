@@ -13,18 +13,18 @@ import CtaBanner from "../CtaBanner";
 
 // ── DATOS FIJOS ──
 const planAfiliado = {
-  precio: "Desde $80.000",
-  consultas: "Gratis",
-  medicamentos: "Precio con descuento",
-  hospitalizacion: "Gratis",
-  nota: "  3 consultas/mes incluidas sin costo",
+  precio: "Desde $39.900",
+  consultas: "Gratis ($0 copago)",
+  medicamentos: "Hasta 40% descuento",
+  hospitalizacion: "Atención 24/7 preferencial",
+  nota: "  Mascota Individual: $39.900/mes · Grupo Familiar: $69.900/mes",
 };
 
 const planSinAfiliacion = {
   precio: "$70.000",
   consulta: "$70.000",
-  medicamentos: "Por definir",
-  hospitalizacion: "Por definir",
+  medicamentos: "Precio regular",
+  hospitalizacion: "Tarifa particular",
 };
 
 const features = [

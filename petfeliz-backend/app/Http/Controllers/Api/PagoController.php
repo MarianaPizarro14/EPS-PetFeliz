@@ -153,12 +153,34 @@ class PagoController extends Controller
             ],
             'plan' => [
                 'nombre' => 'Plan Cobertura Integral EPS PetFeliz',
-                'precio_mensual' => 49900,
+                'precio_mensual' => 69900,
                 'beneficios' => [
                     'Consultas veterinarias generales 100% cubiertas ($0 copago)',
                     'Atención médica de Urgencias 24/7 en Laureles, Itagüí y Bello',
                     'Descuentos de afiliado de hasta 40% en cirugías y laboratorio',
                     'Generación y descarga del Certificado Oficial de Afiliación Digital',
+                ],
+            ],
+            'planes' => [
+                'individual' => [
+                    'nombre' => 'Mascota Individual',
+                    'precio_mensual' => 39900,
+                    'descripcion' => 'Cobertura completa para 1 mascota registrada.',
+                    'beneficios' => [
+                        'Consultas veterinarias generales con $0 copago',
+                        'Atención de urgencias 24 horas',
+                        'Descuentos preferenciales en exámenes y cirugía',
+                    ],
+                ],
+                'familiar' => [
+                    'nombre' => 'Grupo Familiar',
+                    'precio_mensual' => 69900,
+                    'descripcion' => 'Protección integral para todas las mascotas de tu hogar.',
+                    'beneficios' => [
+                        'Cobertura 100% para todas tus mascotas registradas',
+                        'Atención de urgencias 24/7 sin límite de pacientes',
+                        'Descuentos máximos de afiliado en todos los servicios',
+                    ],
                 ],
             ],
             'mascotas' => $mascotas->map(fn($m) => [
@@ -186,6 +208,8 @@ class PagoController extends Controller
 
         $request->validate([
             'metodo_pago' => 'nullable|string',
+            'monto' => 'nullable|numeric',
+            'tipo_plan' => 'nullable|string',
         ]);
 
         $metodoMap = [
@@ -196,7 +220,16 @@ class PagoController extends Controller
         $rawMetodo = $request->metodo_pago ?? 'card';
         $metodoFinal = $metodoMap[$rawMetodo] ?? $rawMetodo;
 
-        $monto = 49900;
+        // Determinar monto: Individual ($39.900) o Familiar ($69.900)
+        $monto = 69900;
+        if ($request->monto && (int)$request->monto === 39900) {
+            $monto = 39900;
+        } elseif ($request->tipo_plan === 'individual') {
+            $monto = 39900;
+        } elseif ($request->monto && (int)$request->monto === 69900) {
+            $monto = 69900;
+        }
+
         $referencia = 'TX-AFIL-' . strtoupper(\Illuminate\Support\Str::random(6)) . '-' . time();
 
         $pago = Pago::create([
@@ -216,17 +249,19 @@ class PagoController extends Controller
         }
         $cliente->save();
 
+        $nombrePlan = $monto === 39900 ? 'Mascota Individual' : 'Grupo Familiar';
+
         // Disparar notificaciones dinámicas (Campanita Web + Correo)
         \App\Services\NotificationService::notificar(
             $cliente,
             '¡Afiliación Activa en EPS PetFeliz!',
-            "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$referencia}). Tu Cobertura Integral EPS se encuentra ACTIVA.",
+            "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$referencia}) para el plan {$nombrePlan}. Tu Cobertura Integral EPS se encuentra ACTIVA.",
             'fa-solid fa-shield-halved',
             'afiliacion',
             new \App\Mail\ConfirmacionPagoMail($cliente, [
                 'referencia' => $referencia,
                 'monto' => $monto,
-                'servicio' => 'Suscripción Plan Cobertura Integral EPS PetFeliz',
+                'servicio' => "Suscripción Plan EPS PetFeliz ({$nombrePlan})",
                 'metodo' => $metodoFinal,
             ])
         );
@@ -241,7 +276,7 @@ class PagoController extends Controller
                 'id_pago' => $pago->id_pago,
                 'referencia' => $referencia,
                 'monto' => $monto,
-                'servicio' => 'Suscripción Plan Cobertura Integral EPS PetFeliz',
+                'servicio' => "Suscripción Plan EPS PetFeliz ({$nombrePlan})",
             ])
         );
 

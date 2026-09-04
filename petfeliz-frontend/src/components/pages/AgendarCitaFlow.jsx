@@ -5,6 +5,7 @@ import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import { RAZAS_POR_ESPECIE } from '../../data/razasPorEspecie'
+import { serviciosData } from '../../data/serviciosData'
 import { veterinariosData, normalizarEspecialidad } from '../../data/veterinariosData'
 import './AgendarCitaFlow.css'
 import './DashboardClient.css'
@@ -136,9 +137,25 @@ function AgendarCitaFlow() {
           headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
         })
         if (resSrv.ok) {
-          const sData = await resSrv.json()
-          setServicios(sData)
-          if (sData.length > 0) setSelectedService(sData[0])
+          const sDataRaw = await resSrv.json()
+          const sData = Array.isArray(sDataRaw)
+            ? sDataRaw
+            : Array.isArray(sDataRaw?.data)
+            ? sDataRaw.data
+            : Array.isArray(sDataRaw?.servicios)
+            ? sDataRaw.servicios
+            : []
+
+          if (sData.length > 0) {
+            setServicios(sData)
+            setSelectedService(sData[0])
+          } else {
+            setServicios(serviciosData)
+            setSelectedService(serviciosData[0])
+          }
+        } else {
+          setServicios(serviciosData)
+          setSelectedService(serviciosData[0])
         }
 
         // 4. Veterinarios

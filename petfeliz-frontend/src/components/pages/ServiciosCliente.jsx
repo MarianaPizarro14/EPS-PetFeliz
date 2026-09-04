@@ -50,13 +50,14 @@ const getServiceIcon = (nombre = '') => {
 }
 
 import { useUser } from '../../context/UserContext'
+import { serviciosData } from '../../data/serviciosData'
 
 export default function ServiciosCliente() {
   const navigate = useNavigate()
   const { usuario, setUsuario } = useUser()
 
   const [activeTab, setActiveTab] = useState('catalogo') // 'catalogo' | 'historial'
-  const [servicios, setServicios] = useState([])
+  const [servicios, setServicios] = useState(serviciosData)
   const [historial, setHistorial] = useState([])
   const [mascotas, setMascotas] = useState([])
   const [selectedMascotaFilter, setSelectedMascotaFilter] = useState('todas')
@@ -77,32 +78,67 @@ export default function ServiciosCliente() {
         setError('')
 
         const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' }
-        const [resUser, resSrv, resMasc, resHist] = await Promise.all([
+        
+        // Usamos Promise.allSettled para asegurar que si un endpoint falla, no rompa los demás
+        const results = await Promise.allSettled([
           fetch(`${import.meta.env.VITE_API_URL}/me`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/servicios`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/mascotas`, { headers }),
           fetch(`${import.meta.env.VITE_API_URL}/cliente/historial-servicios`, { headers }),
         ])
 
-        if (resUser.ok) {
-          const uData = await resUser.json()
+        const [resUser, resSrv, resMasc, resHist] = results
+
+        // 1. Usuario
+        if (resUser.status === 'fulfilled' && resUser.value.ok) {
+          const uData = await resUser.value.json()
           setUsuario(uData.usuario || uData)
+        } else if (resUser.status === 'rejected') {
+          console.error('[ServiciosCliente] Error al consultar /me:', resUser.reason)
         }
-        if (resSrv.ok) {
-          const sData = await resSrv.json()
-          setServicios(Array.isArray(sData) ? sData : [])
+
+        // 2. Servicios (Catálogo)
+        if (resSrv.status === 'fulfilled' && resSrv.value.ok) {
+          const sData = await resSrv.value.json()
+          console.log('[ServiciosCliente] Respuesta de /servicios API:', sData)
+          const listaExtraida = Array.isArray(sData)
+            ? sData
+            : Array.isArray(sData?.data)
+            ? sData.data
+            : Array.isArray(sData?.servicios)
+            ? sData.servicios
+            : []
+          
+          if (listaExtraida.length > 0) {
+            setServicios(listaExtraida)
+          } else {
+            console.warn('[ServiciosCliente] La API /servicios retornó un arreglo vacío. Se usará el catálogo por defecto.')
+            setServicios(serviciosData)
+          }
+        } else {
+          console.warn('[ServiciosCliente] Falló /servicios o no retornó HTTP 200. Usando catálogo por defecto.')
+          setServicios(serviciosData)
         }
-        if (resMasc.ok) {
-          const mData = await resMasc.json()
-          setMascotas(Array.isArray(mData) ? mData : [])
+
+        // 3. Mascotas
+        if (resMasc.status === 'fulfilled' && resMasc.value.ok) {
+          const mData = await resMasc.value.json()
+          setMascotas(Array.isArray(mData) ? mData : (mData?.data || []))
+        } else if (resMasc.status === 'rejected') {
+          console.error('[ServiciosCliente] Error al consultar /mascotas:', resMasc.reason)
         }
-        if (resHist.ok) {
-          const hData = await resHist.json()
-          setHistorial(Array.isArray(hData) ? hData : [])
+
+        // 4. Historial de Servicios
+        if (resHist.status === 'fulfilled' && resHist.value.ok) {
+          const hData = await resHist.value.json()
+          setHistorial(Array.isArray(hData) ? hData : (hData?.data || []))
+        } else if (resHist.status === 'rejected') {
+          console.error('[ServiciosCliente] Error al consultar /cliente/historial-servicios:', resHist.reason)
         }
       } catch (err) {
-        console.error('Error al cargar datos de servicios:', err)
-        setError('Ocurrió un error al cargar la información de servicios.')
+        console.error('[ServiciosCliente] Error general al cargar datos de servicios:', err)
+        setError('Ocurrió un inconveniente al sincronizar los servicios. Se están mostrando los datos del catálogo activo.')
+        setServicios(serviciosData)
       } finally {
         setLoading(false)
       }

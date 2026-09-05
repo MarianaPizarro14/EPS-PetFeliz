@@ -12,22 +12,22 @@
   border-radius: 16px;
   padding: 1.75rem 2rem;
   margin-bottom: 1.75rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 77, 64, 0.08);
   transition: all 0.25s ease;
 }
 
 .afil-status-card--active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 60%, #006780 100%);
+  background: linear-gradient(135deg, #004D40 0%, #00695C 100%);
   color: #ffffff;
 }
 
 .afil-status-card--mora {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%);
+  background: linear-gradient(135deg, #991B1B 0%, #B91C1C 100%);
   color: #ffffff;
 }
 
 .afil-status-card--inactive {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
   color: #ffffff;
 }
 
@@ -44,14 +44,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(8px);
   padding: 0.45rem 1rem;
   border-radius: 9999px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .afil-code-badge {
@@ -65,17 +65,18 @@
 }
 
 .afil-code-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  color: #bae6fd;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .afil-code-val {
   font-family: 'Sora', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: normal;
 }
 
 .afil-status-body {
@@ -98,7 +99,7 @@
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: #e2e8f0;
+  color: rgba(255, 255, 255, 0.9);
   max-width: 650px;
 }
 
@@ -131,7 +132,7 @@
 
 .afil-btn--primary {
   background: #ffffff;
-  color: #166534;
+  color: #004D40;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -151,17 +152,17 @@
 }
 
 .afil-btn--pay-now {
-  background: #16a34a;
+  background: #004D40;
   color: #ffffff;
   font-size: 0.95rem;
   padding: 0.85rem 1.5rem;
-  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 77, 64, 0.25);
 }
 
 .afil-btn--pay-now:hover:not(:disabled) {
-  background: #15803d;
+  background: #00695C;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 77, 64, 0.35);
 }
 
 /* ── GRID PRINCIPAL ── */
@@ -182,14 +183,14 @@
   border-radius: 16px;
   padding: 1.75rem;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px rgba(0, 77, 64, 0.04);
 }
 
 .afil-card-title {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #166534;
+  color: #004D40;
   margin-bottom: 1.25rem;
 }
 
@@ -247,7 +248,7 @@
 }
 
 .afil-benefits-list li i {
-  color: #16a34a;
+  color: #004D40;
   margin-top: 2px;
   font-size: 1rem;
 }
@@ -297,8 +298,8 @@
 .afil-pet-tag {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #166534;
-  background: #dcfce7;
+  color: #004D40;
+  background: #E6F4F1;
   padding: 0.25rem 0.65rem;
   border-radius: 9999px;
 }
@@ -336,8 +337,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #15803d;
-  background: #f0fdf4;
+  color: #004D40;
+  background: #E6F4F1;
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -366,7 +367,7 @@
   font-family: 'Sora', sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #166534;
+  color: #004D40;
 }
 
 .afil-field-label {
@@ -403,9 +404,9 @@
 }
 
 .afil-method-option--selected {
-  border-color: #166534;
-  background: #f0fdf4;
-  color: #166534;
+  border-color: #004D40;
+  background: #E6F4F1;
+  color: #004D40;
 }
 
 .afil-method-option i {
@@ -434,27 +435,27 @@
 
 .afil-plan-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  border-color: #0284c7;
+  box-shadow: 0 12px 30px rgba(0, 77, 64, 0.1);
+  border-color: #004D40;
 }
 
 .afil-plan-card--featured {
-  border-color: #0284c7;
-  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+  border-color: #004D40;
+  background: #F4F7F5;
 }
 
 .afil-plan-badge {
   position: absolute;
   top: -12px;
   right: 20px;
-  background: linear-gradient(135deg, #0284c7, #006780);
+  background: #D97706;
   color: #ffffff;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.3rem 0.8rem;
+  padding: 0.3rem 0.88rem;
   border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .afil-plan-header h3 {
@@ -484,7 +485,7 @@
   font-family: 'Sora', sans-serif;
   font-size: 2.1rem;
   font-weight: 700;
-  color: #0284c7;
+  color: #004D40;
 }
 
 .afil-plan-period {
@@ -515,7 +516,7 @@
   font-family: 'Sora', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #006780;
+  color: #004D40;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -557,8 +558,8 @@
 }
 
 .afil-receipt-total-box {
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: #E6F4F1;
+  border: 1px solid #B2DFDB;
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -571,5 +572,5 @@
   font-family: 'Sora', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #0284c7;
+  color: #004D40;
 }

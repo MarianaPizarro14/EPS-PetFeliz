@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #E2E8F0;
   padding-bottom: 1rem;
   margin-bottom: 1.75rem;
 }
@@ -36,15 +36,15 @@
 }
 
 .servicios-cli-tab:hover {
-  color: var(--dark, #0f172a);
-  background-color: var(--gray-back, #f8fafc);
+  color: #004D40;
+  background-color: #F4F7F5;
 }
 
 .servicios-cli-tab--active {
-  background: #f0fdf4;
-  color: #166534;
+  background: #E6F4F1;
+  color: #004D40;
   font-weight: 600;
-  border-color: #bbf7d0;
+  border-color: #004D40;
 }
 
 /* ── CATÁLOGO GRID & CARDS ── */
@@ -55,21 +55,21 @@
 }
 
 .servicios-cli-item {
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E8F0;
   border-radius: var(--radius-lg, 16px);
   padding: 1.5rem;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 77, 64, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .servicios-cli-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 77, 64, 0.08);
+  border-color: #004D40;
 }
 
 .servicios-cli-item__content {
@@ -86,35 +86,35 @@
 }
 
 .servicios-cli-item__icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
 .servicios-cli-item__icon--green {
-  background: #f0fdf4;
-  color: #166534;
+  background: #E6F4F1;
+  color: #004D40;
 }
 
 .servicios-cli-item__icon--amber {
-  background: #fef3c7;
-  color: #b45309;
+  background: #FEF3C7;
+  color: #D97706;
 }
 
 .servicios-cli-item__icon--blue {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #F4F7F5;
+  color: #004D40;
 }
 
 .servicios-cli-item__img {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -122,24 +122,24 @@
 .servicios-cli-item__badge {
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 20px;
 }
 
 .servicios-cli-item__badge--eps {
-  background: #dcfce7;
-  color: #15803d;
+  background: #E6F4F1;
+  color: #004D40;
 }
 
 .servicios-cli-item__badge--copago {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #FEF3C7;
+  color: #D97706;
 }
 
 .servicios-cli-item__title {
   font-family: 'Sora', sans-serif;
   font-size: 1.12rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dark, #0f172a);
   margin-top: 0.25rem;
   line-height: 1.35;
@@ -158,7 +158,7 @@
   flex-direction: column;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1.5px dashed #e2e8f0;
+  border-top: 1px dashed #E2E8F0;
 }
 
 .servicios-cli-item__meta {
@@ -176,12 +176,12 @@
   font-family: 'Sora', sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--dark, #0f172a);
+  color: #004D40;
 }
 
 .servicios-cli-item__price-sub {
   font-size: 0.75rem;
-  color: #0d9488;
+  color: #D97706;
   font-weight: 600;
 }
 
@@ -197,7 +197,7 @@
 .servicios-cli-btn-agendar {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: var(--green-dark, #166534);
+  background: #004D40;
   color: #ffffff;
   border: none;
   border-radius: 12px;
@@ -213,7 +213,7 @@
 }
 
 .servicios-cli-btn-agendar:hover {
-  background: #14532d;
+  background: #00695C;
   transform: translateY(-1px);
 }
 

@@ -203,23 +203,23 @@ export default function AfiliacionCliente() {
                         <i className={`fa-solid ${!esAfiliado ? 'fa-circle-exclamation' : isEnMora ? 'fa-triangle-exclamation' : 'fa-shield-halved'}`}></i>
                         <span>
                           {!esAfiliado
-                            ? 'SIN COBERTURA ACTIVA (PACIENTE PARTICULAR)'
+                            ? 'Sin cobertura activa (Paciente Particular)'
                             : isEnMora
-                            ? `MENSUALIDAD VENCIDA (${cliente?.dias_mora || 1} ${cliente?.dias_mora === 1 ? 'DÍA' : 'DÍAS'} DE MORA)`
-                            : 'COBERTURA INTEGRAL ACTIVA'}
+                            ? `Mensualidad vencida (${cliente?.dias_mora || 1} ${cliente?.dias_mora === 1 ? 'día' : 'días'} de mora)`
+                            : 'Cobertura activa'}
                         </span>
                       </div>
 
                       {esAfiliado && (
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                           <div className="afil-code-badge">
-                            <span className="afil-code-label">PRÓXIMO VENCIMIENTO</span>
+                            <span className="afil-code-label">Próximo vencimiento</span>
                             <strong className="afil-code-val" style={{ fontSize: '0.95rem' }}>
                               {cliente?.fecha_vencimiento || 'Al día'}
                             </strong>
                           </div>
                           <div className="afil-code-badge">
-                            <span className="afil-code-label">CÓDIGO AFILIADO</span>
+                            <span className="afil-code-label">Código afiliado</span>
                             <strong className="afil-code-val">{cliente?.codigo_afiliado}</strong>
                           </div>
                         </div>

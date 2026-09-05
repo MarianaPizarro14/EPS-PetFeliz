@@ -4,22 +4,22 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #059669;
+  background: #004D40;
   color: var(--white);
   border: none;
   padding: 0.65rem 1.35rem;
   border-radius: 30px;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 77, 64, 0.22);
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .btn-add-pet:hover {
-  background: #047857;
+  background: #00695C;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.38);
+  box-shadow: 0 6px 18px rgba(0, 77, 64, 0.32);
 }
 
 .btn-add-pet--lg {
@@ -27,7 +27,6 @@
   font-size: 0.92rem;
   margin-top: 1rem;
 }
-
 
 /* ── PETS GRID ── */
 
@@ -50,9 +49,9 @@
 .pets-empty__icon {
   width: 70px;
   height: 70px;
-  border-radius: 50%;
-  background: rgba(46, 204, 113, 0.12);
-  color: var(--green-dark);
+  border-radius: 18px;
+  background: #E6F4F1;
+  color: #004D40;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,10 +62,10 @@
   font-size: 2.1rem;
 }
 
-
 .pets-empty h3 {
   font-family: var(--font-head);
   font-size: 1.3rem;
+  font-weight: 700;
   color: var(--dark);
 }
 
@@ -86,17 +85,18 @@
   background: var(--white);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
-  box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 77, 64, 0.04);
+  border: 1px solid #E2E8F0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .pet-card-full:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 77, 64, 0.08);
+  border-color: #004D40;
 }
 
 .pet-card-full__top {
@@ -113,29 +113,28 @@
 .pet-card-full__photo-wrap img {
   width: 68px;
   height: 68px;
-  border-radius: 50%;
+  border-radius: 18px;
   object-fit: cover;
-  border: 2px solid var(--white);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .pet-card-full__status {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 22px;
-  height: 22px;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--blue-accent, #2563EB);
+  background: #004D40;
   color: var(--white);
   border: 2px solid var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 700;
 }
-
 
 .pet-card-full__actions {
   display: flex;
@@ -143,7 +142,7 @@
 }
 
 .btn-icon-pet {
-  background: var(--gray-back);
+  background: #F4F7F5;
   border: none;
   width: 32px;
   height: 32px;
@@ -157,8 +156,8 @@
 }
 
 .btn-icon-pet--edit:hover {
-  background: rgba(46, 204, 113, 0.15);
-  color: var(--green-dark);
+  background: #E6F4F1;
+  color: #004D40;
 }
 
 .btn-icon-pet--delete:hover {
@@ -169,10 +168,9 @@
 .pet-card-full__name {
   font-family: var(--font-head);
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dark);
 }
-
 
 .pet-card-full__breed {
   font-size: 0.82rem;
@@ -184,7 +182,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0.5rem;
-  background: var(--gray-back);
+  background: #F4F7F5;
   padding: 0.75rem;
   border-radius: var(--radius-sm);
 }
@@ -196,15 +194,15 @@
 
 .pet-detail-tag__label {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   color: var(--gray-soft);
-  letter-spacing: 0.03em;
+  letter-spacing: normal;
 }
 
 .pet-detail-tag__val {
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--dark);
   margin-top: 0.15rem;
 }
@@ -281,8 +279,8 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: #E6F4F1;
+  border: 1px solid #B2DFDB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -363,8 +361,8 @@
 .pet-avatar-dropzone {
   width: 86px;
   height: 86px;
-  border-radius: 50%;
-  border: 2px dashed #a7f3d0;
+  border-radius: 18px;
+  border: 2px dashed #B2DFDB;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -377,8 +375,8 @@
 
 .pet-avatar-dropzone:hover,
 .pet-avatar-dropzone--dragging {
-  border-color: #059669;
-  background: #ecfdf5;
+  border-color: #004D40;
+  background: #E6F4F1;
   transform: scale(1.03);
 }
 
@@ -386,8 +384,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #ecfdf5;
-  color: #059669;
+  background: #E6F4F1;
+  color: #004D40;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,14 +395,14 @@
   font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 600;
-  color: #059669;
+  color: #004D40;
 }
 
 .pet-avatar-preview {
   position: relative;
   width: 86px;
   height: 86px;
-  border-radius: 50%;
+  border-radius: 18px;
   border: 3px solid #ffffff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
@@ -412,14 +410,14 @@
 .pet-avatar-preview img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 18px;
   object-fit: cover;
 }
 
 .btn-remove-avatar {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -4px;
+  right: -4px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -440,12 +438,12 @@
 
 .btn-change-avatar-badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -4px;
+  right: -4px;
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #059669;
+  background: #004D40;
   color: var(--white);
   border: 2px solid var(--white);
   cursor: pointer;
@@ -457,7 +455,7 @@
 }
 
 .btn-change-avatar-badge:hover {
-  background: #047857;
+  background: #00695C;
   transform: scale(1.1);
 }
 
@@ -499,9 +497,9 @@
   font-family: var(--font-body);
   font-size: 0.68rem;
   font-weight: 600;
-  color: #047857;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  color: #004D40;
+  background: #E6F4F1;
+  border: 1px solid #B2DFDB;
   padding: 0.15rem 0.5rem;
   border-radius: 12px;
 }
@@ -577,8 +575,8 @@
 
 .pet-form__field input:focus,
 .pet-form__field select:focus {
-  border-color: #059669;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  border-color: #004D40;
+  box-shadow: 0 0 0 3px rgba(0, 77, 64, 0.12);
   background: #ffffff;
 }
 
@@ -601,7 +599,7 @@
 .pet-date-input {
   width: 100%;
   padding-right: 2.5rem !important;
-  accent-color: #059669;
+  accent-color: #004D40;
   color-scheme: light;
   font-family: inherit;
 }
@@ -620,7 +618,7 @@
   position: absolute;
   right: 0.85rem;
   pointer-events: none;
-  color: #059669;
+  color: #004D40;
   display: flex;
   align-items: center;
 }
@@ -655,7 +653,7 @@
 }
 
 .btn-modal-primary {
-  background: #059669;
+  background: #004D40;
   color: var(--white);
   border: none;
   padding: 0.6rem 1.35rem;
@@ -664,14 +662,14 @@
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22);
+  box-shadow: 0 4px 12px rgba(0, 77, 64, 0.22);
   transition: all 0.2s ease;
 }
 
 .btn-modal-primary:hover:not(:disabled) {
-  background: #047857;
+  background: #00695C;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.32);
+  box-shadow: 0 6px 16px rgba(0, 77, 64, 0.32);
 }
 
 .btn-modal-primary:disabled {
@@ -708,8 +706,8 @@
 
 /* ── TARJETA "AGREGAR NUEVA MASCOTA" EN LA CUADRÍCULA ── */
 .pet-card-add-new {
-  background: #ecfdf5;
-  border: 2px dashed #a7f3d0;
+  background: #F4F7F5;
+  border: 2px dashed #B2DFDB;
   border-radius: var(--radius-lg, 20px);
   padding: 2rem 1.25rem;
   display: flex;
@@ -723,10 +721,10 @@
 }
 
 .pet-card-add-new:hover {
-  background: #d1fae5;
-  border-color: #059669;
+  background: #E6F4F1;
+  border-color: #004D40;
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 77, 64, 0.1);
 }
 
 .pet-card-add-new__icon-wrap {
@@ -736,19 +734,19 @@
   min-height: 56px;
   border-radius: 50%;
   background: #ffffff;
-  color: #059669;
+  color: #004D40;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.35rem;
   margin-bottom: 0.85rem;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.12);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 77, 64, 0.12);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .pet-card-add-new:hover .pet-card-add-new__icon-wrap {
   transform: scale(1.1);
-  background: #059669;
+  background: #004D40;
   color: #ffffff;
 }
 
@@ -758,7 +756,6 @@
   color: #0f172a;
   margin-bottom: 0.35rem;
 }
-
 
 .pet-card-add-new__sub {
   font-size: 0.82rem;

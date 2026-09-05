@@ -10,8 +10,8 @@
 /* ── SIDEBAR ── */
 
 .dash-side {
-    background: var(--white);
-    border-right: 1px solid rgba(0, 0, 0, .06);
+    background: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
     padding: 2rem 1.25rem;
     display: flex;
     flex-direction: column;
@@ -26,9 +26,9 @@
 
 .dash-side__logo-title {
     font-family: var(--font-head);
-    font-weight: 800;
+    font-weight: 700;
     font-size: 1.3rem;
-    color: var(--green-dark);
+    color: var(--primary-forest);
 }
 
 .dash-side__logo-sub {
@@ -44,7 +44,7 @@
 }
 
 .dash-side__nav--bottom {
-    border-top: 1px solid rgba(0, 0, 0, .06);
+    border-top: 1px solid #E2E8F0;
     padding-top: 1rem;
 }
 
@@ -52,22 +52,24 @@
     display: flex;
     align-items: center;
     gap: .8rem;
-    padding: .75rem;
+    padding: .75rem 1rem;
     border-radius: var(--radius-sm);
     font-size: .88rem;
     font-weight: 600;
     color: var(--gray-text);
-    transition: background .2s, color .2s;
+    border-left: 4px solid transparent;
+    transition: background .2s, color .2s, border-color .2s;
 }
 
 .dash-side__link:hover {
-    background: var(--gray-back);
-    color: var(--dark);
+    background: var(--bg-sage);
+    color: var(--primary-forest);
 }
 
 .dash-side__link--active {
-    background: var(--blue-light, #EFF6FF);
-    color: var(--blue-accent, #2563EB);
+    background: #E6F4F1;
+    color: var(--primary-forest);
+    border-left: 4px solid var(--primary-forest);
 }
 
 

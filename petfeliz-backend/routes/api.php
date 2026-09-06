@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\DocumentoController;
 use App\Http\Controllers\Api\HistoriaCuidadorController;
 use App\Http\Controllers\Api\ContactoController;
+use App\Http\Controllers\Api\WompiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,6 +20,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'forgot']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 Route::post('/contacto', [ContactoController::class, 'send']);
+
+// Webhooks de Wompi (Público)
+Route::post('/webhooks/wompi', [WompiController::class, 'handleWebhook']);
 
 // Rutas públicas de Historias de Cuidadores
 Route::get('/historias-cuidadores', [HistoriaCuidadorController::class, 'index']);
@@ -59,6 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cliente/pagos/{id}', [PagoController::class, 'show']);
     Route::get('/cliente/afiliacion', [PagoController::class, 'afiliacionInfo']);
     Route::post('/cliente/afiliacion/pagar', [PagoController::class, 'pagarAfiliacion']);
+
+    // Pasarela Wompi (Firma criptográfica SHA256 para Checkout)
+    Route::post('/wompi/generar-firma', [WompiController::class, 'generarFirma']);
 
     // Rutas de Documentos PDF
     Route::get('/cliente/documentos/factura/{id_pago}/pdf', [DocumentoController::class, 'facturaPdf']);

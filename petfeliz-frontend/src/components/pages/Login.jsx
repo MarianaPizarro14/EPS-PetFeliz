@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setStoredAuth } from '../../utils/authStorage'
 import './Login.css'
@@ -9,6 +9,25 @@ const AVATARS = [
   { foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_hombre_2_nuieol.jpg', alt: 'David' },
 ]
 
+const REMEMBER_KEY = 'petfeliz_remember'
+
+// Helpers para Base64 compatibles con UTF-8
+const encodeBase64 = (str) => {
+  try {
+    return btoa(unescape(encodeURIComponent(str)))
+  } catch {
+    return btoa(str)
+  }
+}
+
+const decodeBase64 = (str) => {
+  try {
+    return decodeURIComponent(escape(atob(str)))
+  } catch {
+    return atob(str)
+  }
+}
+
 function Login() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
@@ -16,6 +35,23 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  // Precargar credenciales si el usuario anteriormente marcó "Recuérdame"
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(REMEMBER_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed?.email && parsed?.password) {
+          const decodedPassword = decodeBase64(parsed.password)
+          setForm({ email: parsed.email, password: decodedPassword })
+          setRememberMe(true)
+        }
+      }
+    } catch (err) {
+      console.error('Error al leer credenciales guardadas:', err)
+    }
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.id]: e.target.value })
@@ -42,6 +78,21 @@ function Login() {
       }
 
       setStoredAuth(data.token, data.user, rememberMe)
+
+      // Guardar o eliminar credenciales según la preferencia "Recuérdame"
+      if (rememberMe) {
+        try {
+          const dataToRemember = {
+            email: form.email,
+            password: encodeBase64(form.password),
+          }
+          localStorage.setItem(REMEMBER_KEY, JSON.stringify(dataToRemember))
+        } catch (err) {
+          console.error('Error al guardar credenciales:', err)
+        }
+      } else {
+        localStorage.removeItem(REMEMBER_KEY)
+      }
 
       navigate('/dashboard-client')
     } catch {

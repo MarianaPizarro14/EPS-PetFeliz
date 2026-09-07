@@ -92,6 +92,9 @@ class AgendarCitaController extends Controller
             ->where('fecha', $fecha)
             ->where('id_estado', '!=', 3)
             ->pluck('hora')
+            ->map(function ($h) {
+                return date('h:i A', strtotime($h));
+            })
             ->toArray();
 
         // Slots con reserva temporal vigente
@@ -204,9 +207,10 @@ class AgendarCitaController extends Controller
         ReservaTemporal::where('expires_at', '<', now())->delete();
 
         // 1. Verificar si ya existe cita confirmada en cita table
+        $horaSql = date('H:i:s', strtotime($hora));
         $citaExistente = Cita::where('id_veterinario', $idVet)
             ->where('fecha', $fecha)
-            ->where('hora', $hora)
+            ->where('hora', $horaSql)
             ->where('id_estado', '!=', 3)
             ->exists();
 
@@ -296,9 +300,10 @@ class AgendarCitaController extends Controller
         }
 
         // Doble verificación a nivel de base de datos
+        $horaSql = date('H:i:s', strtotime($reserva->hora));
         $citaExistente = Cita::where('id_veterinario', $reserva->id_veterinario)
             ->where('fecha', $reserva->fecha)
-            ->where('hora', $reserva->hora)
+            ->where('hora', $horaSql)
             ->where('id_estado', '!=', 3)
             ->exists();
 
@@ -318,7 +323,7 @@ class AgendarCitaController extends Controller
             'id_servicio' => $request->id_servicio,
             'motivo' => $motivoFinal,
             'fecha' => $reserva->fecha,
-            'hora' => date('H:i:s', strtotime($reserva->hora)),
+            'hora' => $horaSql,
             'observacion' => $request->observacion ?? 'Pago confirmado en línea',
             'id_estado' => 2, // 2 = Confirmada
             'id_veterinario' => $reserva->id_veterinario,

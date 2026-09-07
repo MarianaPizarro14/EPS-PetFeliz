@@ -34,6 +34,9 @@ export const ESPECIALIDAD_NORMALIZE_MAP = {
   'vacunación': 'Vacunación',
   'medico director': 'Médico Director',
   'médico director': 'Médico Director',
+  'laboratorio clínico': 'Laboratorio Clínico',
+  'laboratorio clinico': 'Laboratorio Clínico',
+  'laboratorio': 'Laboratorio Clínico',
 }
 
 // Normaliza cualquier variante de especialidad que venga de la API/BD
@@ -59,8 +62,8 @@ export const veterinariosData = [
   { id: 13, nombre: 'Dr. Tomás Agudelo', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673227/tomas-agudelo_u6eohz.jpg', especialidad: 'Desparasitación', sede: 'Sede Envigado' },
   { id: 14, nombre: 'Dra. Alejandra Patiño', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673205/alejandra-pati%C3%B1o_m6h1gr.jpg', especialidad: 'Vacunación', sede: 'Sede Laureles · Envigado' },
   { id: 15, nombre: 'Dr. Mauricio Londoño', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673225/mauricio-londo%C3%B1o_yeonik.jpg', especialidad: 'Vacunación', sede: 'Sede Bello' },
-  { id: 16, nombre: 'Dra. Diana Ríos', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673221/diana-rios_olk7ci.jpg', especialidad: 'Médico Director', sede: 'Sede Laureles' },
-  { id: 17, nombre: 'Dr. Hernán Zapata', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/hernan-zapata_whxxms.jpg', especialidad: 'Médico Director', sede: 'Sede Bello' },
+  { id: 16, nombre: 'Dra. Diana Ríos', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673221/diana-rios_olk7ci.jpg', especialidad: 'Laboratorio Clínico', sede: 'Sede Laureles' },
+  { id: 17, nombre: 'Dr. Hernán Zapata', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/hernan-zapata_whxxms.jpg', especialidad: 'Laboratorio Clínico', sede: 'Sede Bello' },
   { id: 18, nombre: 'Dra. Paola Ríos', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673227/paola-rios_sydn3f.jpg', especialidad: 'Médico Director', sede: 'Sede Envigado' },
   { id: 19, nombre: 'Dr. Camilo Arango', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/camilo-arango_mn8o8q.jpg', especialidad: 'Cirugía', sede: 'Sede Laureles' },
   { id: 20, nombre: 'Dra. Juliana Ossa', foto: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/juliana-ossa_bhom4f.jpg', especialidad: 'Cirugía', sede: 'Sede Envigado' },

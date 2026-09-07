@@ -39,9 +39,9 @@ class NotificationService
 
             if ($debeEnviarEmail) {
                 try {
-                    Mail::to($cliente->usuario->email)->send($mailable);
+                    Mail::to($cliente->usuario->email)->queue($mailable);
                 } catch (\Throwable $e) {
-                    Log::error("Fallo al enviar correo de notificación a {$cliente->usuario->email}: " . $e->getMessage());
+                    Log::error("Fallo al poner en cola el correo de notificación a {$cliente->usuario->email}: " . $e->getMessage());
                 }
             }
         }

@@ -382,18 +382,37 @@ function AgendarCitaFlow() {
     setStep(1)
   }
 
-  // Confirmar Pago en Paso 2 y avanzar a Confirmación (Paso 3)
-  const handleConfirmarPago = async (e) => {
-    e.preventDefault()
-    setErrorMsg('')
-
-    if (paymentMethod === 'card') {
-      if (!cardForm.titular || !cardForm.numero || !cardForm.expiracion || !cardForm.cvv) {
-        setErrorMsg('Por favor completa todos los campos del formulario de tarjeta.')
+  // Helper para cargar de manera asíncrona el script oficial de Wompi Widget Checkout
+  const loadWompiScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.WidgetCheckout) {
+        resolve(window.WidgetCheckout)
         return
       }
-    }
+      const existingScript = document.getElementById('wompi-widget-script')
+      if (existingScript) {
+        existingScript.onload = () => resolve(window.WidgetCheckout)
+        existingScript.onerror = () => reject(new Error('Error al cargar el Widget de Wompi.'))
+        return
+      }
+      const script = document.createElement('script')
+      script.id = 'wompi-widget-script'
+      script.src = 'https://checkout.wompi.co/widget.js'
+      script.async = true
+      script.onload = () => {
+        if (window.WidgetCheckout) {
+          resolve(window.WidgetCheckout)
+        } else {
+          reject(new Error('WidgetCheckout no está disponible en window.'))
+        }
+      }
+      script.onerror = () => reject(new Error('No se pudo cargar la pasarela de pago Wompi.'))
+      document.body.appendChild(script)
+    })
+  }
 
+  // Confirmar Cita en Backend
+  const ejecutarConfirmacionBackend = async (referenciaWompi = null) => {
     const token = getStoredToken()
     try {
       setSubmitting(true)
@@ -410,6 +429,7 @@ function AgendarCitaFlow() {
           id_servicio: selectedService?.id_servicio,
           observacion: observacion,
           metodo_pago: paymentMethod,
+          referencia_wompi: referenciaWompi,
         }),
       })
 
@@ -432,6 +452,82 @@ function AgendarCitaFlow() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Confirmar Pago en Paso 2 (Wompi para Tarjeta o directo para $0 / otros métodos)
+  const handleConfirmarPago = async (e) => {
+    if (e && e.preventDefault) e.preventDefault()
+    setErrorMsg('')
+
+    const montoCalculado = getPrecioCitaCalculado(selectedService)
+
+    // Integración con Wompi Sandbox para Tarjeta Crédito / Débito cuando el monto > 0
+    if (paymentMethod === 'card' && montoCalculado > 0) {
+      const token = getStoredToken()
+      try {
+        setSubmitting(true)
+        const refUnica = `RES-${tokenReserva || Date.now()}`
+
+        // 1. Obtener firma criptográfica SHA256 desde el Backend (Laravel)
+        const resFirma = await fetch(`${import.meta.env.VITE_API_URL}/wompi/generar-firma`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            referencia: refUnica,
+            monto: montoCalculado,
+          }),
+        })
+
+        const dataFirma = await resFirma.json()
+        if (!resFirma.ok) {
+          setErrorMsg(dataFirma.message || 'Error al conectar con la pasarela de pagos Wompi.')
+          setSubmitting(false)
+          return
+        }
+
+        // 2. Cargar script de Wompi Widget
+        const WidgetCheckout = await loadWompiScript()
+
+        // 3. Abrir Widget de Wompi Sandbox
+        const checkout = new WidgetCheckout({
+          currency: dataFirma.moneda || 'COP',
+          amountInCents: dataFirma.monto_centavos,
+          reference: dataFirma.referencia,
+          publicKey: dataFirma.publicKey,
+          signature: { integrity: dataFirma.signature },
+        })
+
+        checkout.open(async (result) => {
+          const transaction = result?.transaction
+          if (transaction?.status === 'APPROVED') {
+            await ejecutarConfirmacionBackend(transaction.id || dataFirma.referencia)
+          } else if (transaction?.status === 'DECLINED') {
+            setErrorMsg('La transacción fue rechazada por la entidad financiera emisora. Por favor verifica tu tarjeta o intenta con otro medio de pago.')
+            setSubmitting(false)
+          } else if (transaction?.status === 'VOIDED') {
+            setErrorMsg('La transacción fue cancelada.')
+            setSubmitting(false)
+          } else if (transaction?.status === 'ERROR') {
+            setErrorMsg('Ocurrió un fallo técnico al procesar la transacción en Wompi.')
+            setSubmitting(false)
+          } else {
+            setSubmitting(false)
+          }
+        })
+      } catch (err) {
+        console.error('Error al inicializar pasarela Wompi:', err)
+        setErrorMsg('No se pudo abrir la pasarela de pago Wompi.')
+        setSubmitting(false)
+      }
+      return
+    }
+
+    // Para monto $0 o PSE / Nequi
+    await ejecutarConfirmacionBackend()
   }
 
   // Manejadores para carga de foto en modal
@@ -1041,31 +1137,68 @@ function AgendarCitaFlow() {
 
                     {paymentMethod === 'card' && (
                       <div className="agendar-payment-form">
-                        <div className="pet-form__field">
-                          <label>Nombre del Titular de la Tarjeta *</label>
-                          <input type="text" placeholder="Como aparece en la tarjeta" required />
-                        </div>
-                        <div className="pet-form__field">
-                          <label>Número de Tarjeta *</label>
-                          <input type="text" placeholder="0000 0000 0000 0000" maxLength="19" required />
-                        </div>
-                        <div className="pet-form__row">
-                          <div className="pet-form__field">
-                            <label>Fecha Exp. (MM/AA) *</label>
-                            <input type="text" placeholder="MM/AA" maxLength="5" required />
+                        <div
+                          style={{
+                            background: '#f0fdf4',
+                            border: '1.5px solid #bbf7d0',
+                            borderRadius: '12px',
+                            padding: '1.15rem 1.25rem',
+                            marginBottom: '1.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <div
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                background: '#166534',
+                                color: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.95rem',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <i className="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                              <strong style={{ color: '#166534', fontSize: '0.95rem', fontFamily: 'Sora, sans-serif' }}>
+                                Pasarela de Pago Wompi (Modo Sandbox)
+                              </strong>
+                              <div style={{ fontSize: '0.78rem', color: '#15803d' }}>
+                                Cifrado SSL de 256 bits y firmas criptográficas SHA256 de seguridad
+                              </div>
+                            </div>
                           </div>
-                          <div className="pet-form__field">
-                            <label>Código CVC *</label>
-                            <input type="password" placeholder="123" maxLength="4" required />
-                          </div>
+                          <p style={{ margin: 0, fontSize: '0.82rem', color: '#334155', lineHeight: '1.45' }}>
+                            Al hacer clic en el botón de pago, se abrirá de forma segura la ventana del Widget de Wompi para ingresar los datos de tu tarjeta de crédito o débito de prueba.
+                          </p>
                         </div>
 
                         <div className="agendar-form-actions">
                           <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
                             ← Volver
                           </button>
-                          <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
-                            {submitting ? 'Procesando...' : `Pagar ${formatCOP(getPrecioCitaCalculado(selectedService))}`}
+                          <button
+                            type="button"
+                            className="btn-primary-pet"
+                            style={{ flex: 1 }}
+                            onClick={handleConfirmarPago}
+                            disabled={submitting}
+                          >
+                            {submitting ? (
+                              <>
+                                <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                                <span>Conectando con Wompi...</span>
+                              </>
+                            ) : (
+                              `Pagar ${formatCOP(getPrecioCitaCalculado(selectedService))} con Wompi`
+                            )}
                           </button>
                         </div>
                       </div>

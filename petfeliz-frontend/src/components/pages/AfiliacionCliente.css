@@ -17,18 +17,21 @@
 }
 
 .afil-status-card--active {
-  background: linear-gradient(135deg, #004D40 0%, #00695C 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
 }
 
 .afil-status-card--mora {
-  background: linear-gradient(135deg, #991B1B 0%, #B91C1C 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   color: #ffffff;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25);
 }
 
 .afil-status-card--inactive {
-  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
   color: #ffffff;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.2);
 }
 
 .afil-status-header {

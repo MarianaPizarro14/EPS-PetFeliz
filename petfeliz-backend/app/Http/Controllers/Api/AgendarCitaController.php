@@ -424,7 +424,9 @@ class AgendarCitaController extends Controller
                 'fecha' => $cita->fecha,
                 'hora' => $cita->hora,
                 'servicioNombre' => $motivoFinal,
-                'precio' => $servicio ? $servicio->precio_base : '70000',
+                'precio' => $monto,
+                'monto' => $monto,
+                'tipo_cobertura' => $tipoCobertura,
                 'estado' => 'Confirmada',
                 'mascota' => $pet ? [
                     'id' => $pet->id_mascota,

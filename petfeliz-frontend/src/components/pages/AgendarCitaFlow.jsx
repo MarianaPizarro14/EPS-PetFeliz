@@ -548,9 +548,13 @@ function AgendarCitaFlow() {
   }
 
   // Formatear precio en COP
-  const formatCOP = (val) => {
-    const num = parseInt(val ?? 70000)
-    return `$${num.toLocaleString('es-CO')}`
+  const formatCOP = (val, tipo = '') => {
+    const num = Number(val)
+    if (num === 0 || tipo === 'eps') {
+      return '$0 COP (Incluido EPS)'
+    }
+    const safeNum = isNaN(num) ? 70000 : num
+    return `$${safeNum.toLocaleString('es-CO')}`
   }
 
   const clienteData = afiliacionInfo?.cliente
@@ -1260,7 +1264,7 @@ function AgendarCitaFlow() {
                 </div>
                 <div className="modal-detail-item">
                   <span className="modal-detail-label">Monto Pagado</span>
-                  <span className="modal-detail-value">{formatCOP(confirmedCita?.precio)}</span>
+                  <span className="modal-detail-value">{formatCOP(confirmedCita?.precio, confirmedCita?.tipo_cobertura)}</span>
                 </div>
               </div>
 
@@ -1535,7 +1539,7 @@ function AgendarCitaFlow() {
                 <span>Fecha y Hora:</span> <strong>{confirmedCita.fecha} {confirmedCita.hora}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1.5px dashed #cbd5e1', fontSize: '1rem' }}>
-                <span>Total Pagado:</span> <strong style={{ color: '#059669' }}>{formatCOP(confirmedCita.precio)}</strong>
+                <span>Total Pagado:</span> <strong style={{ color: '#059669' }}>{formatCOP(confirmedCita.precio, confirmedCita.tipo_cobertura)}</strong>
               </div>
             </div>
 

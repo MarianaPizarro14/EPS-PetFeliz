@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             EstadoCitaSeeder::class,
             ServicioSeeder::class,
             VeterinarioSeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }

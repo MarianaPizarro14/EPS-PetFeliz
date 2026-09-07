@@ -13,10 +13,12 @@ use App\Http\Controllers\Api\DocumentoController;
 use App\Http\Controllers\Api\HistoriaCuidadorController;
 use App\Http\Controllers\Api\ContactoController;
 use App\Http\Controllers\Api\WompiController;
+use App\Http\Controllers\Api\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'forgot']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 Route::post('/contacto', [ContactoController::class, 'send']);
@@ -40,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/perfil/logout-all', [AuthController::class, 'logoutAll']);
     Route::post('/perfil/delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::apiResource('mascotas', MascotaController::class);
 
     // Rutas de Notificaciones persistentes

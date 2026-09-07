@@ -16,12 +16,18 @@ class User extends Authenticatable
     protected $primaryKey = 'id_usuario';
 
     protected $fillable = [
-    'email',
-    'contrasena_hash',
-    'activo',
-    'token_reset',
-    'token_reset_expira',
-];
+        'email',
+        'contrasena_hash',
+        'rol',
+        'activo',
+        'token_reset',
+        'token_reset_expira',
+    ];
+
+    public function isAdmin(): bool
+    {
+        return $this->rol === 'admin';
+    }
 
     protected $hidden = [
         'contrasena_hash',

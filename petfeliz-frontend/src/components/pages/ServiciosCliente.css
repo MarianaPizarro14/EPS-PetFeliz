@@ -97,18 +97,18 @@
 }
 
 .servicios-cli-item__icon--green {
-  background: #E6F4F1;
-  color: #004D40;
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
 .servicios-cli-item__icon--amber {
-  background: #FEF3C7;
-  color: #D97706;
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .servicios-cli-item__icon--blue {
-  background: #F4F7F5;
-  color: #004D40;
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
 .servicios-cli-item__img {
@@ -127,13 +127,13 @@
 }
 
 .servicios-cli-item__badge--eps {
-  background: #E6F4F1;
-  color: #004D40;
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
 .servicios-cli-item__badge--copago {
-  background: #FEF3C7;
-  color: #D97706;
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .servicios-cli-item__title {

@@ -29,12 +29,9 @@ const getPhotoUrl = (url, fallback = FALLBACK_PET_IMG) => {
 // Helper para determinar el color de acento del servicio por cobertura
 const getServiceColorClass = (srv) => {
   if (srv.incluido_en_plan || Number(srv.precio_afiliado) === 0) {
-    return 'servicios-cli-item__icon--green'
+    return 'servicios-cli-item__icon--blue'
   }
-  if (srv.precio_afiliado && Number(srv.precio_afiliado) > 0) {
-    return 'servicios-cli-item__icon--amber'
-  }
-  return 'servicios-cli-item__icon--blue'
+  return 'servicios-cli-item__icon--amber'
 }
 
 // Mapeo de íconos por nombre/categoría de servicio

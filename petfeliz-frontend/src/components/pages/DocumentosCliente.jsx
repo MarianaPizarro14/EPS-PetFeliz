@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -29,7 +30,7 @@ export default function DocumentosCliente() {
 
   useEffect(() => {
     const fetchDatos = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       if (!token) {
         navigate('/login')
         return
@@ -80,7 +81,7 @@ export default function DocumentosCliente() {
 
   // Helper para descargar PDF vía Blob o manejar respuestas 404 / 422
   const handleDescargarPdf = async (url, defaultFilename, typeKey) => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) return
 
     try {

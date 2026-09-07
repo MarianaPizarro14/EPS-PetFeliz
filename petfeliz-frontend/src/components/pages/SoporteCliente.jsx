@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -10,7 +11,7 @@ export default function SoporteCliente() {
   const [usuario, setUsuario] = useState({ nombre: 'Usuario', foto: '' })
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) {
       navigate('/login')
       return

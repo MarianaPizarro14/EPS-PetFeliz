@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { clearStoredAuth, getStoredToken } from '../../utils/authStorage'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import DashboardHeader from '../ui/DashboardHeader'
 import SidebarClient from '../ui/SidebarClient'
@@ -93,7 +94,7 @@ function MisMascotas() {
 
   // Cargar perfil del usuario y lista de mascotas
   const loadData = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) {
       navigate('/login')
       return
@@ -146,7 +147,7 @@ function MisMascotas() {
   }, [])
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (token) {
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
@@ -155,8 +156,7 @@ function MisMascotas() {
         })
       } catch (e) { console.error(e) }
     }
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearStoredAuth()
     navigate('/login')
   }
 
@@ -258,7 +258,7 @@ function MisMascotas() {
     setFormError('')
     setSaving(true)
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     const url = editingId
       ? `${import.meta.env.VITE_API_URL}/mascotas/${editingId}`
       : `${import.meta.env.VITE_API_URL}/mascotas`

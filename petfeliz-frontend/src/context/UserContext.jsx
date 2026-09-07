@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { getStoredToken, getStoredUser, updateStoredUser } from '../utils/authStorage'
 
 const UserContext = createContext(null)
 
 export function UserProvider({ children }) {
   const [usuario, setUsuarioState] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('user')
-      return savedUser ? JSON.parse(savedUser) : { nombre: 'Usuario', foto: '' }
+      const savedUser = getStoredUser()
+      return savedUser || { nombre: 'Usuario', foto: '' }
     } catch {
       return { nombre: 'Usuario', foto: '' }
     }
@@ -18,16 +19,16 @@ export function UserProvider({ children }) {
     setUsuarioState((prev) => {
       const updated = typeof newUserData === 'function' ? newUserData(prev) : newUserData
       try {
-        localStorage.setItem('user', JSON.stringify(updated))
+        updateStoredUser(updated)
       } catch (e) {
-        console.error('Error al guardar usuario en localStorage:', e)
+        console.error('Error al guardar usuario en storage:', e)
       }
       return updated
     })
   }, [])
 
   const fetchUsuario = useCallback(async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) {
       setLoadingUser(false)
       return
@@ -49,6 +50,7 @@ export function UserProvider({ children }) {
       setLoadingUser(false)
     }
   }, [setUsuario])
+
 
   useEffect(() => {
     fetchUsuario()

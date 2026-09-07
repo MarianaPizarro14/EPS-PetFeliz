@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { setStoredAuth } from '../../utils/authStorage'
 import './Login.css'
 
 const AVATARS = [
@@ -11,6 +12,7 @@ const AVATARS = [
 function Login() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -39,8 +41,7 @@ function Login() {
         return
       }
 
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      setStoredAuth(data.token, data.user, rememberMe)
 
       navigate('/dashboard-client')
     } catch {
@@ -48,6 +49,7 @@ function Login() {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="auth-split">
@@ -145,6 +147,19 @@ function Login() {
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
+            </div>
+
+            <div className="field__remember">
+              <label className="field__checkbox-label">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  className="field__checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Recuérdame</span>
+              </label>
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import DashboardHeader from '../ui/DashboardHeader'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import SidebarClient from '../ui/SidebarClient'
@@ -59,7 +60,7 @@ function MisCitas() {
 
   // Cargar datos iniciales (Perfil, Citas, Mascotas y Servicios)
   const loadData = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) {
       navigate('/login')
       return
@@ -138,7 +139,7 @@ function MisCitas() {
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/citas`, {
@@ -188,7 +189,7 @@ function MisCitas() {
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/citas/${selectedCita.id}/reprogramar`, {
@@ -225,7 +226,7 @@ function MisCitas() {
 
   // Cancelar cita
   const handleCancelarSubmit = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/citas/${selectedCita.id}/cancelar`, {

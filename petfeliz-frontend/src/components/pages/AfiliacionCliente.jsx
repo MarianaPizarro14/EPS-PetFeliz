@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import { useUser } from '../../context/UserContext'
@@ -44,7 +45,7 @@ export default function AfiliacionCliente() {
   const [selectedReceipt, setSelectedReceipt] = useState(null)
 
   const fetchAfiliacion = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) {
       navigate('/login')
       return
@@ -92,7 +93,7 @@ export default function AfiliacionCliente() {
   // Confirmación del pago de suscripción
   const handleConfirmarPagoSuscripcion = async (e) => {
     e.preventDefault()
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) return
 
     const montoCalculado = selectedPlanType === 'individual' ? 39900 : 69900

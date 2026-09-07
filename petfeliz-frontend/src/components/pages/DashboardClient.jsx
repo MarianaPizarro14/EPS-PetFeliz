@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { clearStoredAuth, getStoredToken } from '../../utils/authStorage'
 import DashboardHeader from '../ui/DashboardHeader'
 import SidebarClient from '../ui/SidebarClient'
 import './DashboardClient.css'
@@ -65,7 +66,7 @@ function DashboardClient() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       if (!token) {
         navigate('/login')
         return
@@ -111,7 +112,7 @@ function DashboardClient() {
   }, [navigate])
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (token) {
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
@@ -126,8 +127,7 @@ function DashboardClient() {
       }
     }
 
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearStoredAuth()
     navigate('/login')
   }
 

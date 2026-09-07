@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import { DEFAULT_USER_AVATAR } from '../../constants/images'
@@ -67,7 +68,7 @@ export default function ServiciosCliente() {
 
   useEffect(() => {
     const fetchDatosServicios = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       if (!token) {
         navigate('/login')
         return

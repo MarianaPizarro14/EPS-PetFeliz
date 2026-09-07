@@ -1,6 +1,7 @@
 // src/components/ui/SidebarClient.jsx
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { getStoredToken, clearStoredAuth } from '../../utils/authStorage'
 
 const menuItems = [
   { to: '/dashboard-client', aliases: ['/dashboard-cliente'], label: 'Panel', icon: 'fa-solid fa-border-all' },
@@ -17,7 +18,7 @@ export default function SidebarClient() {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (token) {
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
@@ -32,8 +33,7 @@ export default function SidebarClient() {
       }
     }
 
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearStoredAuth()
     navigate('/login')
   }
 

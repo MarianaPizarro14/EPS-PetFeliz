@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { getStoredToken, clearStoredAuth } from '../utils/authStorage'
 
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000 // 5 minutos
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem('token')
+  const token = getStoredToken()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -13,8 +14,7 @@ function ProtectedRoute({ children }) {
     let timer
 
     const performLogout = () => {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+      clearStoredAuth()
       navigate('/login', { replace: true })
     }
 

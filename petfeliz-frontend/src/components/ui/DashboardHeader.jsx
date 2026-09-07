@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import { DEPARTAMENTOS_Y_CIUDADES_COLOMBIA } from '../../data/departamentosYCiudadesColombia'
 import { DEFAULT_USER_AVATAR } from '../../constants/images'
+import { getStoredToken, clearStoredAuth } from '../../utils/authStorage'
 import './DashboardHeader.css'
 
 
@@ -172,7 +173,7 @@ export default function DashboardHeader({
 
   // Cargar notificaciones desde el backend
   const fetchNotifications = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) return
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notificaciones`, {
@@ -227,7 +228,7 @@ export default function DashboardHeader({
     e?.stopPropagation()
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) return
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notificaciones/marcar-leidas`, {
@@ -251,7 +252,7 @@ export default function DashboardHeader({
     e?.stopPropagation()
     setNotifications((prev) => prev.filter((n) => n.id !== id))
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (!token) return
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notificaciones/${id}`, {
@@ -273,7 +274,7 @@ export default function DashboardHeader({
 
   // Cierre de sesión simple
   const handleLogout = async () => {
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     if (token) {
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
@@ -287,8 +288,7 @@ export default function DashboardHeader({
         console.error(err)
       }
     }
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    clearStoredAuth()
     navigate('/login')
   }
 
@@ -350,7 +350,7 @@ export default function DashboardHeader({
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     const bodyFormData = new FormData()
 
     Object.keys(profileForm).forEach((key) => {
@@ -414,7 +414,7 @@ export default function DashboardHeader({
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/perfil/change-password`, {
@@ -451,7 +451,7 @@ export default function DashboardHeader({
     setModalError('')
     setModalSuccess('')
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     const bodyFormData = new FormData()
     bodyFormData.append('notificaciones_email', newPrefs.notificaciones_email)
     bodyFormData.append('recordatorios_citas', newPrefs.recordatorios_citas)
@@ -481,7 +481,7 @@ export default function DashboardHeader({
   // Cerrar sesión en todos los dispositivos
   const handleLogoutAllDevices = async () => {
     setSaving(true)
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
 
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/perfil/logout-all`, {
@@ -494,8 +494,7 @@ export default function DashboardHeader({
     } catch (err) {
       console.error(err)
     } finally {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+    clearStoredAuth()
       navigate('/login')
     }
   }
@@ -503,7 +502,7 @@ export default function DashboardHeader({
   // Eliminar Cuenta
   const handleDeleteAccountConfirm = async () => {
     setSaving(true)
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
 
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/perfil/delete-account`, {
@@ -516,8 +515,7 @@ export default function DashboardHeader({
     } catch (err) {
       console.error(err)
     } finally {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+    clearStoredAuth()
       navigate('/login')
     }
   }

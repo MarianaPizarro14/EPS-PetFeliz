@@ -134,7 +134,7 @@ class CitaController extends Controller
             'id_servicio' => $request->id_servicio,
             'motivo' => $motivoFinal,
             'fecha' => $request->fecha,
-            'hora' => $request->hora,
+            'hora' => date('H:i:s', strtotime($request->hora)),
             'observacion' => $request->observacion,
             'id_estado' => 2, // 2 = Confirmada por defecto
             'id_veterinario' => 1,

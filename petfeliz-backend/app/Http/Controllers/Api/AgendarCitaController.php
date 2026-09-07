@@ -33,7 +33,7 @@ class AgendarCitaController extends Controller
                     4 => 'Medicina General', 5 => 'Medicina General', 6 => 'Dermatología',
                     7 => 'Dermatología', 8 => 'Urgencias', 9 => 'Urgencias', 10 => 'Urgencias',
                     11 => 'Desparasitación', 12 => 'Desparasitación', 13 => 'Desparasitación', 14 => 'Vacunación',
-                    15 => 'Vacunación', 16 => 'Médico Director', 17 => 'Médico Director', 18 => 'Médico Director',
+                    15 => 'Vacunación', 16 => 'Laboratorio Clínico', 17 => 'Laboratorio Clínico', 18 => 'Médico Director',
                     19 => 'Cirugía', 20 => 'Cirugía', 21 => 'Cirugía', 22 => 'Odontología',
                     23 => 'Urgencias', 24 => 'Urgencias', 25 => 'Urgencias', 26 => 'Urgencias', 27 => 'Urgencias',
                     28 => 'Medicina General'
@@ -318,7 +318,7 @@ class AgendarCitaController extends Controller
             'id_servicio' => $request->id_servicio,
             'motivo' => $motivoFinal,
             'fecha' => $reserva->fecha,
-            'hora' => $reserva->hora,
+            'hora' => date('H:i:s', strtotime($reserva->hora)),
             'observacion' => $request->observacion ?? 'Pago confirmado en línea',
             'id_estado' => 2, // 2 = Confirmada
             'id_veterinario' => $reserva->id_veterinario,

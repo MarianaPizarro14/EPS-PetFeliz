@@ -295,6 +295,13 @@ export default function DocumentosCliente() {
                   </select>
                 </div>
 
+                {mascotas.length === 0 && (
+                  <div className="docs-cli-card-msg docs-cli-card-msg--info" style={{ marginTop: '0.65rem' }}>
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span>No tienes mascotas registradas. <a href="/mascotas" style={{ color: '#0369a1', textDecoration: 'underline', fontWeight: 600 }}>Registra tu mascota aquí</a> para emitir sus documentos.</span>
+                  </div>
+                )}
+
                 {cardMessages.historial && (
                   <div className="docs-cli-card-msg docs-cli-card-msg--info">
                     <i className="fa-solid fa-circle-info"></i>
@@ -372,6 +379,13 @@ export default function DocumentosCliente() {
                     )}
                   </select>
                 </div>
+
+                {mascotas.length === 0 && (
+                  <div className="docs-cli-card-msg docs-cli-card-msg--info" style={{ marginTop: '0.65rem' }}>
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span>No tienes mascotas registradas. <a href="/mascotas" style={{ color: '#0369a1', textDecoration: 'underline', fontWeight: 600 }}>Registra tu mascota aquí</a> para emitir sus documentos.</span>
+                  </div>
+                )}
 
                 {cardMessages.vacuna && (
                   <div className="docs-cli-card-msg docs-cli-card-msg--info">

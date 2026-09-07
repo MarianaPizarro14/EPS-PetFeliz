@@ -1,6 +1,7 @@
 // src/components/pages/AgendarCitaFlow.jsx
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import CustomDatePicker from '../ui/CustomDatePicker'
@@ -104,7 +105,7 @@ function AgendarCitaFlow() {
   // Cargar datos iniciales desde el Backend
   useEffect(() => {
     const loadInitialData = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       if (!token) {
         navigate('/login')
         return
@@ -270,7 +271,7 @@ function AgendarCitaFlow() {
     if (!selectedVet || !selectedDate) return
 
     const fetchHorarios = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       try {
         setLoadingHorarios(true)
         const res = await fetch(
@@ -301,7 +302,7 @@ function AgendarCitaFlow() {
     if (!selectedVet) return
 
     const fetchDisponibilidadMes = async () => {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       try {
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/agendar/disponibilidad-mes?id_veterinario=${selectedVet.id}&mes=${currentMonth + 1}&anio=${currentYear}`,
@@ -356,7 +357,7 @@ function AgendarCitaFlow() {
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/agendar/reservar-slot`, {
@@ -393,7 +394,7 @@ function AgendarCitaFlow() {
   // Liberar reserva temporal y volver al Paso 1
   const handleCancelarReserva = async () => {
     if (tokenReserva) {
-      const token = localStorage.getItem('token')
+      const token = getStoredToken()
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/agendar/liberar-reserva`, {
           method: 'POST',
@@ -424,7 +425,7 @@ function AgendarCitaFlow() {
       }
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/agendar/confirmar-pago`, {
@@ -532,7 +533,7 @@ function AgendarCitaFlow() {
       return
     }
 
-    const token = localStorage.getItem('token')
+    const token = getStoredToken()
     try {
       setSavingPet(true)
       const formData = new FormData()
@@ -594,8 +595,11 @@ function AgendarCitaFlow() {
     if (!esAfiliado || isEnMora) {
       return Number(srv.precio_base) || 70000
     }
+    if (srv.precio_afiliado !== undefined && srv.precio_afiliado !== null) {
+      return Number(srv.precio_afiliado)
+    }
     if (srv.incluido_en_plan) return 0
-    return Number(srv.precio_afiliado) || Number(srv.precio_base) || 70000
+    return Number(srv.precio_base) || 70000
   }
 
   // Formatear minutos y segundos
@@ -1043,10 +1047,13 @@ function AgendarCitaFlow() {
                   <>
                     <div className="agendar-timer-banner">
                       <span>
-                        <i className="fa-regular fa-clock" style={{ marginRight: '0.4rem' }}></i>
+                        <i className="fa-regular fa-clock" style={{ marginRight: '0.45rem' }}></i>
                         Reserva temporal activa
                       </span>
-                      <span>⏱️ {formatTimer(timerSeconds)}</span>
+                      <span>
+                        <i className="fa-solid fa-stopwatch" style={{ marginRight: '0.35rem' }}></i>
+                        {formatTimer(timerSeconds)}
+                      </span>
                     </div>
 
                     <h3 className="agendar-section-title">
@@ -1106,7 +1113,7 @@ function AgendarCitaFlow() {
                             ← Volver
                           </button>
                           <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
-                            {submitting ? 'Procesando...' : `Pagar ${formatCOP(selectedService?.precio_base)}`}
+                            {submitting ? 'Procesando...' : `Pagar ${formatCOP(getPrecioCitaCalculado(selectedService))}`}
                           </button>
                         </div>
                       </div>
@@ -1240,9 +1247,11 @@ function AgendarCitaFlow() {
                     <span className="agendar-summary-total-sub">
                       {isEnMora
                         ? 'Tarifa Particular por Mora en Afiliación'
-                        : esAfiliado
-                        ? 'Tarifa Afiliado EPS'
-                        : 'Tarifa Particular (Sin Afiliación)'}
+                        : !esAfiliado
+                        ? 'Tarifa Particular (Sin Afiliación)'
+                        : getPrecioCitaCalculado(selectedService) === 0
+                        ? 'Incluido 100% en Plan EPS ($0 COP)'
+                        : 'Copago con Descuento Afiliado EPS'}
                     </span>
                   </div>
                   <strong className="agendar-summary-total-amount">

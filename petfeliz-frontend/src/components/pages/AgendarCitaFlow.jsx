@@ -49,7 +49,6 @@ function AgendarCitaFlow() {
   const [selectedPet, setSelectedPet] = useState(null)
   const [selectedService, setSelectedService] = useState(null)
   const [selectedVet, setSelectedVet] = useState(null)
-  const [specialtyFilter, setSpecialtyFilter] = useState('Todas')
 
   // Calendario Real Estado (Fecha actual)
   const today = new Date()
@@ -215,18 +214,6 @@ function AgendarCitaFlow() {
     loadInitialData()
   }, [])
 
-  // Helper para buscar el servicio médico coincidente con una especialidad
-  const findMatchingService = (specName) => {
-    if (!specName || specName === 'Todas' || servicios.length === 0) return null
-    const lowerSpec = specName.toLowerCase()
-    return (
-      servicios.find((s) => {
-        const sName = s.nombre.toLowerCase()
-        return sName.includes(lowerSpec) || lowerSpec.includes(sName)
-      }) || servicios[0]
-    )
-  }
-
   // Al seleccionar servicio desde las píldoras
   const handleSelectService = (service) => {
     setSelectedService(service)
@@ -237,33 +224,13 @@ function AgendarCitaFlow() {
     )
 
     if (matchingVet) {
-      setSpecialtyFilter(matchingVet.especialidad)
       setSelectedVet(matchingVet)
-    } else {
-      setSpecialtyFilter('Todas')
-    }
-  }
-
-  // Al cambiar la especialidad desde el dropdown
-  const handleSpecialtyFilterChange = (spec) => {
-    setSpecialtyFilter(spec)
-    if (spec !== 'Todas') {
-      const sMatch = findMatchingService(spec)
-      if (sMatch) setSelectedService(sMatch)
-
-      const vetMatch = veterinarios.find((v) => v.especialidad.toLowerCase() === spec.toLowerCase())
-      if (vetMatch) setSelectedVet(vetMatch)
     }
   }
 
   // Al seleccionar un veterinario directamente
   const handleSelectVet = (vet) => {
     setSelectedVet(vet)
-    if (vet.especialidad) {
-      setSpecialtyFilter(vet.especialidad)
-      const sMatch = findMatchingService(vet.especialidad)
-      if (sMatch) setSelectedService(sMatch)
-    }
   }
 
   // Cargar horarios disponibles cuando cambia el veterinario o la fecha
@@ -609,24 +576,18 @@ function AgendarCitaFlow() {
     return `${mins.toString().padStart(2, '0')}:${remSec.toString().padStart(2, '0')} min`
   }
 
-  // 1. Obtener TODAS las especialidades reales registradas (BD + roster local completo,
-  // así el filtro siempre incluye a todos los especialistas del equipo).
-  const especialidadesDisponibles = [
-    'Todas',
-    ...Array.from(
-      new Set([
-        ...veterinarios.map((v) => v.especialidad),
-        ...veterinariosData.map((v) => v.especialidad),
-      ])
-    ).sort(),
-  ]
+  // Filtrado de veterinarios según el servicio médico seleccionado en el paso 2
+  const expectedSpecs = selectedService
+    ? SERVICE_SPECIALTY_MAP[selectedService.nombre] || [selectedService.nombre]
+    : []
 
-  // Filtrado estricto de veterinarios por el dropdown de especialidad
   const filteredVets = veterinarios.filter((v) => {
-    if (specialtyFilter !== 'Todas') {
-      return v.especialidad.toLowerCase() === specialtyFilter.toLowerCase()
-    }
-    return true
+    if (!selectedService || expectedSpecs.length === 0) return true
+    return expectedSpecs.some(
+      (spec) =>
+        v.especialidad.toLowerCase().includes(spec.toLowerCase()) ||
+        spec.toLowerCase().includes(v.especialidad.toLowerCase())
+    )
   })
 
   // Nombres de meses en español
@@ -929,29 +890,11 @@ function AgendarCitaFlow() {
                       ))}
                     </div>
 
-                    {/* 3. Selecciona Un Veterinario con Filtro de Especialidad */}
-                    <div className="agendar-section-header-row">
-                      <h3 className="agendar-section-title">
-                        <span className="agendar-section-num">3</span>
-                        <span>Selecciona un Veterinario</span>
-                      </h3>
-
-                      {/* Dropdown con Filtro y Etiqueta de Contexto */}
-                      <div className="agendar-filter-group">
-                        <label className="agendar-filter-lbl">
-                          <i className="fa-solid fa-filter"></i> Especialidad:
-                        </label>
-                        <select
-                          className="agendar-spec-filter"
-                          value={specialtyFilter}
-                          onChange={(e) => handleSpecialtyFilterChange(e.target.value)}
-                        >
-                          {especialidadesDisponibles.map((spec) => (
-                            <option key={spec} value={spec}>{spec}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                    {/* 3. Selecciona Un Veterinario */}
+                    <h3 className="agendar-section-title">
+                      <span className="agendar-section-num">3</span>
+                      <span>Selecciona un Veterinario</span>
+                    </h3>
 
                     <div className="agendar-vets-grid">
                       {filteredVets.map((v) => (
@@ -964,6 +907,9 @@ function AgendarCitaFlow() {
                           <div className="agendar-vet-card__info">
                             <strong className="agendar-vet-card__name">{v.nombre}</strong>
                             <span className="agendar-vet-card__spec">{v.especialidad}</span>
+                            <span className="agendar-vet-card__location">
+                              <i className="fa-solid fa-location-dot"></i> {v.sede || 'Sede Laureles'}
+                            </span>
                           </div>
 
                           {selectedVet?.id === v.id && (
@@ -976,7 +922,7 @@ function AgendarCitaFlow() {
 
                       {filteredVets.length === 0 && (
                         <p style={{ fontSize: '0.8rem', color: '#94a3b8', gridColumn: '1 / -1', padding: '0.5rem 0' }}>
-                          No hay veterinarios disponibles para esta especialidad.
+                          No hay veterinarios disponibles para este servicio.
                         </p>
                       )}
                     </div>

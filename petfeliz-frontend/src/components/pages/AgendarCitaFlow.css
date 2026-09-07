@@ -391,6 +391,17 @@
   margin-top: 0.1rem;
 }
 
+.agendar-vet-card__location {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: #0d9488;
+  font-weight: 600;
+  margin-top: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .agendar-vet-card__check {
   position: absolute;
   top: 8px;

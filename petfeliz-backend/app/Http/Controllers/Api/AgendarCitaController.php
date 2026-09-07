@@ -39,10 +39,24 @@ class AgendarCitaController extends Controller
                     28 => 'Medicina General'
                 ];
 
+                $sedes = [
+                    1 => 'Sede Laureles', 2 => 'Sede Envigado', 3 => 'Sede Bello',
+                    4 => 'Sede Envigado', 5 => 'Sede Laureles', 6 => 'Sede Laureles · Envigado',
+                    7 => 'Sede Bello · Laureles', 8 => 'Todas las sedes', 9 => 'Todas las sedes',
+                    10 => 'Todas las sedes', 11 => 'Sede Laureles', 12 => 'Sede Bello',
+                    13 => 'Sede Envigado', 14 => 'Sede Laureles · Envigado', 15 => 'Sede Bello',
+                    16 => 'Sede Laureles', 17 => 'Sede Bello', 18 => 'Sede Envigado',
+                    19 => 'Sede Laureles', 20 => 'Sede Envigado', 21 => 'Sede Bello',
+                    22 => 'Sede Laureles', 23 => 'Todas las sedes', 24 => 'Todas las sedes',
+                    25 => 'Todas las sedes', 26 => 'Todas las sedes', 27 => 'Todas las sedes',
+                    28 => 'Sede Bello'
+                ];
+
                 return [
                     'id' => $v->id_veterinario,
                     'nombre' => $v->nombre,
                     'especialidad' => $especialidades[$v->id_veterinario] ?? 'Medicina General',
+                    'sede' => $sedes[$v->id_veterinario] ?? 'Sede Laureles',
                     'calificacion' => $ratings[$v->id_veterinario] ?? 4.8,
                     'foto' => $v->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
                 ];

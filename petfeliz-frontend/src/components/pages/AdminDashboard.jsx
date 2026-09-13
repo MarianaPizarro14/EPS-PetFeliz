@@ -417,24 +417,24 @@ export default function AdminDashboard() {
                     <th>Ref. Transacción</th>
                     <th>Cliente / Usuario</th>
                     <th>Monto (COP)</th>
-                    <th>Método</th>
+                    <th>Método Pago</th>
                     <th>Cobertura</th>
                     <th>Estado</th>
-                    <th>Fecha</th>
+                    <th>Fecha & Hora</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transaccionesFiltradas.map((t) => (
                     <tr key={t.id_pago}>
-                      <td style={{ fontWeight: 700, color: '#0f172a' }}>{t.referencia}</td>
+                      <td className="admin-tx-ref">{t.referencia}</td>
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{t.cliente}</span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email}</span>
+                        <div className="admin-tx-client">
+                          <span className="admin-tx-client-name">{t.cliente}</span>
+                          <span className="admin-tx-client-email">{t.email}</span>
                         </div>
                       </td>
-                      <td style={{ fontWeight: 700, color: '#059669' }}>{t.monto_formateado}</td>
-                      <td>{t.metodo_pago}</td>
+                      <td className="admin-tx-amount">{t.monto_formateado}</td>
+                      <td className="admin-tx-method">{t.metodo_pago}</td>
                       <td>
                         <span className={`admin-tx-badge admin-tx-badge--${t.tipo_cobertura.toLowerCase()}`}>
                           {t.tipo_cobertura}
@@ -442,10 +442,14 @@ export default function AdminDashboard() {
                       </td>
                       <td>
                         <span className={`admin-tx-badge admin-tx-badge--${t.estado.toLowerCase()}`}>
+                          <i className={`fa-solid ${t.estado === 'confirmado' ? 'fa-check' : 'fa-clock'}`} style={{ fontSize: '0.65rem', marginRight: '4px' }}></i>
                           {t.estado}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.78rem', color: '#64748b' }}>{t.fecha}</td>
+                      <td className="admin-tx-date">
+                        <i className="fa-regular fa-clock" style={{ marginRight: '4px', color: '#94a3b8' }}></i>
+                        {t.fecha}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -465,28 +469,25 @@ export default function AdminDashboard() {
                 </div>
                 <h3>Recordatorios de Hoy</h3>
               </div>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                {dashboardData.recordatorios_hoy.length} Notificaciones
+              </span>
             </div>
 
             <div className="admin-reminder-list">
               {dashboardData.recordatorios_hoy.map((r) => (
-                <div key={r.id} className={`admin-reminder-item admin-reminder-item--${r.tipo}`}>
-                  <i
-                    className={`fa-solid ${
-                      r.tipo === 'urgente'
-                        ? 'fa-triangle-exclamation'
-                        : r.tipo === 'exito'
-                        ? 'fa-circle-check'
-                        : 'fa-circle-info'
-                    }`}
-                    style={{
-                      marginTop: '2px',
-                      color: r.tipo === 'urgente' ? '#dc2626' : r.tipo === 'exito' ? '#166534' : '#0369a1',
-                    }}
-                  ></i>
-                  <div className="admin-reminder-content">
-                    <h4>{r.titulo}</h4>
-                    <p>{r.detalle}</p>
+                <div key={r.id} className={`admin-reminder-card admin-reminder-card--${r.tipo}`}>
+                  <div className="admin-reminder-card__top">
+                    <span className="admin-reminder-card__tag">
+                      <i className={`fa-solid ${r.tipo === 'urgente' ? 'fa-triangle-exclamation' : r.tipo === 'exito' ? 'fa-circle-check' : 'fa-circle-info'}`}></i>
+                      {r.tipo === 'urgente' ? 'Urgente' : r.tipo === 'exito' ? 'Auditoría' : 'Verificación'}
+                    </span>
+                    <span className="admin-reminder-card__time">
+                      <i className="fa-regular fa-clock"></i> {r.hora}
+                    </span>
                   </div>
+                  <h4 className="admin-reminder-card__title">{r.titulo}</h4>
+                  <p className="admin-reminder-card__detail">{r.detalle}</p>
                 </div>
               ))}
             </div>
@@ -501,18 +502,25 @@ export default function AdminDashboard() {
                 </div>
                 <h3>Actividad Reciente</h3>
               </div>
+              <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>
+                En tiempo real
+              </span>
             </div>
 
             <div className="admin-timeline">
               {dashboardData.actividad_reciente.map((act) => (
                 <div key={act.id} className="admin-timeline-item">
-                  <div className={`admin-timeline-icon admin-timeline-icon--${act.color}`}>
+                  <div className={`admin-timeline-node admin-timeline-node--${act.color}`}>
                     <i className={act.icono}></i>
                   </div>
-                  <div className="admin-timeline-info">
-                    <h5>{act.titulo}</h5>
-                    <p>{act.descripcion}</p>
-                    <div className="admin-timeline-time">{act.tiempo}</div>
+                  <div className="admin-timeline-content">
+                    <div className="admin-timeline-header">
+                      <h5 className="admin-timeline-title">{act.titulo}</h5>
+                      <span className="admin-timeline-time">
+                        <i className="fa-regular fa-clock"></i> {act.tiempo}
+                      </span>
+                    </div>
+                    <p className="admin-timeline-desc">{act.descripcion}</p>
                   </div>
                 </div>
               ))}

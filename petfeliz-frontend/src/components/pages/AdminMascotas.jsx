@@ -385,10 +385,10 @@ export default function AdminMascotas() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <i className="fa-solid fa-paw" style={{ color: '#059669', fontSize: '1.1rem' }}></i>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
-                  Directorio General de Pacientes (Mascotas)
+                  Mascotas
                 </h2>
               </div>
-              <span className="pet-badge-count">{mascotasFiltradas.length} Registradas</span>
+              <span className="pet-badge-count">{mascotasFiltradas.length} {mascotasFiltradas.length === 1 ? 'mascota' : 'mascotas'}</span>
             </div>
 
             {loading ? (
@@ -407,12 +407,14 @@ export default function AdminMascotas() {
                 <table className="pet-admin-table">
                   <thead>
                     <tr>
-                      <th>PACIENTE / MASCOTA</th>
-                      <th>ESPECIE & RAZA</th>
-                      <th>EDAD & PESO</th>
-                      <th>DUEÑO ASOCIADO</th>
-                      <th>HISTORIAL CITAS</th>
-                      <th style={{ textAlign: 'right' }}>ACCIONES</th>
+                      <th>Paciente</th>
+                      <th>Especie & Raza</th>
+                      <th>Edad & Peso</th>
+                      <th>Cliente</th>
+                      <th>Citas</th>
+                      <th style={{ textAlign: 'right', paddingRight: '1.25rem' }}>
+                        <i className="fa-solid fa-ellipsis" style={{ color: '#94a3b8' }}></i>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -447,7 +449,7 @@ export default function AdminMascotas() {
                         </td>
                         <td>
                           <div style={{ fontSize: '0.88rem', color: '#1e293b' }}>
-                            <div><strong>{m.edad}</strong></div>
+                            <div><span>{m.edad}</span></div>
                             <div style={{ color: '#64748b', fontSize: '0.8rem' }}>
                               {m.peso ? `${m.peso} kg` : 'Peso N/A'}
                             </div>
@@ -456,7 +458,7 @@ export default function AdminMascotas() {
                         <td>
                           {m.dueno ? (
                             <div className="owner-cell">
-                              <strong>{m.dueno.nombre}</strong>
+                              <span style={{ fontWeight: 400, color: '#334155' }}>{m.dueno.nombre}</span>
                               <span className="owner-sub">
                                 <i className="fa-solid fa-phone" style={{ fontSize: '0.75rem', marginRight: '4px' }}></i>
                                 {m.dueno.telefono}

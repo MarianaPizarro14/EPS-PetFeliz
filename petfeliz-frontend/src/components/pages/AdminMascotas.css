@@ -147,11 +147,10 @@
 
 .pet-admin-table th {
   background-color: #f8fafc;
-  color: #475569;
-  font-size: 0.78rem;
+  color: #64748b;
+  font-size: 0.82rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
   padding: 0.85rem 1.25rem;
   border-bottom: 1px solid #e2e8f0;
 }

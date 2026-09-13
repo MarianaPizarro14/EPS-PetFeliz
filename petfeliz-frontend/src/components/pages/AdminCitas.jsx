@@ -205,8 +205,8 @@ export default function AdminCitas() {
                   : 'Citas Canceladas'}
               </h3>
             </div>
-            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-              {citasFiltradas.length} {citasFiltradas.length === 1 ? 'registro encontrado' : 'registros encontrados'}
+            <span className="pet-badge-count">
+              {citasFiltradas.length} {citasFiltradas.length === 1 ? 'cita' : 'citas'}
             </span>
           </div>
 
@@ -232,12 +232,14 @@ export default function AdminCitas() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Fecha & Hora</th>
+                    <th>Fecha</th>
                     <th>Paciente</th>
-                    <th>Dueño / Cliente</th>
-                    <th>Servicio & Médico</th>
+                    <th>Cliente</th>
+                    <th>Servicio</th>
                     <th>Estado</th>
-                    <th style={{ textAlign: 'right' }}>Acción</th>
+                    <th style={{ textAlign: 'right', paddingRight: '1.25rem' }}>
+                      <i className="fa-solid fa-ellipsis" style={{ color: '#94a3b8' }}></i>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -245,8 +247,8 @@ export default function AdminCitas() {
                     <tr key={c.id_cita}>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 700, color: '#0f172a' }}>{c.fecha_formateada || c.fecha}</span>
-                          <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>{c.hora}</span>
+                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{c.fecha_formateada || c.fecha}</span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>{c.hora}</span>
                         </div>
                       </td>
                       <td>
@@ -266,7 +268,7 @@ export default function AdminCitas() {
                       </td>
                       <td>
                         <div className="admin-table__owner-info">
-                          <span className="admin-table__owner-name">{c.dueno.nombre}</span>
+                          <span style={{ fontWeight: 400, color: '#334155', fontSize: '0.88rem' }}>{c.dueno.nombre}</span>
                           <span className="admin-table__owner-phone">
                             <i className="fa-solid fa-phone" style={{ marginRight: '4px', fontSize: '0.7rem' }}></i>
                             {c.dueno.telefono}
@@ -275,8 +277,8 @@ export default function AdminCitas() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{c.servicio}</span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          <span style={{ fontWeight: 400, color: '#334155', fontSize: '0.88rem' }}>{c.servicio}</span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>
                             Dr(a). {c.veterinario.nombre}
                           </span>
                         </div>
@@ -308,9 +310,10 @@ export default function AdminCitas() {
                           type="button"
                           className="admin-btn-action"
                           onClick={() => setSelectedCitaDetail(c)}
+                          title="Ver detalle de la cita"
                         >
-                          <i className="fa-solid fa-eye"></i>
-                          <span>Detalle</span>
+                          <i className="fa-solid fa-eye" style={{ fontSize: '0.85rem' }}></i>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>Ver</span>
                         </button>
                       </td>
                     </tr>

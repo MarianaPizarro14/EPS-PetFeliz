@@ -414,13 +414,13 @@ export default function AdminDashboard() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Ref. Transacción</th>
-                    <th>Cliente / Usuario</th>
-                    <th>Monto (COP)</th>
-                    <th>Método Pago</th>
+                    <th>Referencia</th>
+                    <th>Cliente</th>
+                    <th>Monto</th>
+                    <th>Método</th>
                     <th>Cobertura</th>
                     <th>Estado</th>
-                    <th>Fecha & Hora</th>
+                    <th>Fecha</th>
                   </tr>
                 </thead>
                 <tbody>

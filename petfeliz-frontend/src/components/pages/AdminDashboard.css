@@ -424,39 +424,40 @@
   filter: brightness(1.12);
 }
 
-/* TOOLTIP FLOTANTE EN HOVER */
+/* TOOLTIP FLOTANTE EN HOVER (ESTILO CLARO ELEGANTE) */
 .admin-bar-tooltip {
   position: absolute;
-  top: -46px;
+  top: -52px;
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  background: #0f172a;
-  color: #ffffff;
-  padding: 0.35rem 0.65rem;
-  border-radius: 8px;
-  font-size: 0.72rem;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.75rem;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 20;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0.15rem;
 }
 
 .admin-bar-tooltip::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
-  border-width: 4px 4px 0 4px;
+  border-width: 5px 5px 0 5px;
   border-style: solid;
-  border-color: #0f172a transparent transparent transparent;
+  border-color: #ffffff transparent transparent transparent;
 }
 
 .admin-bar-col:hover .admin-bar-tooltip {
@@ -467,13 +468,14 @@
 
 .admin-bar-tooltip-val {
   font-weight: 700;
-  color: #38bdf8;
-  font-size: 0.76rem;
+  color: #059669;
+  font-size: 0.78rem;
 }
 
 .admin-bar-tooltip-date {
-  font-size: 0.65rem;
-  color: #cbd5e1;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #64748b;
 }
 
 /* DISTRIBUCIÓN DE SERVICIOS */

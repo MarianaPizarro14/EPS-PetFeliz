@@ -249,7 +249,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── SECCIÓN 1: GRÁFICO TENDENCIA DE CITAS + DISTRIBUCIÓN DE SERVICIOS ── */}
-        <div className="admin-content-grid" style={{ marginBottom: '1.5rem' }}>
+        <div className="admin-content-grid" style={{ marginBottom: '1.25rem' }}>
           {/* Gráfico de Barras: Tendencia de Citas (Últimos 14 días) */}
           <div className="admin-card">
             <div className="admin-card__header">
@@ -386,7 +386,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── SECCIÓN 2: TRANSACCIONES RECIENTES (PAGOS) CON BOTÓN EXPORTAR CSV ── */}
-        <div className="admin-card" style={{ marginBottom: '1.5rem' }}>
+        <div className="admin-card" style={{ marginBottom: '1.25rem' }}>
           <div className="admin-card__header">
             <div className="admin-card__title">
               <div className="admin-card__title-icon" style={{ background: '#ecfdf5', color: '#047857' }}>

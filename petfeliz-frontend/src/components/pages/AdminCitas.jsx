@@ -328,137 +328,155 @@ export default function AdminCitas() {
       {/* ── MODAL DETALLE DE CITAS ── */}
       {selectedCitaDetail && (
         <div className="dh-modal-backdrop">
-          <div className="dh-modal-box">
-            <div className="dh-modal-header">
+          <div className="dh-modal-box" style={{ maxWidth: '480px', padding: 0, overflow: 'hidden', borderRadius: '20px' }}>
+            {/* Header del Modal */}
+            <div style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '10px',
-                    background: '#ecfdf5',
-                    color: '#059669',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1rem',
-                  }}
+                <span className="pet-badge-count" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                  Cita #{selectedCitaDetail.id_cita}
+                </span>
+                <span
+                  className={`admin-table__badge ${
+                    selectedCitaDetail.id_estado === 2 || selectedCitaDetail.id_estado === 4
+                      ? 'admin-table__badge--confirmada'
+                      : selectedCitaDetail.id_estado === 3
+                      ? 'admin-table__badge--cancelada'
+                      : 'admin-table__badge--pendiente'
+                  }`}
                 >
-                  <i className="fa-regular fa-calendar-check"></i>
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Detalle de la cita</h3>
-                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    Cita #{selectedCitaDetail.id_cita}
-                  </span>
-                </div>
+                  <i
+                    className={`fa-solid ${
+                      selectedCitaDetail.id_estado === 2 || selectedCitaDetail.id_estado === 4
+                        ? 'fa-check'
+                        : selectedCitaDetail.id_estado === 3
+                        ? 'fa-xmark'
+                        : 'fa-clock'
+                    }`}
+                  ></i>
+                  {selectedCitaDetail.estado}
+                </span>
               </div>
               <button
                 type="button"
                 className="dh-modal-close"
                 onClick={() => setSelectedCitaDetail(null)}
+                style={{ background: '#f1f5f9', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark" style={{ fontSize: '0.9rem', color: '#64748b' }}></i>
               </button>
             </div>
 
-            <div
-              style={{
-                background: '#f8fafc',
-                padding: '1.25rem',
-                borderRadius: '14px',
-                border: '1px solid #e2e8f0',
-                marginBottom: '1.25rem',
-                fontSize: '0.88rem',
-              }}
-            >
+            <div style={{ padding: '1.5rem' }}>
+              {/* Tarjeta Destacada del Paciente / Mascota */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  marginBottom: '1rem',
-                  paddingBottom: '0.85rem',
-                  borderBottom: '1px solid #e2e8f0',
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+                  padding: '1.1rem 1.25rem',
+                  borderRadius: '16px',
+                  border: '1px solid #a7f3d0',
+                  marginBottom: '1.25rem',
                 }}
               >
                 <img
                   src={selectedCitaDetail.paciente.foto}
                   alt={selectedCitaDetail.paciente.nombre}
-                  style={{ width: '56px', height: '56px', borderRadius: '14px', objectFit: 'cover' }}
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #ffffff',
+                    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)',
+                  }}
+                  onError={(e) => {
+                    e.target.onerror = null
+                    e.target.src = 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg'
+                  }}
                 />
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                  <h3 style={{ margin: 0, fontFamily: "'Sora', sans-serif", fontSize: '1.25rem', fontWeight: 700, color: '#064e3b' }}>
                     {selectedCitaDetail.paciente.nombre}
-                  </h4>
-                  <span style={{ color: '#059669', fontWeight: 600, fontSize: '0.82rem' }}>
-                    {selectedCitaDetail.paciente.especie} • {selectedCitaDetail.paciente.raza}
+                  </h3>
+                  <span style={{ fontSize: '0.85rem', color: '#047857', fontWeight: 500 }}>
+                    <i className="fa-solid fa-paw" style={{ fontSize: '0.75rem', marginRight: '5px' }}></i>
+                    {selectedCitaDetail.paciente.especie} • {(selectedCitaDetail.paciente.raza || '').replace(' / Mestizo (Sin raza definida)', '').replace(' (Sin raza definida)', '')}
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Dueño:</span>
-                  <strong style={{ color: '#334155' }}>{selectedCitaDetail.dueno.nombre}</strong>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Tel: {selectedCitaDetail.dueno.telefono}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Email: {selectedCitaDetail.dueno.email}</div>
+              {/* Grid de 2 Columnas: Dueño y Veterinario */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+                {/* Columna Dueño */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.9rem 1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+                    <i className="fa-regular fa-user"></i>
+                    <span>Dueño</span>
+                  </div>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
+                    {selectedCitaDetail.dueno.nombre}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <i className="fa-solid fa-phone" style={{ fontSize: '0.7rem' }}></i>
+                    <span>{selectedCitaDetail.dueno.telefono}</span>
+                  </div>
+                  {selectedCitaDetail.dueno.email && (
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {selectedCitaDetail.dueno.email}
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Veterinario:</span>
-                  <strong style={{ color: '#334155' }}>
+                {/* Columna Veterinario */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.9rem 1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+                    <i className="fa-solid fa-user-doctor"></i>
+                    <span>Veterinario</span>
+                  </div>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
                     {selectedCitaDetail.veterinario.nombre ? (selectedCitaDetail.veterinario.nombre.startsWith('Dr') ? selectedCitaDetail.veterinario.nombre : `Dr(a). ${selectedCitaDetail.veterinario.nombre}`) : 'Veterinario Asignado'}
-                  </strong>
-                  <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 600 }}>
-                    {selectedCitaDetail.veterinario.especialidad}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 500, marginTop: '0.2rem' }}>
+                    {selectedCitaDetail.veterinario.especialidad || 'Medicina General'}
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginTop: '0.85rem',
-                  paddingTop: '0.85rem',
-                  borderTop: '1px dashed #cbd5e1',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem' }}>Fecha y hora:</span>
-                  <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                    {selectedCitaDetail.fecha_formateada || selectedCitaDetail.fecha} • {selectedCitaDetail.hora}
-                  </div>
+              {/* Barra Informativa: Fecha, Hora y Servicio */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', fontSize: '0.88rem' }}>
+                  <i className="fa-regular fa-calendar-days" style={{ color: '#059669' }}></i>
+                  <span style={{ fontWeight: 600 }}>{selectedCitaDetail.fecha_formateada || selectedCitaDetail.fecha}</span>
+                  <span style={{ color: '#94a3b8' }}>•</span>
+                  <i className="fa-regular fa-clock" style={{ color: '#0284c7' }}></i>
+                  <span>{selectedCitaDetail.hora}</span>
                 </div>
-                <div>
-                  <span
-                    className={`admin-table__badge ${
-                      selectedCitaDetail.id_estado === 2 || selectedCitaDetail.id_estado === 4
-                        ? 'admin-table__badge--confirmada'
-                        : selectedCitaDetail.id_estado === 3
-                        ? 'admin-table__badge--cancelada'
-                        : 'admin-table__badge--pendiente'
-                    }`}
-                  >
-                    {selectedCitaDetail.estado}
-                  </span>
-                </div>
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '0.25rem 0.65rem', borderRadius: '6px' }}>
+                  {selectedCitaDetail.servicio}
+                </span>
               </div>
 
+              {/* Bloque de Observación / Nota de la Cita */}
               {selectedCitaDetail.observacion && (
-                <div style={{ marginTop: '0.75rem', fontSize: '0.82rem', color: '#475569', background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-                  <strong>Observación:</strong> {selectedCitaDetail.observacion}
+                <div style={{ background: '#fffbe8', border: '1px solid #fde68a', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <i className="fa-regular fa-note-sticky" style={{ color: '#d97706', fontSize: '1rem', marginTop: '0.15rem' }}></i>
+                  <div style={{ fontSize: '0.85rem', color: '#92400e', lineHeight: '1.4' }}>
+                    <strong style={{ display: 'block', marginBottom: '0.15rem' }}>Observación:</strong>
+                    {selectedCitaDetail.observacion}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="dh-modal-footer">
+            {/* Footer con botón de cierre limpio */}
+            <div style={{ padding: '1rem 1.5rem 1.25rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', background: '#fafafa' }}>
               <button
                 type="button"
-                className="dh-btn-primary"
+                className="btn-primary-adm"
                 onClick={() => setSelectedCitaDetail(null)}
+                style={{ padding: '0.55rem 1.5rem', fontSize: '0.88rem' }}
               >
                 Cerrar
               </button>

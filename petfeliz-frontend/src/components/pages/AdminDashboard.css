@@ -365,17 +365,19 @@
 .admin-timeline {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 1.75rem;
   position: relative;
-  padding-left: 0.2rem;
+  padding-left: 0.25rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }
 
 .admin-timeline::before {
   content: '';
   position: absolute;
-  top: 18px;
-  bottom: 18px;
-  left: 19px;
+  top: 23px;
+  bottom: 23px;
+  left: 25px;
   width: 2px;
   background: #e2e8f0;
   z-index: 1;
@@ -384,22 +386,22 @@
 .admin-timeline-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
+  gap: 1.1rem;
   position: relative;
   z-index: 2;
 }
 
 .admin-timeline-node {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
   background: #ffffff;
-  box-shadow: 0 0 0 4px #ffffff;
+  box-shadow: 0 0 0 5px #ffffff;
   transition: transform 0.2s ease;
 }
 
@@ -428,9 +430,9 @@
 .admin-timeline-content {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   flex: 1;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .admin-timeline-header {
@@ -442,14 +444,14 @@
 
 .admin-timeline-title {
   font-family: 'Sora', sans-serif;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #0f172a;
   margin: 0;
 }
 
 .admin-timeline-time {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #94a3b8;
   white-space: nowrap;
@@ -457,11 +459,11 @@
 
 .admin-timeline-desc {
   font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 400;
   color: #64748b;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 /* INSIGNIAS DE TENDENCIA */

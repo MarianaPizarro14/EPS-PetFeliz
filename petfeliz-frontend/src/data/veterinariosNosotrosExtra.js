@@ -24,9 +24,9 @@ export const veterinariosExtra = {
   14: { desc: 'Esquemas de vacunación completos para perros, gatos y exóticos.', sede: 'Sede Laureles · Envigado', horario: 'Lun–Sáb 8am–3pm', gradient: 'linear-gradient(135deg,#93c5fd,#60a5fa)', icon: 'fa-solid fa-syringe' },
   15: { desc: 'Aplicación de biológicos con seguimiento de reacciones adversas.', sede: 'Sede Bello', horario: 'Mar–Dom 9am–4pm', gradient: 'linear-gradient(135deg,#93c5fd,#60a5fa)', icon: 'fa-solid fa-syringe' },
 
-  16: { desc: 'Co-fundadora y directora médica general de EPS PetFeliz.', sede: 'Sede Laureles', horario: 'Lun–Vie 8am–4pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-star' },
-  17: { desc: 'Director médico de la sede Bello, con 10 años en clínica veterinaria.', sede: 'Sede Bello', horario: 'Lun–Sáb 8am–3pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-star' },
-  18: { desc: 'Directora médica de la sede Envigado, especialista en medicina interna.', sede: 'Sede Envigado', horario: 'Lun–Vie 9am–5pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-star' },
+  16: { desc: 'Especialista en laboratorio clínico, hemogramas y análisis de muestras.', sede: 'Sede Laureles', horario: 'Lun–Vie 8am–4pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-flask' },
+  17: { desc: 'Director de laboratorio clínico y diagnóstico automatizado.', sede: 'Sede Bello', horario: 'Lun–Sáb 8am–3pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-flask' },
+  18: { desc: 'Directora de laboratorio clínico y pruebas de patología veterinaria.', sede: 'Sede Envigado', horario: 'Lun–Vie 9am–5pm', gradient: 'linear-gradient(135deg,#fde68a,#fbbf24)', icon: 'fa-solid fa-flask' },
 
   19: { desc: 'Especialista en cirugía de tejidos blandos y ortopedia veterinaria.', sede: 'Sede Laureles', horario: 'Lun–Vie 7am–3pm', gradient: 'linear-gradient(135deg,#fde68a,#95F7BB)', icon: 'fa-solid fa-scalpel' },
   20: { desc: 'Cirugía de tejidos blandos, esterilizaciones y procedimientos oncológicos.', sede: 'Sede Envigado', horario: 'Mar–Sáb 7am–2pm', gradient: 'linear-gradient(135deg,#fde68a,#95F7BB)', icon: 'fa-solid fa-scalpel' },

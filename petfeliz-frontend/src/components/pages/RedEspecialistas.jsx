@@ -6,7 +6,7 @@ import {
   faKitMedical,
   faShieldVirus,
   faSyringe,
-  faStar,
+  faFlask,
   faScissors,
   faTooth,
   faStethoscope,
@@ -17,25 +17,25 @@ import CtaBanner from '../CtaBanner'
 
 const especialidades = [
   {
-    title: 'Médico General',
-    filtro: 'Médico General',
-    count: 5,
+    title: 'Medicina General',
+    filtro: 'Medicina General',
+    count: 6,
     desc: 'Atención primaria, chequeos preventivos y seguimiento de salud integral.',
     colorClass: 'esp-teal',
     icon: faUserDoctor
   },
   {
-    title: 'Dermatólogo',
-    filtro: 'Dermatólogo',
+    title: 'Dermatología',
+    filtro: 'Dermatología',
     count: 2,
     desc: 'Tratamiento de alergias, infecciones de piel y problemas de pelaje.',
     colorClass: 'esp-purple',
     icon: faHandSparkles
   },
   {
-    title: 'Urgencias',
+    title: 'Urgencias 24/7',
     filtro: 'Urgencias',
-    count: 3,
+    count: 8,
     desc: 'Atención de emergencias críticas y estabilización de pacientes, 24/7.',
     colorClass: 'esp-red',
     icon: faKitMedical
@@ -57,12 +57,12 @@ const especialidades = [
     icon: faSyringe
   },
   {
-    title: 'Médico Director',
-    filtro: 'Médico Director',
+    title: 'Laboratorio Clínico',
+    filtro: 'Laboratorio Clínico',
     count: 3,
-    desc: 'Dirección médica general y de sede, con seguimiento clínico integral.',
+    desc: 'Análisis de muestras, hemogramas, coprológicos y pruebas diagnósticas.',
     colorClass: 'esp-yellow',
-    icon: faStar
+    icon: faFlask
   },
   {
     title: 'Cirugía',

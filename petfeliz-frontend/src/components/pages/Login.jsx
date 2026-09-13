@@ -94,7 +94,11 @@ function Login() {
         localStorage.removeItem(REMEMBER_KEY)
       }
 
-      navigate('/dashboard-client')
+      if (data.user?.rol === 'admin') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/dashboard-client')
+      }
     } catch {
       setError('No se pudo conectar con el servidor. Intenta de nuevo.')
       setLoading(false)

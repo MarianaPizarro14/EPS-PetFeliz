@@ -31,7 +31,7 @@ export default function AdminDashboard() {
     const fetchAdminData = async () => {
       const token = getStoredToken()
       if (!token) {
-        navigate('/admin-login')
+        navigate('/login')
         return
       }
 
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
         })
 
         if (res.status === 401 || res.status === 403) {
-          navigate('/admin-login')
+          navigate('/login')
           return
         }
 

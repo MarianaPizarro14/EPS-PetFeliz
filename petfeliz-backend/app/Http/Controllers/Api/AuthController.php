@@ -57,12 +57,27 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
+        $cliente = $user->cliente;
+
+        $primerNombre = $cliente
+            ? explode(' ', trim($cliente->nombre ?? 'Usuario'))[0]
+            : ($user->rol === 'admin' ? 'Administrador' : 'Usuario');
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso.',
-            'user' => $user,
             'token' => $token,
-        ]);
+            'user' => [
+                'id_usuario' => $user->id_usuario,
+                'id_cliente' => $cliente ? $cliente->id_cliente : null,
+                'email' => $user->email,
+                'rol' => $user->rol ?? 'cliente',
+                'nombre' => $primerNombre,
+                'nombreCompleto' => $cliente ? $cliente->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''),
+                'foto' => $cliente
+                    ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
+                    : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+            ],
+        ], 200);
     }
 
     public function logout(Request $request)

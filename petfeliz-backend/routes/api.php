@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'forgot']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 Route::post('/contacto', [ContactoController::class, 'send']);
@@ -30,10 +29,6 @@ Route::post('/webhooks/wompi', [WompiController::class, 'handleWebhook']);
 Route::get('/historias-cuidadores', [HistoriaCuidadorController::class, 'index']);
 Route::post('/historias-cuidadores', [HistoriaCuidadorController::class, 'store']);
 
-// Rutas de Administración de Historias de Cuidadores
-Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
-Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -43,6 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/perfil/delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+
+    // Rutas de Administración de Historias de Cuidadores
+    Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
+    Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
+
     Route::apiResource('mascotas', MascotaController::class);
 
     // Rutas de Notificaciones persistentes

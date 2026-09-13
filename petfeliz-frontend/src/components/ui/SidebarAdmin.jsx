@@ -34,7 +34,7 @@ export default function SidebarAdmin() {
     }
 
     clearStoredAuth()
-    navigate('/admin-login')
+    navigate('/login')
   }
 
   const isItemActive = (item) => {

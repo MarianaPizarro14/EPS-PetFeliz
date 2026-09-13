@@ -16,7 +16,7 @@ export default function ProtectedRouteAdmin({ children }) {
 
     const performLogout = () => {
       clearStoredAuth()
-      navigate('/admin-login', { replace: true })
+      navigate('/login', { replace: true })
     }
 
     const resetTimer = () => {
@@ -36,7 +36,7 @@ export default function ProtectedRouteAdmin({ children }) {
   }, [token, navigate])
 
   if (!token || !user || user.rol !== 'admin') {
-    return <Navigate to="/admin-login" replace />
+    return <Navigate to="/login" replace />
   }
 
   return children

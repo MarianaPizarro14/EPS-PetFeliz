@@ -6,8 +6,48 @@ import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './AdminDashboard.css'
 
-// Helper para exportar reportes en CSV tabular nativo para Excel sin advertencias de seguridad
-const exportToFormattedCSV = (data, filename = 'Historial_Pagos_EPS_PetFeliz.csv') => {
+// Formateador robusto de fecha y hora para Excel
+const formatFechaHoraExcel = (val) => {
+  if (!val) return ''
+  const str = String(val).trim()
+  if (!str) return ''
+
+  if (str.includes('/') && (str.includes('AM') || str.includes('PM') || str.includes('a.') || str.includes('p.'))) {
+    return str
+  }
+
+  if (str.includes('-')) {
+    try {
+      const cleanStr = str.replace('T', ' ').split('.')[0]
+      const parts = cleanStr.split(' ')
+      const dateParts = parts[0].split('-')
+      if (dateParts.length === 3) {
+        const yr = dateParts[0]
+        const mo = dateParts[1]
+        const dy = dateParts[2]
+        let timeStr = ''
+        if (parts[1]) {
+          const tParts = parts[1].split(':')
+          if (tParts.length >= 2) {
+            let h = parseInt(tParts[0], 10)
+            const ampm = h >= 12 ? 'p. m.' : 'a. m.'
+            h = h % 12 || 12
+            const hh = String(h).padStart(2, '0')
+            timeStr = ` ${hh}:${tParts[1]} ${ampm}`
+          }
+        }
+        return `${dy}/${mo}/${yr}${timeStr}`
+      }
+    } catch {
+      return str
+    }
+  }
+
+  return str
+}
+
+// Helper para exportar reportes a Excel (.xls) con diseño institucional en colores, formato tabular y badges
+const exportToFormattedExcel = (data, filename = 'Historial_Pagos_EPS_PetFeliz.xls') => {
   if (!data || data.length === 0) return
 
   const now = new Date()
@@ -31,76 +71,129 @@ const exportToFormattedCSV = (data, filename = 'Historial_Pagos_EPS_PetFeliz.csv
     'Referencia Transacción',
   ]
 
-  const rows = [
-    ['EPS PETFELIZ - REPORTE GENERAL DE TRANSACCIONES Y FACTURACIÓN', '', '', '', '', '', '', ''],
-    [`Fecha de Exportación: ${fechaExportacion}`, `Total Registros: ${data.length} Transacciones`, 'Generado por: Panel de Administración EPS PetFeliz', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    headers,
-  ]
-
-  data.forEach((item) => {
-    const id = item.ID_Pago ?? item.id_pago ?? item['ID Pago'] ?? ''
-    const fechaRaw = item.Fecha_Hora ?? item.fecha ?? item['Fecha / Hora'] ?? item['Fecha'] ?? ''
-
-    let fecha = fechaRaw
-    if (typeof fechaRaw === 'string' && fechaRaw.includes('-') && fechaRaw.includes(':')) {
-      try {
-        const [dPart, tPart] = fechaRaw.split(' ')
-        const [yr, mo, dy] = dPart.split('-')
-        fecha = `${dy}/${mo}/${yr} ${tPart || ''}`.trim()
-      } catch {
-        fecha = fechaRaw
+  const tableHeadersHtml = headers
+    .map(
+      (h, idx) => {
+        const align = idx === 2 ? 'left' : idx === 3 ? 'right' : 'center'
+        return `<th style="background-color: #059669; color: #ffffff; font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; padding: 10px 14px; border: 1px solid #047857; text-align: ${align};">${h}</th>`
       }
-    }
-
-    const cliente = item.Cliente ?? item.cliente ?? item['Cliente / Usuario'] ?? ''
-    const rawMonto = item.Monto_COP ?? item.monto_formateado ?? item.monto ?? item['Monto (COP)'] ?? item['Monto'] ?? ''
-    let montoFmt = ''
-    if (typeof rawMonto === 'number') {
-      montoFmt = `$ ${rawMonto.toLocaleString('es-CO')} COP`
-    } else if (String(rawMonto).startsWith('$')) {
-      montoFmt = String(rawMonto)
-    } else if (rawMonto !== '') {
-      montoFmt = `$ ${rawMonto}`
-    }
-
-    const metodoRaw = item.Metodo_Pago ?? item.metodo_pago ?? item['Método de Pago'] ?? item['Método Pago'] ?? ''
-    const metodo = String(metodoRaw).charAt(0).toUpperCase() + String(metodoRaw).slice(1)
-
-    const coberturaRaw = item.Tipo_Cobertura ?? item.tipo_cobertura ?? item['Tipo Cobertura'] ?? item['Cobertura'] ?? ''
-    const cobertura = String(coberturaRaw).toUpperCase()
-
-    const estado = String(item.Estado ?? item.estado ?? item['Estado'] ?? '').toUpperCase()
-    const ref = item.Referencia ?? item.referencia ?? item.referencia_transaccion ?? item['Referencia Transacción'] ?? ''
-
-    rows.push([
-      id,
-      fecha,
-      cliente,
-      montoFmt,
-      metodo,
-      cobertura,
-      estado,
-      ref,
-    ])
-  })
-
-  const csvContent = rows
-    .map((row) =>
-      row
-        .map((cell) => {
-          const strVal = String(cell ?? '')
-          if (strVal.includes(';') || strVal.includes('"') || strVal.includes('\n')) {
-            return `"${strVal.replace(/"/g, '""')}"`
-          }
-          return strVal
-        })
-        .join(';')
     )
-    .join('\r\n')
+    .join('')
 
-  const blob = new Blob(['\uFEFF' + csvContent], {
-    type: 'text/csv;charset=utf-8;',
+  const tableRowsHtml = data
+    .map((item, index) => {
+      const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc'
+
+      const id = item.ID_Pago ?? item.id_pago ?? item['ID Pago'] ?? (index + 1)
+      const rawFecha = item.Fecha_Hora ?? item.fecha ?? item['Fecha / Hora'] ?? item['Fecha'] ?? ''
+      const fecha = formatFechaHoraExcel(rawFecha)
+
+      const cliente = item.Cliente ?? item.cliente ?? item['Cliente / Usuario'] ?? 'Cliente EPS'
+
+      const rawMonto = item.Monto_COP ?? item.monto_formateado ?? item.monto ?? item['Monto (COP)'] ?? item['Monto'] ?? 0
+      let montoFmt = ''
+      if (typeof rawMonto === 'number') {
+        montoFmt = `$ ${rawMonto.toLocaleString('es-CO')} COP`
+      } else if (String(rawMonto).startsWith('$')) {
+        montoFmt = String(rawMonto)
+      } else if (rawMonto !== '') {
+        montoFmt = `$ ${rawMonto}`
+      } else {
+        montoFmt = '$ 0 COP'
+      }
+
+      const rawMetodo = item.Metodo_Pago ?? item.metodo_pago ?? item['Método de Pago'] ?? item['Método Pago'] ?? 'Tarjeta'
+      const metodo = String(rawMetodo).charAt(0).toUpperCase() + String(rawMetodo).slice(1)
+
+      const rawCobertura = item.Tipo_Cobertura ?? item.tipo_cobertura ?? item['Tipo Cobertura'] ?? item['Cobertura'] ?? 'PARTICULAR'
+      const cobertura = String(rawCobertura).toUpperCase()
+
+      const rawEstado = item.Estado ?? item.estado ?? item['Estado'] ?? 'confirmado'
+      const estadoStr = String(rawEstado).toLowerCase()
+      const estadoUpper = estadoStr.toUpperCase()
+
+      const ref = item.Referencia ?? item.referencia ?? item.referencia_transaccion ?? item['Referencia Transacción'] ?? `TX-${id}`
+
+      const estadoBg =
+        estadoStr === 'confirmado' ? '#d1fae5' : estadoStr === 'cancelado' ? '#fee2e2' : '#fef3c7'
+      const estadoColor =
+        estadoStr === 'confirmado' ? '#065f46' : estadoStr === 'cancelado' ? '#991b1b' : '#92400e'
+
+      return `
+        <tr style="background-color: ${bgColor};">
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; text-align: center; mso-number-format:'\\@';">${id}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; text-align: center; mso-number-format:'\\@';">${fecha}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; color: #0f172a; mso-number-format:'\\@';">${cliente}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; color: #059669; text-align: right; mso-number-format:'\\@';">${montoFmt}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; text-align: center; mso-number-format:'\\@';">${metodo}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; text-align: center; mso-number-format:'\\@';">${cobertura}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: ${estadoColor}; background-color: ${estadoBg}; mso-number-format:'\\@';">${estadoUpper}</td>
+          <td style="font-family: Consolas, monospace; font-size: 9.5pt; padding: 8px; border: 1px solid #cbd5e1; color: #475569; mso-number-format:'\\@';">${ref}</td>
+        </tr>
+      `
+    })
+    .join('')
+
+  const excelHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Historial de Pagos</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          td { mso-number-format: "\\@"; }
+        </style>
+      </head>
+      <body>
+        <table style="border-collapse: collapse; width: 100%;">
+          <colgroup>
+            <col style="width: 70pt;" />
+            <col style="width: 140pt;" />
+            <col style="width: 160pt;" />
+            <col style="width: 120pt;" />
+            <col style="width: 140pt;" />
+            <col style="width: 120pt;" />
+            <col style="width: 110pt;" />
+            <col style="width: 190pt;" />
+          </colgroup>
+          <tr>
+            <td colspan="8" style="background-color: #064e3b; color: #ffffff; font-family: Arial, sans-serif; font-size: 15pt; font-weight: bold; padding: 14px; text-align: center; border: 1px solid #047857;">
+              EPS PETFELIZ - REPORTE GENERAL DE TRANSACCIONES Y FACTURACIÓN
+            </td>
+          </tr>
+          <tr>
+            <td colspan="8" style="background-color: #ecfdf5; color: #047857; font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: bold; padding: 8px 12px; border: 1px solid #059669;">
+              Fecha de Exportación: ${fechaExportacion} &nbsp;&nbsp;|&nbsp;&nbsp; Total Registros: ${data.length} Transacciones &nbsp;&nbsp;|&nbsp;&nbsp; Generado por: Panel de Administración EPS PetFeliz
+            </td>
+          </tr>
+          <tr><td colspan="8" style="height: 10px;"></td></tr>
+          <thead>
+            <tr>
+              ${tableHeadersHtml}
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `
+
+  const blob = new Blob(['\uFEFF' + excelHtml], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
   })
 
   const link = document.createElement('a')
@@ -225,8 +318,8 @@ export default function AdminDashboard() {
         ? dashboardData.historial_completo_pagos
         : dashboardData.transacciones_recientes
 
-    const filename = `Historial_Pagos_EPS_PetFeliz_${new Date().toISOString().slice(0, 10)}.csv`
-    exportToFormattedCSV(dataToExport, filename)
+    const filename = `Historial_Pagos_EPS_PetFeliz_${new Date().toISOString().slice(0, 10)}.xls`
+    exportToFormattedExcel(dataToExport, filename)
   }
 
   return (
@@ -472,7 +565,12 @@ export default function AdminDashboard() {
               <h3>Transacciones Recientes & Facturación</h3>
             </div>
 
-            <button type="button" className="admin-btn-csv" onClick={handleExportCSV}>
+            <button
+              type="button"
+              className="admin-btn-csv"
+              onClick={handleExportCSV}
+              title="Descarga la plantilla estilizada en Excel (si Excel te muestra un aviso de confirmación, presiona 'Sí' para cargar los colores y formato)"
+            >
               <i className="fa-solid fa-file-excel"></i>
               <span>Exportar Reporte Excel</span>
             </button>

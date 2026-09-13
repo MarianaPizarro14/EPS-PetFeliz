@@ -35,6 +35,7 @@
     font-size: .72rem;
     color: var(--gray-soft);
     font-weight: 600;
+    margin-top: 6px;
 }
 
 .dash-side__nav {

@@ -105,8 +105,8 @@ export default function AdminCitas() {
 
       <main className="dash-main">
         <DashboardHeader
-          title="Gestión Integral de Citas Médicas"
-          subtitle="Monitoreo, búsqueda y expedientes de atenciones programadas en la red EPS PetFeliz"
+          title="Citas"
+          subtitle="Consulta y administra las citas agendadas en la clínica"
           usuario={usuario}
           onUserUpdated={setUsuario}
           showSearch={true}

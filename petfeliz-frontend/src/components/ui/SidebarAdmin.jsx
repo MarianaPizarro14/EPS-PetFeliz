@@ -54,7 +54,7 @@ export default function SidebarAdmin() {
             <i className="fa-solid fa-shield-halved" style={{ color: '#059669', fontSize: '1.1rem' }}></i>
             <span className="dash-side__logo-title">EPS PetFeliz</span>
           </div>
-          <span className="dash-side__logo-sub" style={{ color: '#059669', fontWeight: 700 }}>
+          <span className="dash-side__logo-sub" style={{ color: '#059669', fontWeight: 700, marginTop: '6px', display: 'block' }}>
             PANEL DE ADMINISTRACIÓN
           </span>
         </div>

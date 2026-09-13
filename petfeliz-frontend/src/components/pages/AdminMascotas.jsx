@@ -287,7 +287,11 @@ export default function AdminMascotas() {
       <SidebarAdmin />
 
       <main className="dash-main">
-        <DashboardHeader usuario={usuario} titulo="Gestión de Mascotas & Historias Clínicas" />
+        <DashboardHeader
+          title="Mascotas"
+          subtitle="Consulta y gestiona las mascotas registradas y sus historias clínicas"
+          usuario={usuario}
+        />
 
         <div className="dash-content">
           {errorGlobal && (

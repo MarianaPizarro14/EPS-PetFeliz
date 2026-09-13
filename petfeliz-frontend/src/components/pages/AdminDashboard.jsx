@@ -158,7 +158,7 @@ export default function AdminDashboard() {
       <main className="dash-main">
         <DashboardHeader
           title={`¡Bienvenido de nuevo, ${usuario.nombre}!`}
-          subtitle="Esto es lo que pasa hoy en la red clínica e indicadores de EPS PetFeliz"
+          subtitle="Resumen de actividad e indicadores clave de hoy"
           usuario={usuario}
           onUserUpdated={setUsuario}
           showSearch={true}

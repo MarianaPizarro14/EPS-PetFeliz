@@ -272,19 +272,48 @@ export default function AdminDashboard() {
               <div className="admin-chart-wrap">
                 <div className="admin-bar-chart">
                   {dashboardData.tendencia_citas.map((item, idx) => {
-                    const isMax = item.total > 0 && item.total === maxCitasChart
-                    const heightPct = Math.max(12, Math.round((item.total / maxCitasChart) * 100))
+                    const todayIso = new Date().toISOString().slice(0, 10)
+                    const isToday = item.iso === todayIso || idx === dashboardData.tendencia_citas.length - 1
+                    const isMax = item.total > 0 && item.total === maxCitasChart && !isToday
+                    const ratio = maxCitasChart > 0 ? item.total / maxCitasChart : 0
+                    const heightPct = Math.max(10, Math.round(ratio * 100))
+
+                    // Determinación de color por tono / significancia
+                    let barColor = '#a7f3d0' // verde tenue por defecto
+                    let barShadow = 'none'
+
+                    if (isToday) {
+                      barColor = '#0284c7' // Azul destacado para HOY
+                      barShadow = '0 4px 12px rgba(2, 132, 199, 0.35)'
+                    } else if (isMax) {
+                      barColor = '#047857' // Verde oscuro/intenso para el PICO MÁXIMO
+                      barShadow = '0 4px 12px rgba(4, 120, 87, 0.3)'
+                    } else if (ratio >= 0.65) {
+                      barColor = '#10b981' // Verde medio-alto
+                    } else if (ratio >= 0.35) {
+                      barColor = '#6ee7b7' // Verde medio
+                    } else {
+                      barColor = '#a7f3d0' // Verde tenue / clarito
+                    }
+
                     return (
                       <div
                         key={idx}
-                        className={`admin-bar-col ${isMax ? 'admin-bar-col--max' : ''}`}
+                        className={`admin-bar-col ${
+                          isToday ? 'admin-bar-col--today' : isMax ? 'admin-bar-col--max' : ''
+                        }`}
                       >
-                        <span className="admin-bar-val">{item.total}</span>
                         <div className="admin-bar-area">
                           <div
-                            className={`admin-bar-item ${isMax ? 'admin-bar-item--highlight' : ''}`}
-                            style={{ height: `${heightPct}%` }}
-                            title={`${item.fecha}: ${item.total} citas`}
+                            className="admin-bar-item"
+                            style={{
+                              height: `${heightPct}%`,
+                              backgroundColor: barColor,
+                              boxShadow: barShadow,
+                            }}
+                            title={`${item.fecha}: ${item.total} citas${
+                              isToday ? ' (Hoy)' : isMax ? ' (Pico máximo)' : ''
+                            }`}
                           ></div>
                         </div>
                         <span className="admin-bar-date">{item.fecha}</span>

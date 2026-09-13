@@ -381,8 +381,8 @@
 .admin-bar-chart {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.4rem;
+  justify-content: space-around;
+  gap: 0.85rem;
   height: 200px;
   padding: 1.25rem 0.75rem 0.75rem;
   background: #ffffff;
@@ -401,56 +401,40 @@
   cursor: pointer;
 }
 
-.admin-bar-val {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #64748b;
-  margin-bottom: 0.3rem;
-  transition: color 0.2s ease;
-}
-
-.admin-bar-col--max .admin-bar-val {
-  color: #047857;
-  font-size: 0.76rem;
-}
-
 .admin-bar-area {
   width: 100%;
-  height: 130px;
+  height: 140px;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   border-bottom: 2px solid #e2e8f0;
   padding-bottom: 1px;
 }
 
 .admin-bar-item {
-  width: 100%;
-  background: #a7f3d0;
-  border-radius: 6px 6px 0 0;
-  transition: height 0.4s ease, background-color 0.2s ease, transform 0.2s ease;
-}
-
-.admin-bar-item--highlight {
-  background: #059669;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  width: 14px;
+  max-width: 16px;
+  border-radius: 9999px 9999px 0 0;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, transform 0.2s ease;
 }
 
 .admin-bar-col:hover .admin-bar-item {
-  background: #34d399;
-  transform: translateY(-2px);
-}
-
-.admin-bar-col:hover .admin-bar-item--highlight {
-  background: #047857;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  filter: brightness(1.08);
 }
 
 .admin-bar-date {
   font-size: 0.65rem;
   font-weight: 600;
   color: #64748b;
-  margin-top: 0.45rem;
+  margin-top: 0.5rem;
   white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.admin-bar-col--today .admin-bar-date {
+  color: #0284c7;
+  font-weight: 700;
 }
 
 .admin-bar-col--max .admin-bar-date {

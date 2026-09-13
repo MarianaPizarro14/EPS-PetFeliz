@@ -45,6 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/mascotas/{id}', [AdminController::class, 'mascotasUpdate']);
     Route::delete('/admin/mascotas/{id}', [AdminController::class, 'mascotasDestroy']);
 
+    // Rutas de Administración de Veterinarios
+    Route::get('/admin/veterinarios', [AdminController::class, 'veterinariosIndex']);
+    Route::get('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosShow']);
+    Route::post('/admin/veterinarios', [AdminController::class, 'veterinariosStore']);
+    Route::put('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosUpdate']);
+    Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
+
     // Rutas de Administración de Historias de Cuidadores
     Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
     Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);

@@ -792,6 +792,14 @@ class AdminController extends Controller
         ], 200);
     }
 
+    /**
+     * Eliminar (soft delete) una mascota desde Administración.
+     */
+    public function mascotasDestroy($id)
+    {
+        $mascota = Mascota::where('id_mascota', $id)->firstOrFail();
+        $mascota->delete();
+
         return response()->json([
             'message' => 'Mascota eliminada correctamente.',
         ], 200);

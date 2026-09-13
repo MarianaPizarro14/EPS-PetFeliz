@@ -261,7 +261,7 @@ export default function AdminCitas() {
                           <div className="admin-table__patient-info">
                             <span className="admin-table__patient-name">{c.paciente.nombre}</span>
                             <span className="admin-table__patient-spec">
-                              {c.paciente.especie} • {c.paciente.raza}
+                              {c.paciente.especie} • {(c.paciente.raza || '').replace(' / Mestizo (Sin raza definida)', '').replace(' (Sin raza definida)', '')}
                             </span>
                           </div>
                         </div>
@@ -279,7 +279,7 @@ export default function AdminCitas() {
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{ fontWeight: 400, color: '#334155', fontSize: '0.88rem' }}>{c.servicio}</span>
                           <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 400 }}>
-                            Dr(a). {c.veterinario.nombre}
+                            {c.veterinario.nombre ? (c.veterinario.nombre.startsWith('Dr') ? c.veterinario.nombre : `Dr(a). ${c.veterinario.nombre}`) : 'Veterinario Asignado'}
                           </span>
                         </div>
                       </td>
@@ -407,7 +407,9 @@ export default function AdminCitas() {
 
                 <div>
                   <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Veterinario:</span>
-                  <strong style={{ color: '#334155' }}>Dr(a). {selectedCitaDetail.veterinario.nombre}</strong>
+                  <strong style={{ color: '#334155' }}>
+                    {selectedCitaDetail.veterinario.nombre ? (selectedCitaDetail.veterinario.nombre.startsWith('Dr') ? selectedCitaDetail.veterinario.nombre : `Dr(a). ${selectedCitaDetail.veterinario.nombre}`) : 'Veterinario Asignado'}
+                  </strong>
                   <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 600 }}>
                     {selectedCitaDetail.veterinario.especialidad}
                   </div>

@@ -6,6 +6,27 @@ import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './AdminDashboard.css'
 
+// Helper para exportar arreglos de objetos a CSV con soporte UTF-8
+const exportToCSV = (data, filename = 'Historial_Pagos_EPS_PetFeliz.csv') => {
+  if (!data || data.length === 0) return
+
+  const headers = Object.keys(data[0]).join(',')
+  const rows = data.map((obj) =>
+    Object.values(obj)
+      .map((val) => `"${String(val ?? '').replace(/"/g, '""')}"`)
+      .join(',')
+  )
+
+  const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n')
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement('a')
+  link.setAttribute('href', encodedUri)
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const storedUser = getStoredUser()
@@ -17,7 +38,21 @@ export default function AdminDashboard() {
   })
 
   const [dashboardData, setDashboardData] = useState({
-    stats: { total_citas_hoy: 0, citas_pendientes: 0, revisiones_hoy: 0 },
+    stats: {
+      total_citas_hoy: 0,
+      citas_hoy_trend: '+0% respecto a ayer',
+      citas_hoy_trend_positive: true,
+      citas_pendientes: 0,
+      pendientes_trend: '0% por atender',
+      pendientes_trend_positive: true,
+      revisiones_hoy: 0,
+      revisiones_trend: '+0% hoy',
+      revisiones_trend_positive: true,
+    },
+    tendencia_citas: [],
+    distribucion_servicios: [],
+    transacciones_recientes: [],
+    historial_completo_pagos: [],
     proximos_pacientes: [],
     recordatorios_hoy: [],
     actividad_reciente: [],
@@ -25,6 +60,7 @@ export default function AdminDashboard() {
 
   const [loading, setLoading] = useState(true)
   const [errorGlobal, setErrorGlobal] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedCitaDetail, setSelectedCitaDetail] = useState(null)
 
   useEffect(() => {
@@ -65,16 +101,70 @@ export default function AdminDashboard() {
     fetchAdminData()
   }, [navigate])
 
+  // Filtrado dinámico en tiempo real según la barra de búsqueda global
+  const searchLower = searchTerm.toLowerCase().trim()
+
+  const pacientesFiltrados = dashboardData.proximos_pacientes.filter((c) => {
+    if (!searchLower) return true
+    return (
+      c.paciente.nombre.toLowerCase().includes(searchLower) ||
+      c.paciente.especie.toLowerCase().includes(searchLower) ||
+      c.paciente.raza.toLowerCase().includes(searchLower) ||
+      c.dueno.nombre.toLowerCase().includes(searchLower) ||
+      c.dueno.telefono.toLowerCase().includes(searchLower) ||
+      c.servicio.toLowerCase().includes(searchLower) ||
+      c.veterinario.nombre.toLowerCase().includes(searchLower)
+    )
+  })
+
+  const transaccionesFiltradas = dashboardData.transacciones_recientes.filter((t) => {
+    if (!searchLower) return true
+    return (
+      t.cliente.toLowerCase().includes(searchLower) ||
+      t.email.toLowerCase().includes(searchLower) ||
+      t.metodo_pago.toLowerCase().includes(searchLower) ||
+      t.referencia.toLowerCase().includes(searchLower) ||
+      t.tipo_cobertura.toLowerCase().includes(searchLower)
+    )
+  })
+
+  // Cálculo del valor máximo para las barras del gráfico de 14 días
+  const maxCitasChart = Math.max(
+    5,
+    ...dashboardData.tendencia_citas.map((d) => d.total || 0)
+  )
+
+  const handleExportCSV = () => {
+    const dataToExport =
+      dashboardData.historial_completo_pagos.length > 0
+        ? dashboardData.historial_completo_pagos
+        : dashboardData.transacciones_recientes.map((t) => ({
+            'ID Pago': t.id_pago,
+            Fecha: t.fecha,
+            Cliente: t.cliente,
+            Monto: t.monto,
+            'Método Pago': t.metodo_pago,
+            Cobertura: t.tipo_cobertura,
+            Estado: t.estado,
+            Referencia: t.referencia,
+          }))
+
+    exportToCSV(dataToExport, `Historial_Pagos_EPS_PetFeliz_${new Date().toISOString().slice(0, 10)}.csv`)
+  }
+
   return (
     <div className="dash">
       <SidebarAdmin />
 
       <main className="dash-main">
         <DashboardHeader
-          title="Panel de Control Administrativo"
-          subtitle="Monitoreo en tiempo real de atenciones clínicas, expedientes de pacientes e indicadores de la EPS"
+          title={`¡Bienvenido de nuevo, ${usuario.nombre}!`}
+          subtitle="Esto es lo que pasa hoy en la red clínica e indicadores de EPS PetFeliz"
           usuario={usuario}
           onUserUpdated={setUsuario}
+          showSearch={true}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
         />
 
         {errorGlobal && (
@@ -84,14 +174,27 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── 3 TARJETAS DE ESTADÍSTICAS (VERDE, AZUL, ÁMBAR) ── */}
+        {/* ── 3 TARJETAS DE ESTADÍSTICAS CON INDICADORES DE TENDENCIA ── */}
         <div className="admin-dash-grid">
           {/* Card 1: Total Citas Hoy (Verde) */}
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
               <span>Total Citas Hoy</span>
               <h3>{loading ? '...' : dashboardData.stats.total_citas_hoy}</h3>
-              <div className="admin-stat-card__sub">Atenciones agendadas para el día</div>
+              <div
+                className={`admin-trend-badge ${
+                  dashboardData.stats.citas_hoy_trend_positive
+                    ? 'admin-trend-badge--positive'
+                    : 'admin-trend-badge--negative'
+                }`}
+              >
+                <i
+                  className={`fa-solid ${
+                    dashboardData.stats.citas_hoy_trend_positive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'
+                  }`}
+                ></i>
+                <span>{dashboardData.stats.citas_hoy_trend || '+12.5% este mes'}</span>
+              </div>
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--green">
               <i className="fa-solid fa-calendar-check"></i>
@@ -103,7 +206,20 @@ export default function AdminDashboard() {
             <div className="admin-stat-card__info">
               <span>Citas Pendientes</span>
               <h3>{loading ? '...' : dashboardData.stats.citas_pendientes}</h3>
-              <div className="admin-stat-card__sub">Por confirmar o en espera</div>
+              <div
+                className={`admin-trend-badge ${
+                  dashboardData.stats.pendientes_trend_positive
+                    ? 'admin-trend-badge--positive'
+                    : 'admin-trend-badge--negative'
+                }`}
+              >
+                <i
+                  className={`fa-solid ${
+                    dashboardData.stats.pendientes_trend_positive ? 'fa-circle-check' : 'fa-clock'
+                  }`}
+                ></i>
+                <span>{dashboardData.stats.pendientes_trend || '42 por atender'}</span>
+              </div>
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--blue">
               <i className="fa-solid fa-clock"></i>
@@ -115,15 +231,179 @@ export default function AdminDashboard() {
             <div className="admin-stat-card__info">
               <span>Revisiones / Atendidas</span>
               <h3>{loading ? '...' : dashboardData.stats.revisiones_hoy}</h3>
-              <div className="admin-stat-card__sub">Consultas procesadas con éxito</div>
+              <div
+                className={`admin-trend-badge ${
+                  dashboardData.stats.revisiones_trend_positive
+                    ? 'admin-trend-badge--positive'
+                    : 'admin-trend-badge--negative'
+                }`}
+              >
+                <i className="fa-solid fa-user-doctor"></i>
+                <span>{dashboardData.stats.revisiones_trend || '+5 hoy'}</span>
+              </div>
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--amber">
-              <i className="fa-solid fa-user-doctor"></i>
+              <i className="fa-solid fa-stethoscope"></i>
             </div>
           </div>
         </div>
 
-        {/* ── LAYOUT DE CONTENIDO DE DOS COLUMNAS ── */}
+        {/* ── SECCIÓN 1: GRÁFICO TENDENCIA DE CITAS + DISTRIBUCIÓN DE SERVICIOS ── */}
+        <div className="admin-content-grid" style={{ marginBottom: '1.5rem' }}>
+          {/* Gráfico de Barras: Tendencia de Citas (Últimos 14 días) */}
+          <div className="admin-card">
+            <div className="admin-card__header">
+              <div className="admin-card__title">
+                <div className="admin-card__title-icon">
+                  <i className="fa-solid fa-chart-column"></i>
+                </div>
+                <h3>Tendencia de Citas (Últimos 14 Días)</h3>
+              </div>
+              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                Volumen diario de atenciones
+              </span>
+            </div>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.4rem' }}></i>
+              </div>
+            ) : (
+              <div className="admin-chart-wrap">
+                <div className="admin-bar-chart">
+                  {dashboardData.tendencia_citas.map((item, idx) => {
+                    const heightPct = Math.max(12, Math.round((item.total / maxCitasChart) * 100))
+                    return (
+                      <div key={idx} className="admin-bar-col">
+                        <span className="admin-bar-val">{item.total}</span>
+                        <div className="admin-bar-track">
+                          <div
+                            className="admin-bar-fill"
+                            style={{ height: `${heightPct}%` }}
+                            title={`${item.fecha}: ${item.total} citas`}
+                          ></div>
+                        </div>
+                        <span className="admin-bar-date">{item.fecha}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Distribución de Servicios */}
+          <div className="admin-card">
+            <div className="admin-card__header">
+              <div className="admin-card__title">
+                <div className="admin-card__title-icon" style={{ background: '#f0fdf4', color: '#166534' }}>
+                  <i className="fa-solid fa-pie-chart"></i>
+                </div>
+                <h3>Distribución de Servicios</h3>
+              </div>
+            </div>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.4rem' }}></i>
+              </div>
+            ) : (
+              <div className="admin-service-dist-list">
+                {dashboardData.distribucion_servicios.map((s, idx) => (
+                  <div key={idx} className="admin-service-item">
+                    <div className="admin-service-info">
+                      <span className="admin-service-name">{s.servicio}</span>
+                      <span className="admin-service-stats">
+                        {s.total} ({s.porcentaje}%)
+                      </span>
+                    </div>
+                    <div className="admin-service-track">
+                      <div
+                        className="admin-service-fill"
+                        style={{
+                          width: `${Math.min(100, s.porcentaje)}%`,
+                          backgroundColor: s.color || '#059669',
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── SECCIÓN 2: TRANSACCIONES RECIENTES (PAGOS) CON BOTÓN EXPORTAR CSV ── */}
+        <div className="admin-card" style={{ marginBottom: '1.5rem' }}>
+          <div className="admin-card__header">
+            <div className="admin-card__title">
+              <div className="admin-card__title-icon" style={{ background: '#ecfdf5', color: '#047857' }}>
+                <i className="fa-solid fa-receipt"></i>
+              </div>
+              <h3>Transacciones Recientes & Facturación</h3>
+            </div>
+
+            <button type="button" className="admin-btn-csv" onClick={handleExportCSV}>
+              <i className="fa-solid fa-file-csv"></i>
+              <span>Exportar Todo a CSV</span>
+            </button>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+              <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.4rem' }}></i>
+            </div>
+          ) : transaccionesFiltradas.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+              <i className="fa-solid fa-inbox" style={{ fontSize: '1.6rem', marginBottom: '0.4rem', color: '#94a3b8' }}></i>
+              <p>No se encontraron transacciones con el criterio de búsqueda "{searchTerm}".</p>
+            </div>
+          ) : (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Ref. Transacción</th>
+                    <th>Cliente / Usuario</th>
+                    <th>Monto (COP)</th>
+                    <th>Método</th>
+                    <th>Cobertura</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transaccionesFiltradas.map((t) => (
+                    <tr key={t.id_pago}>
+                      <td style={{ fontWeight: 700, color: '#0f172a' }}>{t.referencia}</td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{t.cliente}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.email}</span>
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: '#059669' }}>{t.monto_formateado}</td>
+                      <td>{t.metodo_pago}</td>
+                      <td>
+                        <span className={`admin-tx-badge admin-tx-badge--${t.tipo_cobertura.toLowerCase()}`}>
+                          {t.tipo_cobertura}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`admin-tx-badge admin-tx-badge--${t.estado.toLowerCase()}`}>
+                          {t.estado}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.78rem', color: '#64748b' }}>{t.fecha}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* ── SECCIÓN 3: PRÓXIMOS PACIENTES + RECORDATORIOS & ACTIVIDAD ── */}
         <div className="admin-content-grid">
           {/* Columna Izquierda: Tabla Próximos Pacientes */}
           <div className="admin-card">
@@ -135,7 +415,7 @@ export default function AdminDashboard() {
                 <h3>Próximos Pacientes</h3>
               </div>
               <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-                {dashboardData.proximos_pacientes.length} Pacientes en agenda
+                {pacientesFiltrados.length} Pacientes en agenda
               </span>
             </div>
 
@@ -144,10 +424,10 @@ export default function AdminDashboard() {
                 <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}></i>
                 <p>Cargando lista de atenciones médicas...</p>
               </div>
-            ) : dashboardData.proximos_pacientes.length === 0 ? (
+            ) : pacientesFiltrados.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#64748b' }}>
                 <i className="fa-solid fa-calendar-xmark" style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#94a3b8' }}></i>
-                <p>No hay citas registradas para la fecha seleccionada.</p>
+                <p>No hay citas o pacientes que coincidan con la búsqueda.</p>
               </div>
             ) : (
               <div className="admin-table-wrap">
@@ -163,7 +443,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dashboardData.proximos_pacientes.map((c) => (
+                    {pacientesFiltrados.map((c) => (
                       <tr key={c.id_cita}>
                         <td className="admin-table__time">{c.hora}</td>
                         <td>

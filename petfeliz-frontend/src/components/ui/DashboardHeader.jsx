@@ -84,6 +84,9 @@ export default function DashboardHeader({
   onUserUpdated,
   extraActions,
   openProfileTrigger,
+  searchTerm,
+  onSearchChange,
+  showSearch = false,
 }) {
   const navigate = useNavigate()
 
@@ -528,6 +531,19 @@ export default function DashboardHeader({
       </div>
 
       <div className="dash-header__right">
+        {showSearch && (
+          <div className="dash-header__search-wrap">
+            <i className="fa-solid fa-magnifying-glass dash-header__search-icon"></i>
+            <input
+              type="text"
+              className="dash-header__search-input"
+              placeholder="Buscar pacientes, clientes, pagos..."
+              value={searchTerm || ''}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+            />
+          </div>
+        )}
+
         {extraActions}
 
         {/* ── 1. NOTIFICACIONES (Campana con badge y desplegable) ── */}

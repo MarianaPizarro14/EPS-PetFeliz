@@ -336,20 +336,20 @@ export default function AdminCitas() {
                     width: '36px',
                     height: '36px',
                     borderRadius: '10px',
-                    background: '#e0f2fe',
-                    color: '#0284c7',
+                    background: '#ecfdf5',
+                    color: '#059669',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1rem',
                   }}
                 >
-                  <i className="fa-solid fa-stethoscope"></i>
+                  <i className="fa-regular fa-calendar-check"></i>
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Expediente de Atención Médica</h3>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Detalle de la cita</h3>
                   <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    Cita No. #{selectedCitaDetail.id_cita} — EPS PetFeliz
+                    Cita #{selectedCitaDetail.id_cita}
                   </span>
                 </div>
               </div>
@@ -399,14 +399,14 @@ export default function AdminCitas() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Propietario / Dueño:</span>
+                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Dueño:</span>
                   <strong style={{ color: '#334155' }}>{selectedCitaDetail.dueno.nombre}</strong>
                   <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Tel: {selectedCitaDetail.dueno.telefono}</div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Email: {selectedCitaDetail.dueno.email}</div>
                 </div>
 
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Médico Tratante:</span>
+                  <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block' }}>Veterinario:</span>
                   <strong style={{ color: '#334155' }}>Dr(a). {selectedCitaDetail.veterinario.nombre}</strong>
                   <div style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 600 }}>
                     {selectedCitaDetail.veterinario.especialidad}
@@ -425,9 +425,9 @@ export default function AdminCitas() {
                 }}
               >
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '0.78rem' }}>Fecha y Hora Programada:</span>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                    {selectedCitaDetail.fecha_formateada || selectedCitaDetail.fecha} - {selectedCitaDetail.hora}
+                  <span style={{ color: '#64748b', fontSize: '0.78rem' }}>Fecha y hora:</span>
+                  <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                    {selectedCitaDetail.fecha_formateada || selectedCitaDetail.fecha} • {selectedCitaDetail.hora}
                   </div>
                 </div>
                 <div>
@@ -447,7 +447,7 @@ export default function AdminCitas() {
 
               {selectedCitaDetail.observacion && (
                 <div style={{ marginTop: '0.75rem', fontSize: '0.82rem', color: '#475569', background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-                  <strong>Observación registrada:</strong> {selectedCitaDetail.observacion}
+                  <strong>Observación:</strong> {selectedCitaDetail.observacion}
                 </div>
               )}
             </div>
@@ -458,7 +458,7 @@ export default function AdminCitas() {
                 className="dh-btn-primary"
                 onClick={() => setSelectedCitaDetail(null)}
               >
-                Entendido / Cerrar
+                Cerrar
               </button>
             </div>
           </div>

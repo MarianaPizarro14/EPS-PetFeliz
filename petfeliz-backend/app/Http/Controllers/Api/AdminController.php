@@ -110,39 +110,67 @@ class AdminController extends Controller
             ];
         }
 
-        // 3. Distribución de Servicios basada en Citas
-        $citasPorServicio = DB::table('cita')
+        // 3. Distribución de Servicios basada en el Catálogo Clínico de EPS PetFeliz
+        $serviciosCatalogo = [
+            ['servicio' => 'Consulta Veterinaria General', 'color' => '#059669', 'alias' => ['Consulta General', 'consulta']],
+            ['servicio' => 'Vacunación & Desparasitación', 'color' => '#0284c7', 'alias' => ['vacunacion', 'desparasitacion']],
+            ['servicio' => 'Urgencias & Cuidados Críticos', 'color' => '#d97706', 'alias' => ['urgencias', 'emergencias']],
+            ['servicio' => 'Odontología Veterinaria', 'color' => '#ec4899', 'alias' => ['odontologia']],
+            ['servicio' => 'Cirugía Veterinaria', 'color' => '#6366f1', 'alias' => ['cirugia']],
+            ['servicio' => 'Exámenes & Diagnóstico', 'color' => '#8b5cf6', 'alias' => ['laboratorio', 'examenes']],
+        ];
+
+        $citasPorServicioRaw = DB::table('cita')
             ->leftJoin('servicio', 'cita.id_servicio', '=', 'servicio.id_servicio')
-            ->select(DB::raw("COALESCE(servicio.nombre, cita.motivo, 'Consulta General') as nombre_servicio"), DB::raw('count(*) as total'))
+            ->select(DB::raw("COALESCE(servicio.nombre, cita.motivo, 'Consulta Veterinaria General') as nombre_servicio"), DB::raw('count(*) as total'))
             ->groupBy('nombre_servicio')
-            ->orderBy('total', 'desc')
             ->get();
 
         $totalCitasGlobal = Cita::count() ?: 1;
-        
-        $colores = ['#059669', '#0284c7', '#d97706', '#8b5cf6', '#ec4899', '#6366f1'];
-        $idxColor = 0;
-        
-        $distribucionServicios = $citasPorServicio->map(function ($item) use ($totalCitasGlobal, &$colores, &$idxColor) {
-            $pct = round(($item->total / $totalCitasGlobal) * 100, 1);
-            $color = $colores[$idxColor % count($colores)];
-            $idxColor++;
+
+        $distribucionServicios = collect($serviciosCatalogo)->map(function ($cat) use ($citasPorServicioRaw, $totalCitasGlobal) {
+            $matchedCount = 0;
+            foreach ($citasPorServicioRaw as $rawItem) {
+                $nameLower = mb_strtolower($rawItem->nombre_servicio);
+                $catLower = mb_strtolower($cat['servicio']);
+                $isMatch = false;
+
+                if (str_contains($nameLower, 'consulta') || str_contains($catLower, 'consulta')) {
+                    if (str_contains($nameLower, 'consulta') && str_contains($catLower, 'consulta')) $isMatch = true;
+                }
+
+                if (!$isMatch && str_contains($nameLower, mb_strtolower($cat['servicio']))) {
+                    $isMatch = true;
+                }
+
+                if (!$isMatch && isset($cat['alias'])) {
+                    foreach ($cat['alias'] as $alias) {
+                        if (str_contains($nameLower, $alias)) {
+                            $isMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ($isMatch) {
+                    $matchedCount += $rawItem->total;
+                }
+            }
+
+            // Fallback si la BD no tiene clasificadas citas aún en este servicio pero es la consulta principal
+            if ($cat['servicio'] === 'Consulta Veterinaria General' && $matchedCount === 0 && $citasPorServicioRaw->isNotEmpty()) {
+                $matchedCount = $citasPorServicioRaw->sum('total');
+            }
+
+            $pct = round(($matchedCount / $totalCitasGlobal) * 100, 1);
+
             return [
-                'servicio' => $item->nombre_servicio,
-                'total' => $item->total,
-                'porcentaje' => $pct > 0 ? $pct : 15,
-                'color' => $color,
+                'servicio' => $cat['servicio'],
+                'total' => $matchedCount,
+                'porcentaje' => $pct,
+                'color' => $cat['color'],
             ];
         });
-
-        if ($distribucionServicios->isEmpty()) {
-            $distribucionServicios = collect([
-                ['servicio' => 'Consulta Veterinaria General', 'total' => 14, 'porcentaje' => 45.0, 'color' => '#059669'],
-                ['servicio' => 'Vacunación & Desparasitación', 'total' => 8, 'porcentaje' => 25.0, 'color' => '#0284c7'],
-                ['servicio' => 'Urgencias y Cuidados Críticos', 'total' => 5, 'porcentaje' => 16.0, 'color' => '#d97706'],
-                ['servicio' => 'Exámenes de Laboratorio', 'total' => 4, 'porcentaje' => 14.0, 'color' => '#8b5cf6'],
-            ]);
-        }
 
         // 4. Transacciones Recientes y Todo el Historial de Pagos para CSV
         $pagosAll = Pago::with(['cliente.usuario'])

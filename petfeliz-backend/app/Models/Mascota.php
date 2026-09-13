@@ -20,6 +20,8 @@ class Mascota extends Model
         'sexo',
         'fecha_nacimiento',
         'peso',
+        'alergias',
+        'vacunas',
         'foto_mascota',
         'id_cliente',
     ];

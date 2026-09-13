@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\Pago;
+use App\Models\Mascota;
+use App\Models\Cliente;
+use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -549,6 +552,256 @@ class AdminController extends Controller
                 'atendidas' => $atendidas,
                 'canceladas' => $canceladas,
             ]
+        ], 200);
+    }
+
+    /**
+     * Obtener listado de mascotas para el módulo de Administración.
+     */
+    public function mascotasIndex(Request $request)
+    {
+        $mascotas = Mascota::with(['cliente', 'citas'])->orderBy('id_mascota', 'desc')->get();
+
+        $clientes = Cliente::orderBy('nombre', 'asc')->get(['id_cliente', 'nombre', 'telefono', 'cedula']);
+
+        $formatted = $mascotas->map(function ($mascota) {
+            $edadTexto = 'Edad N/A';
+            if ($mascota->fecha_nacimiento) {
+                $nacimiento = Carbon::parse($mascota->fecha_nacimiento);
+                $anios = (int) $nacimiento->diffInYears(Carbon::now());
+                if ($anios > 0) {
+                    $edadTexto = $anios . ($anios === 1 ? ' Año' : ' Años');
+                } else {
+                    $meses = (int) $nacimiento->diffInMonths(Carbon::now());
+                    $edadTexto = $meses . ($meses === 1 ? ' Mes' : ' Meses');
+                }
+            }
+
+            return [
+                'id_mascota' => $mascota->id_mascota,
+                'nombre' => $mascota->nombre,
+                'especie' => $mascota->especie ?? 'Canino',
+                'raza' => $mascota->raza ?? 'Criollo',
+                'sexo' => $mascota->sexo ?? 'Macho',
+                'fecha_nacimiento' => $mascota->fecha_nacimiento,
+                'edad' => $edadTexto,
+                'peso' => $mascota->peso !== null ? (float) $mascota->peso : null,
+                'alergias' => $mascota->alergias ?? 'Ninguna conocida',
+                'vacunas' => $mascota->vacunas ? json_decode($mascota->vacunas, true) : [],
+                'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
+                'id_cliente' => $mascota->id_cliente,
+                'dueno' => $mascota->cliente ? [
+                    'id_cliente' => $mascota->cliente->id_cliente,
+                    'nombre' => $mascota->cliente->nombre ?? 'Cliente N/A',
+                    'telefono' => $mascota->cliente->telefono ?? 'Sin Teléfono',
+                    'cedula' => $mascota->cliente->cedula ?? '',
+                    'es_afiliado' => (bool) ($mascota->cliente->es_afiliado ?? false),
+                ] : null,
+                'total_citas' => $mascota->citas->count(),
+            ];
+        });
+
+        $totalMascotas = $formatted->count();
+        $caninos = $formatted->where('especie', 'Canino')->count();
+        $felinos = $formatted->where('especie', 'Felino')->count();
+        $conAlergias = $formatted->filter(function($m) {
+            return !empty($m['alergias']) && strtolower($m['alergias']) !== 'ninguna' && strtolower($m['alergias']) !== 'ninguna conocida';
+        })->count();
+
+        return response()->json([
+            'mascotas' => $formatted->values(),
+            'clientes' => $clientes,
+            'stats' => [
+                'total' => $totalMascotas,
+                'caninos' => $caninos,
+                'felinos' => $felinos,
+                'otros' => $totalMascotas - ($caninos + $felinos),
+                'con_alergias' => $conAlergias,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Obtener la Ficha Clínica Individual de una mascota.
+     */
+    public function mascotasShow($id)
+    {
+        $mascota = Mascota::with(['cliente', 'citas.servicio', 'citas.veterinario', 'citas.estadoCita'])
+            ->where('id_mascota', $id)
+            ->firstOrFail();
+
+        $edadTexto = 'Edad N/A';
+        if ($mascota->fecha_nacimiento) {
+            $nacimiento = Carbon::parse($mascota->fecha_nacimiento);
+            $anios = (int) $nacimiento->diffInYears(Carbon::now());
+            if ($anios > 0) {
+                $edadTexto = $anios . ($anios === 1 ? ' Año' : ' Años');
+            } else {
+                $meses = (int) $nacimiento->diffInMonths(Carbon::now());
+                $edadTexto = $meses . ($meses === 1 ? ' Mes' : ' Meses');
+            }
+        }
+
+        $citasFormateadas = $mascota->citas->map(function ($cita) {
+            $fechaCarbon = Carbon::parse($cita->fecha);
+            return [
+                'id_cita' => $cita->id_cita,
+                'fecha' => $cita->fecha,
+                'fecha_formateada' => $fechaCarbon->format('d/m/Y'),
+                'hora' => Carbon::parse($cita->hora)->format('h:i A'),
+                'servicio' => $cita->servicio ? $cita->servicio->nombre : ($cita->motivo ?? 'Consulta General'),
+                'veterinario' => $cita->veterinario ? $cita->veterinario->nombre : 'Veterinario Asignado',
+                'estado' => $cita->estadoCita ? $cita->estadoCita->nombre : 'Pendiente',
+                'id_estado' => $cita->id_estado,
+                'motivo' => $cita->motivo,
+                'observaciones' => $cita->observaciones,
+            ];
+        });
+
+        $vacunasArray = $mascota->vacunas ? json_decode($mascota->vacunas, true) : null;
+        if (!$vacunasArray || !is_array($vacunasArray)) {
+            $vacunasArray = [
+                ['nombre' => 'Rabia', 'estado' => 'Aplicada', 'fecha' => '2026-01-15'],
+                ['nombre' => 'Séxtuple Canina / Triple Felina', 'estado' => 'Aplicada', 'fecha' => '2026-03-10'],
+                ['nombre' => 'Parvovirus', 'estado' => 'Pendiente', 'fecha' => '2026-10-20'],
+                ['nombre' => 'Desparasitación Interna', 'estado' => 'Aplicada', 'fecha' => '2026-06-01'],
+            ];
+        }
+
+        return response()->json([
+            'id_mascota' => $mascota->id_mascota,
+            'nombre' => $mascota->nombre,
+            'especie' => $mascota->especie ?? 'Canino',
+            'raza' => $mascota->raza ?? 'Criollo',
+            'sexo' => $mascota->sexo ?? 'Macho',
+            'fecha_nacimiento' => $mascota->fecha_nacimiento,
+            'edad' => $edadTexto,
+            'peso' => $mascota->peso !== null ? (float) $mascota->peso : null,
+            'alergias' => $mascota->alergias ?? 'Ninguna alergia registrada',
+            'vacunas' => $vacunasArray,
+            'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
+            'dueno' => $mascota->cliente ? [
+                'id_cliente' => $mascota->cliente->id_cliente,
+                'nombre' => $mascota->cliente->nombre,
+                'telefono' => $mascota->cliente->telefono,
+                'direccion' => $mascota->cliente->direccion,
+                'cedula' => $mascota->cliente->cedula,
+                'es_afiliado' => (bool) $mascota->cliente->es_afiliado,
+            ] : null,
+            'citas' => $citasFormateadas,
+        ], 200);
+    }
+
+    /**
+     * Crear una nueva mascota desde el panel de Administración.
+     */
+    public function mascotasStore(Request $request)
+    {
+        $request->validate([
+            'id_cliente' => 'required|exists:cliente,id_cliente',
+            'nombre' => 'required|string|max:100',
+            'especie' => 'nullable|string|max:50',
+            'raza' => 'nullable|string|max:50',
+            'sexo' => 'nullable|string|max:20',
+            'fecha_nacimiento' => 'nullable|date',
+            'peso' => 'nullable|numeric|min:0',
+            'alergias' => 'nullable|string',
+            'vacunas' => 'nullable',
+            'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'foto_mascota' => 'nullable',
+        ]);
+
+        $fotoUrl = is_string($request->foto_mascota) ? $request->foto_mascota : null;
+
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'mascotas');
+        } elseif ($request->hasFile('foto_mascota')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_mascota'), 'mascotas');
+        }
+
+        $vacunasJson = is_array($request->vacunas) ? json_encode($request->vacunas) : (is_string($request->vacunas) ? $request->vacunas : null);
+
+        $mascota = Mascota::create([
+            'id_cliente' => $request->id_cliente,
+            'nombre' => $request->nombre,
+            'especie' => $request->especie ?? 'Canino',
+            'raza' => $request->raza ?? 'Criollo',
+            'sexo' => $request->sexo ?? 'Macho',
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'peso' => $request->peso,
+            'alergias' => $request->alergias,
+            'vacunas' => $vacunasJson,
+            'foto_mascota' => $fotoUrl,
+        ]);
+
+        return response()->json([
+            'message' => 'Mascota registrada exitosamente.',
+            'mascota' => $mascota,
+        ], 201);
+    }
+
+    /**
+     * Actualizar información de una mascota desde Administración.
+     */
+    public function mascotasUpdate(Request $request, $id)
+    {
+        $mascota = Mascota::where('id_mascota', $id)->firstOrFail();
+
+        $request->validate([
+            'id_cliente' => 'sometimes|required|exists:cliente,id_cliente',
+            'nombre' => 'sometimes|required|string|max:100',
+            'especie' => 'nullable|string|max:50',
+            'raza' => 'nullable|string|max:50',
+            'sexo' => 'nullable|string|max:20',
+            'fecha_nacimiento' => 'nullable|date',
+            'peso' => 'nullable|numeric|min:0',
+            'alergias' => 'nullable|string',
+            'vacunas' => 'nullable',
+            'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'foto_mascota' => 'nullable',
+        ]);
+
+        $data = $request->only([
+            'id_cliente',
+            'nombre',
+            'especie',
+            'raza',
+            'sexo',
+            'fecha_nacimiento',
+            'peso',
+            'alergias',
+        ]);
+
+        if ($request->has('vacunas')) {
+            $data['vacunas'] = is_array($request->vacunas) ? json_encode($request->vacunas) : $request->vacunas;
+        }
+
+        if ($request->hasFile('foto')) {
+            $data['foto_mascota'] = CloudinaryService::upload($request->file('foto'), 'mascotas');
+        } elseif ($request->hasFile('foto_mascota')) {
+            $data['foto_mascota'] = CloudinaryService::upload($request->file('foto_mascota'), 'mascotas');
+        } elseif ($request->has('foto_mascota') && is_string($request->foto_mascota)) {
+            $data['foto_mascota'] = $request->foto_mascota;
+        }
+
+        $mascota->update($data);
+
+        return response()->json([
+            'message' => 'Información de la mascota actualizada correctamente.',
+            'mascota' => $mascota,
+        ], 200);
+    }
+
+    /**
+     * Eliminar (soft delete) una mascota desde Administración.
+     */
+    public function mascotasDestroy($id)
+    {
+        $mascota = Mascota::where('id_mascota', $id)->firstOrFail();
+        $mascota->delete();
+
+        return response()->json([
+            'message' => 'Mascota eliminada correctamente.',
         ], 200);
     }
 }

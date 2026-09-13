@@ -1,0 +1,568 @@
+/* src/components/pages/AdminMascotas.css */
+
+.adm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #ffffff;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  margin-bottom: 1.5rem;
+}
+
+.adm-toolbar__search {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.adm-toolbar__search .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.adm-toolbar__search input {
+  width: 100%;
+  padding: 0.65rem 2.25rem 0.65rem 2.5rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.adm-toolbar__search input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.adm-toolbar__search .clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-toolbar__search .clear-btn:hover {
+  color: #475569;
+}
+
+.adm-toolbar__filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.adm-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adm-filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.adm-filter-group select {
+  padding: 0.6rem 2rem 0.6rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.adm-filter-group select:focus {
+  border-color: #059669;
+}
+
+.btn-primary-adm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #059669;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.btn-primary-adm:hover {
+  background-color: #047857;
+}
+
+.btn-primary-adm:active {
+  transform: scale(0.98);
+}
+
+.pet-badge-count {
+  background-color: #ecfdf5;
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+}
+
+/* Tabla de Mascotas */
+.pet-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+}
+
+.pet-admin-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pet-admin-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.pet-admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.pet-admin-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.pet-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.pet-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.pet-name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.pet-meta-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+.species-pill {
+  display: inline-block;
+  background-color: #f1f5f9;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.owner-cell {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.owner-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.citas-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f0fdf4;
+  color: #166534;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 16px;
+}
+
+/* Botones de Acción */
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.act-btn--view {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.act-btn--view:hover {
+  background-color: #d1fae5;
+}
+
+.act-btn--edit {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.act-btn--edit:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.act-btn--delete {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.act-btn--delete:hover {
+  background-color: #fee2e2;
+}
+
+/* Ficha Clínica Card & Tabs */
+.ficha-header-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 1.25rem;
+  border-radius: 14px;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 1.5rem;
+}
+
+.ficha-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
+}
+
+.ficha-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ficha-pet-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 0;
+}
+
+.ficha-pet-details {
+  font-size: 0.88rem;
+  color: #047857;
+  margin: 0;
+}
+
+.ficha-owner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #065f46;
+  margin-top: 0.2rem;
+}
+
+.ficha-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+
+.ficha-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.ficha-tab-btn:hover {
+  color: #059669;
+}
+
+.ficha-tab-btn--active {
+  color: #059669;
+  border-bottom-color: #059669;
+}
+
+.grid-2-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.info-box {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.info-box__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.85rem 0;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.info-list li:last-child {
+  border-bottom: none;
+}
+
+.info-list li span {
+  color: #64748b;
+}
+
+/* Citas History List */
+.citas-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.cita-history-item {
+  display: flex;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.cita-history-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.cita-history-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cita-history-time {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.cita-history-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cita-history-vet {
+  font-size: 0.82rem;
+  color: #059669;
+  margin: 0;
+}
+
+.cita-history-obs {
+  font-size: 0.82rem;
+  color: #475569;
+  margin: 0.2rem 0 0 0;
+  background: #f8fafc;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+}
+
+/* Vacunas Grid */
+.vacunas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.vacuna-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}
+
+.vacuna-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.vacuna-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Alergias Box */
+.alergias-box {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.alergias-box__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Forms Admin */
+.form-group-adm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.form-group-adm label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-group-adm input,
+.form-group-adm select,
+.form-group-adm textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-group-adm input:focus,
+.form-group-adm select:focus,
+.form-group-adm textarea:focus {
+  border-color: #059669;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}

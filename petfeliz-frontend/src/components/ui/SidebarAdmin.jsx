@@ -9,6 +9,7 @@ const adminMenuItems = [
   { to: '/admin/veterinarios', aliases: [], label: 'Veterinarios', icon: 'fa-solid fa-user-doctor' },
   { to: '/admin/servicios', aliases: [], label: 'Servicios', icon: 'fa-solid fa-stethoscope' },
   { to: '/admin/clientes', aliases: [], label: 'Clientes', icon: 'fa-solid fa-users' },
+  { to: '/admin/mascotas', aliases: [], label: 'Mascotas', icon: 'fa-solid fa-paw' },
   { to: '/admin/pagos', aliases: [], label: 'Pagos y Facturación', icon: 'fa-regular fa-file-lines' },
   { to: '/admin/configuracion', aliases: [], label: 'Configuración', icon: 'fa-solid fa-gear' },
 ]

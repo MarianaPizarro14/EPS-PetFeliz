@@ -39,6 +39,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/admin/citas', [AdminController::class, 'citas']);
+    Route::get('/admin/mascotas', [AdminController::class, 'mascotasIndex']);
+    Route::get('/admin/mascotas/{id}', [AdminController::class, 'mascotasShow']);
+    Route::post('/admin/mascotas', [AdminController::class, 'mascotasStore']);
+    Route::put('/admin/mascotas/{id}', [AdminController::class, 'mascotasUpdate']);
+    Route::delete('/admin/mascotas/{id}', [AdminController::class, 'mascotasDestroy']);
 
     // Rutas de Administración de Historias de Cuidadores
     Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);

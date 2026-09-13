@@ -32,6 +32,7 @@ import ProtectedRouteAdmin from './components/ProtectedRouteAdmin'
 import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadores'
 import AdminDashboard from './components/pages/AdminDashboard'
 import AdminCitas from './components/pages/AdminCitas'
+import AdminMascotas from './components/pages/AdminMascotas'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
@@ -39,7 +40,7 @@ const APP_ROUTES = [
   '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
-  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas'
+  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas'
 ]
 
 function AppContent() {
@@ -105,6 +106,14 @@ function AppContent() {
           element={
             <ProtectedRouteAdmin>
               <AdminCitas />
+            </ProtectedRouteAdmin>
+          }
+        />
+        <Route
+          path="/admin/mascotas"
+          element={
+            <ProtectedRouteAdmin>
+              <AdminMascotas />
             </ProtectedRouteAdmin>
           }
         />

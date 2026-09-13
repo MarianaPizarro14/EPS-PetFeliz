@@ -105,6 +105,8 @@
 
 .admin-content-grid > .admin-card {
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-card__header {
@@ -487,7 +489,10 @@
 .admin-service-dist-list {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 1.1rem;
+  flex: 1;
+  justify-content: center;
+  padding: 0.5rem 0;
 }
 
 .admin-service-item {

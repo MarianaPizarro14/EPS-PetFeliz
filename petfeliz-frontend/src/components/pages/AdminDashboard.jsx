@@ -336,7 +336,6 @@ export default function AdminDashboard() {
                             }}
                           ></div>
                         </div>
-                        <span className="admin-bar-date">{item.fecha}</span>
                       </div>
                     )
                   })}

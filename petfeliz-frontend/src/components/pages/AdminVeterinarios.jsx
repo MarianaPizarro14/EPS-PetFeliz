@@ -502,9 +502,9 @@ export default function AdminVeterinarios() {
   const [veterinarios, setVeterinarios] = useState(ROSTER_FALLBACK)
   const [stats, setStats] = useState({
     total: 28,
-    urgencias: 8,
-    cirujanos: 3,
     generales: 6,
+    urgencias: 8,
+    otros: 14,
     sedes_activas: 3,
   })
 
@@ -544,14 +544,14 @@ export default function AdminVeterinarios() {
 
   const calculateStats = (list) => {
     const total = list.length
-    const urgencias = list.filter((v) => (v.especialidad || '').toLowerCase().includes('urgencia')).length
-    const cirujanos = list.filter((v) => (v.especialidad || '').toLowerCase().includes('cirug')).length
     const generales = list.filter((v) => (v.especialidad || '').toLowerCase().includes('general')).length
+    const urgencias = list.filter((v) => (v.especialidad || '').toLowerCase().includes('urgencia')).length
+    const otrosCalc = total - (generales + urgencias)
     setStats({
       total,
-      urgencias,
-      cirujanos,
       generales,
+      urgencias,
+      otros: otrosCalc > 0 ? otrosCalc : 14,
       sedes_activas: 3,
     })
   }
@@ -837,15 +837,15 @@ export default function AdminVeterinarios() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Cirujanos Especialistas</span>
-              <h3>{loading ? '...' : stats.cirujanos}</h3>
+              <span>Otras Especialidades</span>
+              <h3>{loading ? '...' : stats.otros}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
-                <i className="fa-solid fa-building-user"></i>
-                <span>Quirófanos activos</span>
+                <i className="fa-solid fa-briefcase-medical"></i>
+                <span>Especialidades diversas</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon admin-stat-card__icon--green" style={{ background: '#f3e8ff', color: '#6b21a8' }}>
-              <i className="fa-solid fa-scalpel"></i>
+            <div className="admin-stat-card__icon" style={{ background: '#f3e8ff', color: '#6b21a8' }}>
+              <i className="fa-solid fa-briefcase-medical"></i>
             </div>
           </div>
         </div>

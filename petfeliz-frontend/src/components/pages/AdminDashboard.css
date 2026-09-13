@@ -381,10 +381,10 @@
 .admin-bar-chart {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 0.15rem;
+  justify-content: space-between;
+  gap: 0.4rem;
   height: 200px;
-  padding: 1.25rem 0.5rem 0.5rem;
+  padding: 1.25rem 0.75rem 0.5rem;
   background: #ffffff;
   border-radius: 14px;
   border: 1px solid #f1f5f9;
@@ -395,7 +395,7 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
-  max-width: 36px;
+  max-width: 30px;
   height: 100%;
   justify-content: flex-end;
   position: relative;
@@ -412,9 +412,9 @@
 }
 
 .admin-bar-item {
-  width: 88%;
-  max-width: 32px;
-  min-width: 20px;
+  width: 76%;
+  max-width: 26px;
+  min-width: 16px;
   border-radius: 6px 6px 0 0;
   transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, transform 0.2s ease;
 }
@@ -424,23 +424,56 @@
   filter: brightness(1.12);
 }
 
-.admin-bar-date {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: #64748b;
-  margin-top: 0.5rem;
+/* TOOLTIP FLOTANTE EN HOVER */
+.admin-bar-tooltip {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
   white-space: nowrap;
-  transition: color 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 20;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
 }
 
-.admin-bar-col--today .admin-bar-date {
-  color: #0284c7;
-  font-weight: 700;
+.admin-bar-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
 }
 
-.admin-bar-col--max .admin-bar-date {
-  color: #047857;
+.admin-bar-col:hover .admin-bar-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.admin-bar-tooltip-val {
   font-weight: 700;
+  color: #38bdf8;
+  font-size: 0.76rem;
+}
+
+.admin-bar-tooltip-date {
+  font-size: 0.65rem;
+  color: #cbd5e1;
 }
 
 /* DISTRIBUCIÓN DE SERVICIOS */

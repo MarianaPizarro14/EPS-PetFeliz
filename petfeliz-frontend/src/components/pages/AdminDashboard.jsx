@@ -276,7 +276,22 @@ export default function AdminDashboard() {
                     const isToday = item.iso === todayIso || idx === dashboardData.tendencia_citas.length - 1
                     const isMax = item.total > 0 && item.total === maxCitasChart && !isToday
                     const ratio = maxCitasChart > 0 ? item.total / maxCitasChart : 0
-                    const heightPct = Math.max(10, Math.round(ratio * 100))
+                    const heightPct = Math.max(12, Math.round(ratio * 100))
+
+                    // Formatear fecha completa para el tooltip (ej. "Domingo, 13 de Septiembre")
+                    let fechaCompleta = item.fecha
+                    if (item.iso) {
+                      try {
+                        const parts = item.iso.split('-')
+                        if (parts.length === 3) {
+                          const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10))
+                          const formatted = dateObj.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })
+                          fechaCompleta = formatted.charAt(0).toUpperCase() + formatted.slice(1)
+                        }
+                      } catch {
+                        fechaCompleta = item.fecha
+                      }
+                    }
 
                     // Determinación de color por tono / significancia
                     let barColor = '#a7f3d0' // verde tenue por defecto
@@ -303,6 +318,14 @@ export default function AdminDashboard() {
                           isToday ? 'admin-bar-col--today' : isMax ? 'admin-bar-col--max' : ''
                         }`}
                       >
+                        {/* Tooltip flotante en hover */}
+                        <div className="admin-bar-tooltip">
+                          <span className="admin-bar-tooltip-val">
+                            {item.total} {item.total === 1 ? 'Cita' : 'Citas'}
+                          </span>
+                          <span className="admin-bar-tooltip-date">{fechaCompleta}</span>
+                        </div>
+
                         <div className="admin-bar-area">
                           <div
                             className="admin-bar-item"
@@ -311,9 +334,6 @@ export default function AdminDashboard() {
                               backgroundColor: barColor,
                               boxShadow: barShadow,
                             }}
-                            title={`${item.fecha}: ${item.total} citas${
-                              isToday ? ' (Hoy)' : isMax ? ' (Pico máximo)' : ''
-                            }`}
                           ></div>
                         </div>
                         <span className="admin-bar-date">{item.fecha}</span>

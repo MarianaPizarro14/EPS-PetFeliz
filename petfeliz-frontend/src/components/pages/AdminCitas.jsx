@@ -312,8 +312,8 @@ export default function AdminCitas() {
                           onClick={() => setSelectedCitaDetail(c)}
                           title="Ver detalle de la cita"
                         >
-                          <i className="fa-solid fa-eye" style={{ fontSize: '0.85rem' }}></i>
-                          <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>Ver</span>
+                          <i className="fa-regular fa-eye" style={{ fontSize: '0.85rem' }}></i>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Ver</span>
                         </button>
                       </td>
                     </tr>

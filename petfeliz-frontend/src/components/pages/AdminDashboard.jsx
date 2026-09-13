@@ -272,13 +272,17 @@ export default function AdminDashboard() {
               <div className="admin-chart-wrap">
                 <div className="admin-bar-chart">
                   {dashboardData.tendencia_citas.map((item, idx) => {
+                    const isMax = item.total > 0 && item.total === maxCitasChart
                     const heightPct = Math.max(12, Math.round((item.total / maxCitasChart) * 100))
                     return (
-                      <div key={idx} className="admin-bar-col">
+                      <div
+                        key={idx}
+                        className={`admin-bar-col ${isMax ? 'admin-bar-col--max' : ''}`}
+                      >
                         <span className="admin-bar-val">{item.total}</span>
-                        <div className="admin-bar-track">
+                        <div className="admin-bar-area">
                           <div
-                            className="admin-bar-fill"
+                            className={`admin-bar-item ${isMax ? 'admin-bar-item--highlight' : ''}`}
                             style={{ height: `${heightPct}%` }}
                             title={`${item.fecha}: ${item.total} citas`}
                           ></div>

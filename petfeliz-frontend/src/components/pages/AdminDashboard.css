@@ -382,12 +382,12 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.5rem;
-  height: 180px;
-  padding: 1rem 0.5rem 0.5rem;
-  background: #f8fafc;
+  gap: 0.4rem;
+  height: 200px;
+  padding: 1.25rem 0.75rem 0.75rem;
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #f1f5f9;
 }
 
 .admin-bar-col {
@@ -398,43 +398,64 @@
   height: 100%;
   justify-content: flex-end;
   position: relative;
+  cursor: pointer;
 }
 
 .admin-bar-val {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #059669;
-  margin-bottom: 0.25rem;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+  transition: color 0.2s ease;
 }
 
-.admin-bar-track {
+.admin-bar-col--max .admin-bar-val {
+  color: #047857;
+  font-size: 0.76rem;
+}
+
+.admin-bar-area {
   width: 100%;
-  max-width: 24px;
-  background: #e2e8f0;
-  border-radius: 6px 6px 0 0;
-  height: 120px;
+  height: 130px;
   display: flex;
   align-items: flex-end;
-  overflow: hidden;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 1px;
 }
 
-.admin-bar-fill {
+.admin-bar-item {
   width: 100%;
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  background: #a7f3d0;
   border-radius: 6px 6px 0 0;
-  transition: height 0.4s ease;
+  transition: height 0.4s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
-.admin-bar-col:hover .admin-bar-fill {
-  background: linear-gradient(180deg, #34d399 0%, #047857 100%);
+.admin-bar-item--highlight {
+  background: #059669;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+.admin-bar-col:hover .admin-bar-item {
+  background: #34d399;
+  transform: translateY(-2px);
+}
+
+.admin-bar-col:hover .admin-bar-item--highlight {
+  background: #047857;
+  transform: translateY(-2px);
 }
 
 .admin-bar-date {
   font-size: 0.65rem;
   font-weight: 600;
   color: #64748b;
-  margin-top: 0.4rem;
+  margin-top: 0.45rem;
   white-space: nowrap;
+}
+
+.admin-bar-col--max .admin-bar-date {
+  color: #047857;
+  font-weight: 700;
 }
 
 /* DISTRIBUCIÓN DE SERVICIOS */

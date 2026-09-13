@@ -6,25 +6,134 @@ import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './AdminDashboard.css'
 
-// Helper para exportar arreglos de objetos a CSV con soporte UTF-8
-const exportToCSV = (data, filename = 'Historial_Pagos_EPS_PetFeliz.csv') => {
+// Helper para exportar reportes a Excel (.xls) con diseño institucional, colores, fecha y formato tabular
+const exportToFormattedExcel = (data, filename = 'Reporte_Pagos_EPS_PetFeliz.xls') => {
   if (!data || data.length === 0) return
 
-  const headers = Object.keys(data[0]).join(',')
-  const rows = data.map((obj) =>
-    Object.values(obj)
-      .map((val) => `"${String(val ?? '').replace(/"/g, '""')}"`)
-      .join(',')
-  )
+  const now = new Date()
+  const fechaExportacion =
+    now.toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }) +
+    ' ' +
+    now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true })
 
-  const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n')
-  const encodedUri = encodeURI(csvContent)
+  const headers = [
+    'ID Pago',
+    'Fecha / Hora',
+    'Cliente / Usuario',
+    'Monto (COP)',
+    'Método de Pago',
+    'Tipo Cobertura',
+    'Estado',
+    'Referencia Transacción',
+  ]
+
+  const tableHeadersHtml = headers
+    .map(
+      (h) =>
+        `<th style="background-color: #059669; color: #ffffff; font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; padding: 10px 14px; border: 1px solid #047857; text-align: center;">${h}</th>`
+    )
+    .join('')
+
+  const tableRowsHtml = data
+    .map((item, index) => {
+      const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc'
+      const id = item['ID Pago'] || item.id_pago || ''
+      const fecha = item['Fecha'] || item.fecha || ''
+      const cliente = item['Cliente'] || item.cliente || ''
+      const rawMonto = item['Monto'] || item.monto_formateado || item.monto || ''
+      const montoFmt =
+        typeof rawMonto === 'number'
+          ? `$ ${rawMonto.toLocaleString('es-CO')} COP`
+          : String(rawMonto).startsWith('$')
+          ? String(rawMonto)
+          : `$ ${rawMonto}`
+
+      const metodo = item['Método Pago'] || item.metodo_pago || ''
+      const cobertura = item['Cobertura'] || item.tipo_cobertura || ''
+      const estado = String(item['Estado'] || item.estado || '').toLowerCase()
+      const ref = item['Referencia'] || item.referencia || ''
+
+      const estadoColor =
+        estado === 'confirmado' ? '#065f46' : estado === 'cancelado' ? '#991b1b' : '#92400e'
+      const estadoBg =
+        estado === 'confirmado' ? '#d1fae5' : estado === 'cancelado' ? '#fee2e2' : '#fef3c7'
+
+      return `
+        <tr style="background-color: ${bgColor};">
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${id}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${fecha}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #0f172a;">${cliente}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #059669; text-align: right;">${montoFmt}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${metodo}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; text-align: center; text-transform: capitalize;">${cobertura}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 10pt; padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: ${estadoColor}; background-color: ${estadoBg};">${estado.toUpperCase()}</td>
+          <td style="font-family: Arial, sans-serif; font-size: 9.5pt; padding: 8px; border: 1px solid #e2e8f0; color: #475569; font-family: monospace;">${ref}</td>
+        </tr>
+      `
+    })
+    .join('')
+
+  const excelHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Historial de Pagos</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+      </head>
+      <body>
+        <table style="border-collapse: collapse; width: 100%;">
+          <tr>
+            <td colspan="8" style="background-color: #064e3b; color: #ffffff; font-family: Arial, sans-serif; font-size: 15pt; font-weight: bold; padding: 14px; text-align: center;">
+              EPS PETFELIZ - REPORTE GENERAL DE TRANSACCIONES Y FACTURACIÓN
+            </td>
+          </tr>
+          <tr>
+            <td colspan="8" style="background-color: #ecfdf5; color: #047857; font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: bold; padding: 8px 12px; border-bottom: 2px solid #059669;">
+              Fecha de Exportación: ${fechaExportacion} &nbsp;&nbsp;|&nbsp;&nbsp; Total Registros: ${data.length} Transacciones &nbsp;&nbsp;|&nbsp;&nbsp; Generado por: Panel de Administración EPS PetFeliz
+            </td>
+          </tr>
+          <tr><td colspan="8" style="height: 10px;"></td></tr>
+          <thead>
+            <tr>
+              ${tableHeadersHtml}
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `
+
+  const blob = new Blob(['\uFEFF' + excelHtml], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  })
+
   const link = document.createElement('a')
-  link.setAttribute('href', encodedUri)
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
   link.setAttribute('download', filename)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 export default function AdminDashboard() {
@@ -148,7 +257,7 @@ export default function AdminDashboard() {
             Referencia: t.referencia,
           }))
 
-    exportToCSV(dataToExport, `Historial_Pagos_EPS_PetFeliz_${new Date().toISOString().slice(0, 10)}.csv`)
+    exportToFormattedExcel(dataToExport, `Historial_Pagos_EPS_PetFeliz_${new Date().toISOString().slice(0, 10)}.xls`)
   }
 
   return (
@@ -395,8 +504,8 @@ export default function AdminDashboard() {
             </div>
 
             <button type="button" className="admin-btn-csv" onClick={handleExportCSV}>
-              <i className="fa-solid fa-file-csv"></i>
-              <span>Exportar Todo a CSV</span>
+              <i className="fa-solid fa-file-excel"></i>
+              <span>Exportar Reporte Excel</span>
             </button>
           </div>
 

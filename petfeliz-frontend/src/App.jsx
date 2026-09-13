@@ -31,6 +31,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import ProtectedRouteAdmin from './components/ProtectedRouteAdmin'
 import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadores'
 import AdminDashboard from './components/pages/AdminDashboard'
+import AdminCitas from './components/pages/AdminCitas'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
@@ -38,7 +39,7 @@ const APP_ROUTES = [
   '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
-  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard'
+  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas'
 ]
 
 function AppContent() {
@@ -96,6 +97,14 @@ function AppContent() {
           element={
             <ProtectedRouteAdmin>
               <AdminDashboard />
+            </ProtectedRouteAdmin>
+          }
+        />
+        <Route
+          path="/admin/citas"
+          element={
+            <ProtectedRouteAdmin>
+              <AdminCitas />
             </ProtectedRouteAdmin>
           }
         />

@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/perfil/delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+    Route::get('/admin/citas', [AdminController::class, 'citas']);
 
     // Rutas de Administración de Historias de Cuidadores
     Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);

@@ -6,7 +6,7 @@ import {
   faKitMedical,
   faShieldVirus,
   faSyringe,
-  faFlask,
+  faStar,
   faScissors,
   faTooth,
   faStethoscope,
@@ -57,12 +57,12 @@ const especialidades = [
     icon: faSyringe
   },
   {
-    title: 'Laboratorio Clínico',
-    filtro: 'Laboratorio Clínico',
+    title: 'Médico Director',
+    filtro: 'Médico Director',
     count: 3,
-    desc: 'Análisis de muestras, hemogramas, coprológicos y pruebas diagnósticas.',
+    desc: 'Dirección médica general y de sede, con seguimiento clínico integral.',
     colorClass: 'esp-yellow',
-    icon: faFlask
+    icon: faStar
   },
   {
     title: 'Cirugía',

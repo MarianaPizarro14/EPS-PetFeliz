@@ -29,7 +29,7 @@ const timelineItems = [
 // Ojo: estos valores deben coincidir EXACTO con los valores de `especialidad`
 // que vienen en veterinariosData.js (ej. 'Dermatología', no 'Dermatólogo'),
 // o el filtro no va a encontrar coincidencias.
-const especialidades = ['Todos', 'Medicina General', 'Laboratorio Clínico', 'Dermatología', 'Urgencias', 'Desparasitación', 'Vacunación', 'Cirugía', 'Odontología']
+const especialidades = ['Todos', 'Medicina General', 'Médico Director', 'Dermatología', 'Urgencias', 'Desparasitación', 'Vacunación', 'Cirugía', 'Odontología']
 
 function Nosotros() {
   const location = useLocation()

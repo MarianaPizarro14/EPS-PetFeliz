@@ -25,9 +25,10 @@ class WompiController extends Controller
         $integritySecret = config('services.wompi.integrity_secret');
         $publicKey = config('services.wompi.public_key');
 
-        if (!$integritySecret) {
+        if (empty($integritySecret)) {
+            \Illuminate\Support\Facades\Log::error('WOMPI CONFIG ERROR: La variable WOMPI_INTEGRITY_SECRET no está configurada en Railway.');
             return response()->json([
-                'message' => 'Error de configuración: Secreto de integridad de Wompi no configurado.'
+                'message' => 'No pudimos iniciar el pago en este momento. Por favor intenta de nuevo en unos minutos o selecciona otro método de pago.'
             ], 500);
         }
 

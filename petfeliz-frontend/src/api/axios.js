@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getStoredToken } from '../utils/authStorage'
+import { getStoredToken, clearStoredAuth } from '../utils/authStorage'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
@@ -10,7 +10,7 @@ const api = axios.create({
   },
 })
 
-// Interceptor para incluir el token de autenticación dinámicamente si existe
+// Interceptor de petición para adjuntar Bearer Token
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
   if (token) {
@@ -18,5 +18,24 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+// Interceptor de respuesta para detectar 401 Unauthorized en peticiones protegidas (invalidación de token / sesión cerrada)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const requestUrl = error.config?.url || ''
+      // NO activar la redirección de sesión cerrada si la petición es un intento de login o registro
+      const isAuthEndpoint = requestUrl.includes('/login') || requestUrl.includes('/register') || requestUrl.includes('/auth/google')
+
+      if (!isAuthEndpoint && !window.location.pathname.includes('/login')) {
+        clearStoredAuth()
+        sessionStorage.setItem('logout_reason', 'Tu sesión se cerró o ha caducado.')
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 
 export default api

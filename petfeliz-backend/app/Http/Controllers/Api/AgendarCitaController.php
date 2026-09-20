@@ -417,6 +417,13 @@ class AgendarCitaController extends Controller
             'cita'
         );
 
+        \App\Services\NotificationService::notificarAdmin(
+            'Nueva Cita Confirmada',
+            "El cliente {$cliente->nombre} agendó {$motivoFinal} para {$petNombre} el {$cita->fecha} a las {$cita->hora}.",
+            'fa-solid fa-calendar-check',
+            'cita'
+        );
+
         return response()->json([
             'message' => '¡Cita confirmada y pagada con éxito!',
             'cita' => [

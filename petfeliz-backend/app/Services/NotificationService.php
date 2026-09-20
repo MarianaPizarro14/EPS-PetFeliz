@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Models\Cliente;
 use App\Models\Notificacion;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
     /**
-     * Crear notificación web (campanita) y opcionalmente enviar correo electrónico al cliente.
+     * Crear notificación web (campanita) y opcionalmente enviar correo electrónico transaccional al cliente.
      */
     public static function notificar(
         Cliente $cliente,
@@ -21,9 +22,9 @@ class NotificationService
         $mailable = null,
         bool $esRecordatorioCita = false
     ) {
-        // 1. Guardar en la base de datos (Campanita Web)
         $notificacion = Notificacion::create([
             'id_cliente' => $cliente->id_cliente,
+            'id_usuario' => $cliente->id_usuario,
             'titulo' => $titulo,
             'mensaje' => $mensaje,
             'leida' => false,
@@ -31,21 +32,49 @@ class NotificationService
             'tipo' => $tipo,
         ]);
 
-        // 2. Enviar correo si existe mailable y el usuario lo tiene permitido en sus preferencias
         if ($mailable && $cliente->usuario && !empty($cliente->usuario->email)) {
+            // Los correos de recordatorio de cita respetan el interruptor de preferencia.
+            // Los correos transaccionales (facturas, confirmación de cita, comprobante de pago) SIEMPRE se envían.
             $debeEnviarEmail = $esRecordatorioCita
                 ? ($cliente->recordatorios_citas ?? true)
-                : ($cliente->notificaciones_email ?? true);
+                : true;
 
             if ($debeEnviarEmail) {
                 try {
-                    Mail::to($cliente->usuario->email)->queue($mailable);
+                    Mail::to($cliente->usuario->email)->send($mailable);
                 } catch (\Throwable $e) {
-                    Log::error("Fallo al poner en cola el correo de notificación a {$cliente->usuario->email}: " . $e->getMessage());
+                    Log::error("Fallo no bloqueante al enviar correo transaccional a {$cliente->usuario->email}: " . $e->getMessage());
                 }
             }
         }
 
         return $notificacion;
+    }
+
+    /**
+     * Crear notificación web para todos los administradores del sistema.
+     */
+    public static function notificarAdmin(
+        string $titulo,
+        string $mensaje,
+        string $icono = 'fa-solid fa-shield-halved',
+        string $tipo = 'admin'
+    ) {
+        try {
+            $admins = User::where('rol', 'admin')->get();
+            foreach ($admins as $admin) {
+                Notificacion::create([
+                    'id_cliente' => null,
+                    'id_usuario' => $admin->id_usuario,
+                    'titulo' => $titulo,
+                    'mensaje' => $mensaje,
+                    'leida' => false,
+                    'icono' => $icono,
+                    'tipo' => $tipo,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error("Fallo al crear notificación de administrador: " . $e->getMessage());
+        }
     }
 }

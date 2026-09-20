@@ -9,17 +9,33 @@ use Illuminate\Http\Request;
 class NotificacionController extends Controller
 {
     /**
-     * Listar notificaciones del cliente autenticado.
+     * Construir la consulta de notificaciones tanto para cliente como para cualquier rol de usuario.
+     */
+    private function queryUserNotifications($user)
+    {
+        $cliente = $user->cliente;
+        $clienteId = $cliente ? $cliente->id_cliente : null;
+        $userId = $user->id_usuario;
+
+        return Notificacion::where(function ($query) use ($clienteId, $userId) {
+            $query->where('id_usuario', $userId);
+            if ($clienteId) {
+                $query->orWhere('id_cliente', $clienteId);
+            }
+        });
+    }
+
+    /**
+     * Listar notificaciones del usuario autenticado (Cliente o Admin).
      */
     public function index(Request $request)
     {
-        $cliente = $request->user()->cliente;
-
-        if (!$cliente) {
+        $user = $request->user();
+        if (!$user) {
             return response()->json(['notifications' => [], 'unreadCount' => 0], 200);
         }
 
-        $notificaciones = Notificacion::where('id_cliente', $cliente->id_cliente)
+        $notificaciones = $this->queryUserNotifications($user)
             ->orderBy('id_notificacion', 'desc')
             ->get()
             ->map(function ($n) {
@@ -46,12 +62,7 @@ class NotificacionController extends Controller
      */
     public function marcarTodasLeidas(Request $request)
     {
-        $cliente = $request->user()->cliente;
-
-        if ($cliente) {
-            Notificacion::where('id_cliente', $cliente->id_cliente)->update(['leida' => true]);
-        }
-
+        $this->queryUserNotifications($request->user())->update(['leida' => true]);
         return $this->index($request);
     }
 
@@ -60,13 +71,9 @@ class NotificacionController extends Controller
      */
     public function marcarLeida(Request $request, $id)
     {
-        $cliente = $request->user()->cliente;
-
-        if ($cliente) {
-            Notificacion::where('id_cliente', $cliente->id_cliente)
-                ->where('id_notificacion', $id)
-                ->update(['leida' => true]);
-        }
+        $this->queryUserNotifications($request->user())
+            ->where('id_notificacion', $id)
+            ->update(['leida' => true]);
 
         return $this->index($request);
     }
@@ -76,13 +83,9 @@ class NotificacionController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $cliente = $request->user()->cliente;
-
-        if ($cliente) {
-            Notificacion::where('id_cliente', $cliente->id_cliente)
-                ->where('id_notificacion', $id)
-                ->delete();
-        }
+        $this->queryUserNotifications($request->user())
+            ->where('id_notificacion', $id)
+            ->delete();
 
         return $this->index($request);
     }
@@ -92,11 +95,7 @@ class NotificacionController extends Controller
      */
     public function destroyAll(Request $request)
     {
-        $cliente = $request->user()->cliente;
-
-        if ($cliente) {
-            Notificacion::where('id_cliente', $cliente->id_cliente)->delete();
-        }
+        $this->queryUserNotifications($request->user())->delete();
 
         return response()->json([
             'notifications' => [],

@@ -177,6 +177,13 @@ class CitaController extends Controller
             'cita'
         );
 
+        \App\Services\NotificationService::notificarAdmin(
+            'Cita Reprogramada',
+            "El cliente {$cliente->nombre} reprogramó la cita de {$petNombre} para el {$cita->fecha} a las {$cita->hora}.",
+            'fa-regular fa-clock',
+            'cita'
+        );
+
         return response()->json([
             'message' => 'Cita reprogramada exitosamente.',
             'cita' => $cita,
@@ -204,6 +211,13 @@ class CitaController extends Controller
             $cliente,
             'Cita Cancelada',
             "La cita para {$petNombre} del {$cita->fecha} ha sido cancelada.",
+            'fa-solid fa-calendar-xmark',
+            'cita'
+        );
+
+        \App\Services\NotificationService::notificarAdmin(
+            'Cita Cancelada',
+            "El cliente {$cliente->nombre} canceló la cita de {$petNombre} del {$cita->fecha}.",
             'fa-solid fa-calendar-xmark',
             'cita'
         );

@@ -39,6 +39,21 @@ class AuthController extends Controller
 
         [$user, $cliente] = $result;
 
+        \App\Services\NotificationService::notificar(
+            $cliente,
+            '¡Bienvenido a EPS PetFeliz!',
+            "Tu cuenta ha sido creada exitosamente. Estamos listos para cuidar de tus mascotas con el mejor servicio médico.",
+            'fa-solid fa-shield-heart',
+            'bienvenida'
+        );
+
+        \App\Services\NotificationService::notificarAdmin(
+            'Nuevo Usuario Registrado',
+            "Se ha registrado el nuevo usuario {$user->email} ({$cliente->nombre}).",
+            'fa-solid fa-user-plus',
+            'usuario'
+        );
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -351,18 +366,26 @@ class AuthController extends Controller
 
     public function changePassword(Request $request)
     {
+        $user = $request->user();
+
         $request->validate([
-            'contrasena_actual' => 'required|string',
+            'contrasena_actual' => 'nullable|string',
             'nueva_contrasena' => 'required|string|min:6',
             'confirmar_nueva_contrasena' => 'required|string|same:nueva_contrasena',
         ]);
 
-        $user = $request->user();
-
-        if (!Hash::check($request->contrasena_actual, $user->contrasena_hash)) {
+        if (Hash::check($request->nueva_contrasena, $user->contrasena_hash)) {
             return response()->json([
-                'message' => 'La contraseña actual no es correcta.',
+                'message' => 'La nueva contraseña no puede ser igual a la actual.',
             ], 422);
+        }
+
+        if ($request->filled('contrasena_actual')) {
+            if (!Hash::check($request->contrasena_actual, $user->contrasena_hash)) {
+                return response()->json([
+                    'message' => 'La contraseña actual no es correcta.',
+                ], 422);
+            }
         }
 
         $user->contrasena_hash = Hash::make($request->nueva_contrasena);

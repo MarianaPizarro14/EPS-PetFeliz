@@ -38,8 +38,14 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const { loginWithGoogle, googleLoading } = useGoogleAuth(setError)
 
-  // Precargar credenciales si el usuario anteriormente marcó "Recuérdame"
+  // Precargar credenciales si el usuario anteriormente marcó "Recuérdame" y verificar cierres de sesión
   useEffect(() => {
+    const reason = sessionStorage.getItem('logout_reason')
+    if (reason) {
+      setError(reason)
+      sessionStorage.removeItem('logout_reason')
+    }
+
     try {
       const saved = localStorage.getItem(REMEMBER_KEY)
       if (saved) {

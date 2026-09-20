@@ -17,13 +17,17 @@ class WompiController extends Controller
             'monto' => 'required|numeric|gt:0',
         ]);
 
-        $referencia = $request->referencia;
+        $referencia = trim($request->referencia);
         $montoPesos = $request->monto;
         $montoCentavos = (int) round($montoPesos * 100);
 
-        $currency = config('services.wompi.currency', 'COP');
-        $integritySecret = config('services.wompi.integrity_secret');
-        $publicKey = config('services.wompi.public_key');
+        $currency = trim(config('services.wompi.currency', 'COP'));
+        $rawSecret = config('services.wompi.integrity_secret') ?? '';
+        // Limpiar espacios en blanco, comillas simples/dobles y saltos de línea invisibles
+        $integritySecret = trim(trim($rawSecret), '"\'');
+
+        $rawPublicKey = config('services.wompi.public_key') ?? '';
+        $publicKey = trim(trim($rawPublicKey), '"\'');
 
         if (empty($integritySecret)) {
             \Illuminate\Support\Facades\Log::error('WOMPI CONFIG ERROR: La variable WOMPI_INTEGRITY_SECRET no está configurada en Railway.');
@@ -31,6 +35,9 @@ class WompiController extends Controller
                 'message' => 'No pudimos iniciar el pago en este momento. Por favor intenta de nuevo en unos minutos o selecciona otro método de pago.'
             ], 500);
         }
+
+        // Log::info temporal de depuración SIN el secreto para comparar datos
+        \Illuminate\Support\Facades\Log::info("WOMPI FIRMA DEBUG: Referencia={$referencia}, MontoPesos={$montoPesos}, MontoCentavos={$montoCentavos}, Moneda={$currency}");
 
         // Concatenación requerida por Wompi: Referencia + MontoEnCentavos + Moneda + SecretoDeIntegridad
         $cadenaFirma = $referencia . $montoCentavos . $currency . $integritySecret;

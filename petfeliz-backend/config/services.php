@@ -42,5 +42,9 @@ return [
         'currency' => env('WOMPI_CURRENCY', 'COP'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+    ],
+
 ];
 

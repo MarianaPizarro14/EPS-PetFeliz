@@ -1,21 +1,20 @@
 <?php
 
+$frontendUrlEnv = env('FRONTEND_URL', 'http://localhost:5173,http://127.0.0.1:5173');
+$configuredOrigins = array_filter(array_map('trim', explode(',', $frontendUrlEnv)));
+
 return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_values(array_unique(array_merge([
         'http://localhost:5173',
         'http://127.0.0.1:5173',
-        'https://www.epspetfeliz.site',
-        'https://epspetfeliz.site',
-        env('FRONTEND_URL', 'https://www.epspetfeliz.site'),
-    ],
+    ], $configuredOrigins))),
 
     'allowed_origins_patterns' => [
-        '#^https://(www\.)?epspetfeliz\.site$#',
         '#^https://.*\.vercel\.app$#',
     ],
 

@@ -1,1 +1,10 @@
+.env
+.env.*
+!.env.example
 petfeliz-frontend/.env
+petfeliz-frontend/.env.*
+!petfeliz-frontend/.env.example
+petfeliz-backend/.env
+petfeliz-backend/.env.*
+!petfeliz-backend/.env.example
+

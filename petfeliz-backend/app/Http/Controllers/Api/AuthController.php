@@ -96,6 +96,9 @@ class AuthController extends Controller
             $email = null;
             $name = null;
             $picture = null;
+            $emailVerified = false;
+            $aud = null;
+            $azp = null;
 
             if ($tokenType === 'id_token') {
                 $response = Http::get("https://oauth2.googleapis.com/tokeninfo?id_token={$token}");
@@ -104,6 +107,9 @@ class AuthController extends Controller
                     $email = $data['email'] ?? null;
                     $name = $data['name'] ?? ($data['given_name'] ?? null);
                     $picture = $data['picture'] ?? null;
+                    $emailVerified = filter_var($data['email_verified'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                    $aud = $data['aud'] ?? null;
+                    $azp = $data['azp'] ?? null;
                 }
             } else {
                 // flow con access_token usando la API userinfo de Google
@@ -116,15 +122,20 @@ class AuthController extends Controller
                     $email = $data['email'] ?? null;
                     $name = $data['name'] ?? ($data['given_name'] ?? null);
                     $picture = $data['picture'] ?? null;
+                    $emailVerified = filter_var($data['email_verified'] ?? false, FILTER_VALIDATE_BOOLEAN);
                 }
-            }
 
-            if (!$email) {
-                // Intento fallback con tokeninfo usando access_token
-                $responseFallback = Http::get("https://oauth2.googleapis.com/tokeninfo?access_token={$token}");
-                if ($responseFallback->successful()) {
-                    $data = $responseFallback->json();
-                    $email = $data['email'] ?? null;
+                $tokenInfoRes = Http::get("https://oauth2.googleapis.com/tokeninfo?access_token={$token}");
+                if ($tokenInfoRes->successful()) {
+                    $tInfo = $tokenInfoRes->json();
+                    $aud = $tInfo['aud'] ?? $aud;
+                    $azp = $tInfo['azp'] ?? $azp;
+                    if (isset($tInfo['email_verified'])) {
+                        $emailVerified = filter_var($tInfo['email_verified'], FILTER_VALIDATE_BOOLEAN);
+                    }
+                    if (!$email && isset($tInfo['email'])) {
+                        $email = $tInfo['email'];
+                    }
                 }
             }
 
@@ -132,6 +143,25 @@ class AuthController extends Controller
                 return response()->json([
                     'message' => 'No se pudo verificar la sesión con Google o el token ha caducado.',
                 ], 401);
+            }
+
+            if (!$emailVerified) {
+                return response()->json([
+                    'message' => 'El correo electrónico asociado a la cuenta de Google no está verificado.',
+                ], 401);
+            }
+
+            // Validar que el token pertenezca al Client ID configurado de la app
+            $expectedClientId = config('services.google.client_id');
+            if ($expectedClientId) {
+                $matchesAud = $aud && $aud === $expectedClientId;
+                $matchesAzp = $azp && $azp === $expectedClientId;
+
+                if (!$matchesAud && !$matchesAzp) {
+                    return response()->json([
+                        'message' => 'El token de autenticación no pertenece a esta aplicación.',
+                    ], 401);
+                }
             }
 
             if (!$name) {

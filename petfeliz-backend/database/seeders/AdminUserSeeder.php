@@ -13,13 +13,26 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@petfeliz.com'],
-            [
-                'contrasena_hash' => Hash::make('Admin2026*'),
+        $adminEmail = config('services.admin.email', 'admin@petfeliz.com');
+        $initialPassword = config('services.admin.initial_password');
+
+        if (empty($initialPassword)) {
+            $this->command?->warn('ADMIN_INITIAL_PASSWORD no está definida. Omitiendo la creación del usuario administrador.');
+            return;
+        }
+
+        $existingAdmin = User::where('email', $adminEmail)->first();
+
+        if (!$existingAdmin) {
+            User::create([
+                'email' => $adminEmail,
+                'contrasena_hash' => Hash::make($initialPassword),
                 'rol' => 'admin',
                 'activo' => 1,
-            ]
-        );
+            ]);
+            $this->command?->info("Usuario administrador {$adminEmail} creado exitosamente.");
+        } else {
+            $this->command?->info("El usuario administrador {$adminEmail} ya existe. No se modificó la contraseña.");
+        }
     }
 }

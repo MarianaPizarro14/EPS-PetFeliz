@@ -4,6 +4,6 @@
     "builder": "RAILPACK"
   },
   "deploy": {
-    "startCommand": "php artisan config:clear && php artisan route:clear && php artisan migrate --force && php artisan db:seed --class=AdminUserSeeder --force && frankenphp run --config Caddyfile"
+    "startCommand": "php artisan config:clear && php artisan route:clear && php artisan migrate --force && frankenphp run --config Caddyfile"
   }
 }

@@ -55,7 +55,7 @@ class VeterinarioSeeder extends Seeder
                 DB::table('usuario')->insert([
                     'id_usuario' => $userId,
                     'email' => $email,
-                    'contrasena_hash' => Hash::make('password123'),
+                    'contrasena_hash' => Hash::make(Str::random(16)),
                     'activo' => true,
                     'created_at' => now(),
                     'updated_at' => now(),

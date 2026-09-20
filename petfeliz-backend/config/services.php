@@ -46,5 +46,10 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
     ],
 
+    'admin' => [
+        'email' => env('ADMIN_EMAIL', 'admin@petfeliz.com'),
+        'initial_password' => env('ADMIN_INITIAL_PASSWORD'),
+    ],
+
 ];
 

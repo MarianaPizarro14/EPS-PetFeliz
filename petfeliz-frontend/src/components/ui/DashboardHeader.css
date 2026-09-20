@@ -890,34 +890,86 @@
 }
 
 .dh-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   background: #f1f5f9;
-  color: #475569;
-  border: none;
+  color: #334155;
+  border: 1px solid #cbd5e1;
   padding: 0.55rem 1.1rem;
   border-radius: 8px;
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
 }
 
 .dh-btn-secondary:hover {
   background: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.dh-btn-secondary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.4);
+  outline: none;
 }
 
 .dh-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   background: #0d9488;
   color: #ffffff;
   border: none;
   padding: 0.55rem 1.15rem;
   border-radius: 8px;
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
+  outline: none;
 }
 
 .dh-btn-primary:hover {
   background: #0f766e;
+}
+
+.dh-btn-primary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.3);
+  outline: none;
+}
+
+.dh-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.15rem;
+  border-radius: 8px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.dh-btn-danger:hover {
+  background: #b91c1c;
+}
+
+.dh-btn-danger:focus-visible {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+  outline: none;
 }
 
 /* Responsive */

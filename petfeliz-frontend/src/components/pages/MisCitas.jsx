@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getStoredToken } from '../../utils/authStorage'
+import { formatDateCO, formatTimeCO } from '../../utils/dateFormatter'
 import DashboardHeader from '../ui/DashboardHeader'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import SidebarClient from '../ui/SidebarClient'
@@ -28,6 +29,20 @@ function MisCitas() {
   const [showDetalleModal, setShowDetalleModal] = useState(false)
 
   const [selectedCita, setSelectedCita] = useState(null)
+
+  // Cerrar modales con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowAgendarModal(false)
+        setShowReprogramarModal(false)
+        setShowCancelarModal(false)
+        setShowDetalleModal(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Formulario Agendar Cita
   const [agendarForm, setAgendarForm] = useState({
@@ -359,12 +374,12 @@ function MisCitas() {
 
                       <div className="cita-card__details">
                         <span className="cita-card__detail-item">
-                          <i className="fa-regular fa-calendar"></i>
-                          {cita.fecha}
+                          <i className="fa-regular fa-calendar-days"></i>
+                          {formatDateCO(cita.fecha)}
                         </span>
                         <span className="cita-card__detail-item">
                           <i className="fa-regular fa-clock"></i>
-                          {cita.hora}
+                          {formatTimeCO(cita.hora)}
                         </span>
                         {cita.veterinario && (
                           <span className="cita-card__detail-item">
@@ -389,17 +404,17 @@ function MisCitas() {
                       <>
                         <button
                           type="button"
-                          className="btn-action-sm btn-action-sm--outline"
+                          className="btn-action-sm btn-action-sm--secondary"
                           onClick={() => openReprogramarModal(cita)}
                         >
-                          <i className="fa-regular fa-calendar-pen"></i> Reprogramar
+                          <i className="fa-regular fa-calendar-days"></i> Reprogramar
                         </button>
                         <button
                           type="button"
-                          className="btn-action-sm btn-action-sm--danger"
+                          className="btn-action-sm btn-action-sm--danger-text"
                           onClick={() => openCancelarModal(cita)}
                         >
-                          <i className="fa-regular fa-circle-xmark"></i> Cancelar
+                          <i className="fa-regular fa-circle-xmark"></i> Cancelar cita
                         </button>
                       </>
                     )}
@@ -413,10 +428,10 @@ function MisCitas() {
 
       {/* ── MODAL 1: AGENDAR NUEVA CITA ── */}
       {showAgendarModal && (
-        <div className="dh-modal-backdrop">
-          <div className="dh-modal-box dh-modal-box--wide">
+        <div className="dh-modal-backdrop" onClick={() => setShowAgendarModal(false)}>
+          <div className="dh-modal-box dh-modal-box--wide" onClick={(e) => e.stopPropagation()}>
             <div className="dh-modal-header">
-              <h3>Agendar Nueva Cita</h3>
+              <h3>Agendar nueva cita</h3>
               <button type="button" className="dh-modal-close" onClick={() => setShowAgendarModal(false)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
@@ -446,7 +461,7 @@ function MisCitas() {
                 </div>
 
                 <div className="dh-form-field">
-                  <label>Tipo de Servicio *</label>
+                  <label>Tipo de servicio *</label>
                   <select
                     required
                     value={agendarForm.id_servicio}
@@ -461,7 +476,7 @@ function MisCitas() {
                 </div>
 
                 <div className="dh-form-field">
-                  <label>Fecha de la Cita *</label>
+                  <label>Fecha de la cita *</label>
                   <CustomDatePicker
                     value={agendarForm.fecha}
                     onChange={(val) => setAgendarForm({ ...agendarForm, fecha: val })}
@@ -470,7 +485,7 @@ function MisCitas() {
                 </div>
 
                 <div className="dh-form-field">
-                  <label>Hora Preferida *</label>
+                  <label>Hora preferida *</label>
                   <select
                     value={agendarForm.hora}
                     onChange={(e) => setAgendarForm({ ...agendarForm, hora: e.target.value })}
@@ -484,7 +499,7 @@ function MisCitas() {
                 </div>
 
                 <div className="dh-form-field dh-form-field--full">
-                  <label>Notas / Motivo Adicional</label>
+                  <label>Notas / motivo adicional</label>
                   <input
                     type="text"
                     placeholder="ej. Presenta estornudos desde ayer / vacunación anual"
@@ -499,7 +514,7 @@ function MisCitas() {
                   Cancelar
                 </button>
                 <button type="submit" className="dh-btn-primary" disabled={submitting}>
-                  {submitting ? 'Confirmando...' : 'Confirmar Cita'}
+                  {submitting ? 'Confirmando...' : 'Confirmar cita'}
                 </button>
               </div>
             </form>
@@ -509,10 +524,10 @@ function MisCitas() {
 
       {/* ── MODAL 2: REPROGRAMAR CITA ── */}
       {showReprogramarModal && selectedCita && (
-        <div className="dh-modal-backdrop">
-          <div className="dh-modal-box">
+        <div className="dh-modal-backdrop" onClick={() => setShowReprogramarModal(false)}>
+          <div className="dh-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="dh-modal-header">
-              <h3>Reprogramar Cita</h3>
+              <h3>Reprogramar cita</h3>
               <button type="button" className="dh-modal-close" onClick={() => setShowReprogramarModal(false)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
@@ -527,7 +542,7 @@ function MisCitas() {
               </div>
 
               <div className="dh-form-field" style={{ marginBottom: '1rem' }}>
-                <label>Nueva Fecha *</label>
+                <label>Nueva fecha *</label>
                 <CustomDatePicker
                   value={reprogramarForm.fecha}
                   onChange={(val) => setReprogramarForm({ ...reprogramarForm, fecha: val })}
@@ -536,7 +551,7 @@ function MisCitas() {
               </div>
 
               <div className="dh-form-field" style={{ marginBottom: '1.5rem' }}>
-                <label>Nueva Hora *</label>
+                <label>Nueva hora *</label>
                 <select
                   value={reprogramarForm.hora}
                   onChange={(e) => setReprogramarForm({ ...reprogramarForm, hora: e.target.value })}
@@ -554,7 +569,7 @@ function MisCitas() {
                   Cancelar
                 </button>
                 <button type="submit" className="dh-btn-primary" disabled={submitting}>
-                  {submitting ? 'Guardando...' : 'Guardar Nueva Fecha'}
+                  {submitting ? 'Guardando...' : 'Guardar nueva fecha'}
                 </button>
               </div>
             </form>
@@ -564,26 +579,30 @@ function MisCitas() {
 
       {/* ── MODAL 3: CANCELAR CITA ── */}
       {showCancelarModal && selectedCita && (
-        <div className="dh-modal-backdrop">
-          <div className="dh-modal-box">
+        <div className="dh-modal-backdrop" onClick={() => setShowCancelarModal(false)}>
+          <div className="dh-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="dh-modal-header">
-              <h3>Confirmar Cancelación</h3>
+              <h3>Confirmar cancelación</h3>
               <button type="button" className="dh-modal-close" onClick={() => setShowCancelarModal(false)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: '1.5', margin: '1rem 0' }}>
-              ¿Estás seguro de que deseas cancelar la cita de <strong>{selectedCita.mascota?.nombre}</strong> para el día{' '}
-              <strong>{selectedCita.fecha}</strong> a las <strong>{selectedCita.hora}</strong>?
+            <p style={{ fontSize: '0.9rem', color: '#334155', lineHeight: '1.5', margin: '1rem 0 0.5rem' }}>
+              ¿Estás seguro de que deseas cancelar la cita de <strong>{selectedCita.mascota?.nombre}</strong> para el{' '}
+              <strong>{formatDateCO(selectedCita.fecha)}</strong> a las <strong>{formatTimeCO(selectedCita.hora)}</strong>?
+            </p>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: '1.45', marginBottom: '1.25rem', backgroundColor: '#f8fafc', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <i className="fa-solid fa-circle-info" style={{ marginRight: '0.35rem', color: '#0284c7' }}></i>
+              Esta acción liberará el horario. Si realizaste un pago previo, la transacción no se reembolsa automáticamente; puedes reprogramarla o gestionar el saldo con soporte.
             </p>
 
             <div className="dh-modal-footer">
               <button type="button" className="dh-btn-secondary" onClick={() => setShowCancelarModal(false)}>
-                Volver
+                Mantener cita
               </button>
               <button type="button" className="dh-btn-danger" onClick={handleCancelarSubmit} disabled={submitting}>
-                {submitting ? 'Cancelando...' : 'Sí, Cancelar Cita'}
+                {submitting ? 'Cancelando...' : 'Sí, cancelar cita'}
               </button>
             </div>
           </div>
@@ -592,10 +611,10 @@ function MisCitas() {
 
       {/* ── MODAL 4: VER DETALLE DE CITA ── */}
       {showDetalleModal && selectedCita && (
-        <div className="dh-modal-backdrop">
-          <div className="dh-modal-box">
+        <div className="dh-modal-backdrop" onClick={() => setShowDetalleModal(false)}>
+          <div className="dh-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="dh-modal-header">
-              <h3>Detalle de la Cita</h3>
+              <h3>Detalle de la cita</h3>
               <button type="button" className="dh-modal-close" onClick={() => setShowDetalleModal(false)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
@@ -612,11 +631,11 @@ function MisCitas() {
               </div>
               <div className="modal-detail-item">
                 <span className="modal-detail-label">Fecha</span>
-                <span className="modal-detail-value">{selectedCita.fecha}</span>
+                <span className="modal-detail-value">{formatDateCO(selectedCita.fecha)}</span>
               </div>
               <div className="modal-detail-item">
                 <span className="modal-detail-label">Hora</span>
-                <span className="modal-detail-value">{selectedCita.hora}</span>
+                <span className="modal-detail-value">{formatTimeCO(selectedCita.hora)}</span>
               </div>
               <div className="modal-detail-item">
                 <span className="modal-detail-label">Veterinario</span>
@@ -636,7 +655,7 @@ function MisCitas() {
             )}
 
             <div className="dh-modal-footer">
-              <button type="button" className="dh-btn-primary" onClick={() => setShowDetalleModal(false)}>
+              <button type="button" className="dh-btn-secondary" onClick={() => setShowDetalleModal(false)}>
                 Cerrar
               </button>
             </div>

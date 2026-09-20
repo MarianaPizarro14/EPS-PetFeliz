@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { setStoredAuth } from '../../utils/authStorage'
+import { useGoogleAuth } from '../../hooks/useGoogleAuth'
 import './Register.css'
 
 const AVATARS = [
@@ -22,6 +24,7 @@ function Register() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const { loginWithGoogle, googleLoading } = useGoogleAuth(setError)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.id]: e.target.value })
@@ -67,8 +70,7 @@ function Register() {
         return
       }
 
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      setStoredAuth(data.token, data.user, true)
 
       navigate('/dashboard-client')
     } catch {
@@ -135,9 +137,23 @@ function Register() {
             <p className="auth-form__subtitle">Empieza gratis, sin tarjeta de crédito.</p>
           </div>
 
-          <button className="auth-social-btn">
-            <GoogleIcon />
-            Registrarse con Google
+          <button 
+            type="button" 
+            className="auth-social-btn"
+            onClick={loginWithGoogle}
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? (
+              <>
+                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                Conectando...
+              </>
+            ) : (
+              <>
+                <GoogleIcon />
+                Registrarse con Google
+              </>
+            )}
           </button>
 
           <div className="auth-divider"><span>O CON TU CORREO</span></div>

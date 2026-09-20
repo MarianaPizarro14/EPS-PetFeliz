@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -78,6 +80,132 @@ class AuthController extends Controller
                     : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
             ],
         ], 200);
+    }
+
+    public function googleAuth(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'token_type' => 'nullable|string|in:id_token,access_token',
+        ]);
+
+        $token = $request->input('token');
+        $tokenType = $request->input('token_type', 'access_token');
+
+        try {
+            $email = null;
+            $name = null;
+            $picture = null;
+
+            if ($tokenType === 'id_token') {
+                $response = Http::get("https://oauth2.googleapis.com/tokeninfo?id_token={$token}");
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $email = $data['email'] ?? null;
+                    $name = $data['name'] ?? ($data['given_name'] ?? null);
+                    $picture = $data['picture'] ?? null;
+                }
+            } else {
+                // flow con access_token usando la API userinfo de Google
+                $response = Http::withHeaders([
+                    'Authorization' => "Bearer {$token}",
+                ])->get('https://www.googleapis.com/oauth2/v3/userinfo');
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $email = $data['email'] ?? null;
+                    $name = $data['name'] ?? ($data['given_name'] ?? null);
+                    $picture = $data['picture'] ?? null;
+                }
+            }
+
+            if (!$email) {
+                // Intento fallback con tokeninfo usando access_token
+                $responseFallback = Http::get("https://oauth2.googleapis.com/tokeninfo?access_token={$token}");
+                if ($responseFallback->successful()) {
+                    $data = $responseFallback->json();
+                    $email = $data['email'] ?? null;
+                }
+            }
+
+            if (!$email) {
+                return response()->json([
+                    'message' => 'No se pudo verificar la sesión con Google o el token ha caducado.',
+                ], 401);
+            }
+
+            if (!$name) {
+                $name = explode('@', $email)[0];
+            }
+
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                $result = DB::transaction(function () use ($email, $name, $picture) {
+                    $user = User::create([
+                        'email' => $email,
+                        'contrasena_hash' => Hash::make(Str::random(24)),
+                        'rol' => 'cliente',
+                        'activo' => 1,
+                    ]);
+
+                    $cliente = Cliente::create([
+                        'id_usuario' => $user->id_usuario,
+                        'nombre' => $name,
+                        'foto_perfil' => $picture ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+                    ]);
+
+                    return [$user, $cliente];
+                });
+
+                [$user, $cliente] = $result;
+            } else {
+                $cliente = $user->cliente;
+                if (!$cliente) {
+                    $cliente = Cliente::create([
+                        'id_usuario' => $user->id_usuario,
+                        'nombre' => $name,
+                        'foto_perfil' => $picture ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+                    ]);
+                } else if ($picture && str_contains($cliente->foto_perfil ?? '', 'default.jpg')) {
+                    $cliente->foto_perfil = $picture;
+                    $cliente->save();
+                }
+            }
+
+            if (!$user->activo) {
+                return response()->json([
+                    'message' => 'Tu cuenta se encuentra desactivada.',
+                ], 403);
+            }
+
+            $sanctumToken = $user->createToken('auth_token')->plainTextToken;
+
+            $primerNombre = $cliente
+                ? explode(' ', trim($cliente->nombre ?? 'Usuario'))[0]
+                : ($user->rol === 'admin' ? 'Administrador' : 'Usuario');
+
+            return response()->json([
+                'message' => 'Inicio de sesión con Google exitoso.',
+                'token' => $sanctumToken,
+                'user' => [
+                    'id_usuario' => $user->id_usuario,
+                    'id_cliente' => $cliente ? $cliente->id_cliente : null,
+                    'email' => $user->email,
+                    'rol' => $user->rol ?? 'cliente',
+                    'nombre' => $primerNombre,
+                    'nombreCompleto' => $cliente ? $cliente->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''),
+                    'foto' => $cliente
+                        ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
+                        : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                ],
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error de conexión durante la autenticación con Google: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function logout(Request $request)

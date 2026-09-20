@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -255,14 +256,18 @@ function AppContent() {
 
 import { UserProvider } from './context/UserContext'
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-google-client-id'
+
 function App() {
   return (
-    <BrowserRouter>
-      <UserProvider>
-        <AppContent />
-        <Analytics />
-      </UserProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <UserProvider>
+          <AppContent />
+          <Analytics />
+        </UserProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   )
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setStoredAuth } from '../../utils/authStorage'
+import { useGoogleAuth } from '../../hooks/useGoogleAuth'
 import './Login.css'
 
 const AVATARS = [
@@ -35,6 +36,7 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const { loginWithGoogle, googleLoading } = useGoogleAuth(setError)
 
   // Precargar credenciales si el usuario anteriormente marcó "Recuérdame"
   useEffect(() => {
@@ -224,9 +226,23 @@ function Login() {
 
           <div className="auth-divider"><span>O INICIA SESIÓN CON</span></div>
 
-          <button className="auth-social-btn">
-            <GoogleIcon />
-            Google
+          <button 
+            type="button" 
+            className="auth-social-btn"
+            onClick={loginWithGoogle}
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? (
+              <>
+                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                Conectando...
+              </>
+            ) : (
+              <>
+                <GoogleIcon />
+                Google
+              </>
+            )}
           </button>
 
           <p className="auth-form__footer">

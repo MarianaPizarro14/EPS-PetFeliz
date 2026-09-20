@@ -444,7 +444,10 @@ function AgendarCitaFlow() {
         return
       }
 
-      setConfirmedCita(data.cita)
+      setConfirmedCita({
+        ...data.cita,
+        email_enviado: data.email_enviado,
+      })
       setStep(3)
     } catch (err) {
       console.error('Error al confirmar pago:', err)
@@ -1368,9 +1371,16 @@ function AgendarCitaFlow() {
                 <i className="fa-solid fa-check"></i>
               </div>
               <h2 className="agendar-success-title">¡Cita Confirmada!</h2>
-              <p className="agendar-success-sub">
-                Tu agendamiento y pago han sido procesados exitosamente. Hemos enviado la confirmación y el comprobante a tu correo electrónico.
-              </p>
+              {confirmedCita?.email_enviado ? (
+                <p className="agendar-success-sub">
+                  Tu agendamiento y pago han sido procesados exitosamente. Hemos enviado la confirmación y el comprobante a tu correo electrónico.
+                </p>
+              ) : (
+                <p className="agendar-success-sub" style={{ color: '#d97706', backgroundColor: '#fffbe pressure/0.05', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fef3c7' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '0.4rem', color: '#d97706' }}></i>
+                  Tu pago quedó registrado. No pudimos enviar el correo ahora; puedes ver tu recibo aquí.
+                </p>
+              )}
 
               <div className="modal-detail-grid" style={{ textAlign: 'left', marginBottom: '1.75rem' }}>
                 <div className="modal-detail-item">

@@ -269,7 +269,7 @@ class PagoController extends Controller
         $nombrePlan = $monto === 39900 ? 'Mascota Individual' : 'Grupo Familiar';
 
         // Disparar notificaciones dinámicas (Campanita Web + Correo)
-        \App\Services\NotificationService::notificar(
+        $emailEnviado1 = \App\Services\NotificationService::notificar(
             $cliente,
             '¡Afiliación Activa en EPS PetFeliz!',
             "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$referencia}) para el plan {$nombrePlan}. Tu Cobertura Integral EPS se encuentra ACTIVA.",
@@ -283,7 +283,7 @@ class PagoController extends Controller
             ])
         );
 
-        \App\Services\NotificationService::notificar(
+        $emailEnviado2 = \App\Services\NotificationService::notificar(
             $cliente,
             'Comprobante de Afiliación Disponible',
             "Se generó tu recibo electrónico de afiliación. Puedes consultar tu Certificado Digital en el menú Afiliación.",
@@ -299,6 +299,7 @@ class PagoController extends Controller
 
         return response()->json([
             'message' => '¡Pago de afiliación procesado con éxito! Tu Cobertura Integral EPS está activa.',
+            'email_enviado' => ($emailEnviado1 || $emailEnviado2),
             'pago' => $pago,
             'cliente' => [
                 'es_afiliado' => true,

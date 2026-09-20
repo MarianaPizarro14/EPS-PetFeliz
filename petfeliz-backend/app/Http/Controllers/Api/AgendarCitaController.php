@@ -381,7 +381,7 @@ class AgendarCitaController extends Controller
         $vetNombre = $vet ? $vet->nombre : 'Médico Asignado';
 
         // Disparar notificaciones dinámicas en tiempo real (Campanita Web + Correos Electrónicos)
-        \App\Services\NotificationService::notificar(
+        $emailEnviado1 = \App\Services\NotificationService::notificar(
             $cliente,
             'Pago Exitoso Registrado',
             "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$pago->referencia_transaccion}) para el servicio {$motivoFinal}.",
@@ -395,7 +395,7 @@ class AgendarCitaController extends Controller
             ])
         );
 
-        \App\Services\NotificationService::notificar(
+        $emailEnviado2 = \App\Services\NotificationService::notificar(
             $cliente,
             'Comprobante Digital Disponible',
             "Se ha generado el comprobante electrónico para la atención de {$petNombre}.",
@@ -426,6 +426,7 @@ class AgendarCitaController extends Controller
 
         return response()->json([
             'message' => '¡Cita confirmada y pagada con éxito!',
+            'email_enviado' => ($emailEnviado1 || $emailEnviado2),
             'cita' => [
                 'id' => $cita->id_cita,
                 'fecha' => $cita->fecha,

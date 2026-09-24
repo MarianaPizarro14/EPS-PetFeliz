@@ -16,19 +16,18 @@ use App\Http\Controllers\Api\WompiController;
 use App\Http\Controllers\Api\AdminController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/auth/google', [AuthController::class, 'googleAuth']);
-Route::post('/forgot-password', [PasswordResetController::class, 'forgot']);
-Route::post('/reset-password', [PasswordResetController::class, 'reset']);
-Route::post('/contacto', [ContactoController::class, 'send']);
+Route::middleware('throttle:5,1')->post('/register', [AuthController::class, 'register']);
+Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:10,1')->post('/auth/google', [AuthController::class, 'googleAuth']);
+Route::middleware('throttle:3,1')->post('/forgot-password', [PasswordResetController::class, 'forgot']);
+Route::middleware('throttle:5,1')->post('/reset-password', [PasswordResetController::class, 'reset']);
+Route::middleware('throttle:5,1')->post('/contacto', [ContactoController::class, 'send']);
 
 // Webhooks de Wompi (Público)
 Route::post('/webhooks/wompi', [WompiController::class, 'handleWebhook']);
 
 // Rutas públicas de Historias de Cuidadores
 Route::get('/historias-cuidadores', [HistoriaCuidadorController::class, 'index']);
-Route::post('/historias-cuidadores', [HistoriaCuidadorController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -38,6 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/perfil/logout-all', [AuthController::class, 'logoutAll']);
     Route::post('/perfil/delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
+
+    // Historias de Cuidadores (Creación requiere autenticación)
+    Route::post('/historias-cuidadores', [HistoriaCuidadorController::class, 'store']);
 
     // Rutas de Administración (requieren rol admin)
     Route::middleware('admin')->group(function () {
@@ -85,8 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cliente/afiliacion', [PagoController::class, 'afiliacionInfo']);
     Route::post('/cliente/afiliacion/pagar', [PagoController::class, 'pagarAfiliacion']);
 
-    // Pasarela Wompi (Firma criptográfica SHA256 para Checkout)
-    Route::post('/wompi/generar-firma', [WompiController::class, 'generarFirma']);
+    // Pasarela Wompi (Firma criptográfica SHA256 para Checkout - Rate Limited)
+    Route::middleware('throttle:10,1')->post('/wompi/generar-firma', [WompiController::class, 'generarFirma']);
 
     // Rutas de Documentos PDF
     Route::get('/cliente/documentos/factura/{id_pago}/pdf', [DocumentoController::class, 'facturaPdf']);

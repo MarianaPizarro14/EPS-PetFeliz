@@ -95,6 +95,17 @@ export default function AdminVeterinarios() {
   const [deletingVet, setDeletingVet] = useState(null)
   const [submittingDelete, setSubmittingDelete] = useState(false)
 
+  const [createdCredentials, setCreatedCredentials] = useState(null)
+  const [copiedToast, setCopiedToast] = useState(false)
+
+  const handleCopyCredentials = () => {
+    if (!createdCredentials) return
+    const textToCopy = `CREDENCIALES DE ACCESO VETERINARIO - EPS PETFELIZ\n\nNombre: ${createdCredentials.nombre}\nUsuario / Correo: ${createdCredentials.correo}\nContraseña Temporal: ${createdCredentials.contrasena}\n\nIniciar Sesión: ${window.location.origin}/login`
+    navigator.clipboard.writeText(textToCopy)
+    setCopiedToast(true)
+    setTimeout(() => setCopiedToast(false), 3000)
+  }
+
   const calculateStats = (list, apiStats = null) => {
     if (apiStats) {
       setStats(apiStats)
@@ -243,6 +254,13 @@ export default function AdminVeterinarios() {
           )
         } else {
           setVeterinarios((prev) => [savedVet, ...prev])
+          if (responseData.contrasena_temporal) {
+            setCreatedCredentials({
+              nombre: savedVet.nombre,
+              correo: savedVet.correo,
+              contrasena: responseData.contrasena_temporal,
+            })
+          }
         }
         setShowModalForm(false)
         fetchVeterinariosData()
@@ -683,6 +701,75 @@ export default function AdminVeterinarios() {
                 disabled={submittingDelete}
               >
                 {submittingDelete ? 'Eliminando...' : 'Sí, Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CREDENCIALES DE ACCESO CREADAS ── */}
+      {createdCredentials && (
+        <div className="adm-modal-overlay" onClick={() => setCreatedCredentials(null)}>
+          <div className="adm-modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#059669' }}>
+                <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
+                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif' }}>Credenciales de Acceso Creadas</h3>
+              </div>
+              <button className="adm-modal-close" onClick={() => setCreatedCredentials(null)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="adm-modal-body" style={{ padding: '1.25rem 0 0 0' }}>
+              <p style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+                Se ha generado con éxito la cuenta de usuario para <strong>{createdCredentials.nombre}</strong>.
+              </p>
+
+              <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '12px', border: '1px solid #cbd5e1', marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '0.8rem' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                    Usuario / Correo Electrónico
+                  </span>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
+                    {createdCredentials.correo}
+                  </span>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                    Contraseña Temporal
+                  </span>
+                  <span style={{ fontFamily: 'monospace', fontSize: '1.2rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '0.36rem 0.75rem', borderRadius: '6px', border: '1px solid #a7f3d0', display: 'inline-block' }}>
+                    {createdCredentials.contrasena}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginTop: '2px', fontSize: '0.95rem' }}></i>
+                <span style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
+                  <strong>Importante:</strong> Esta contraseña temporal solo se muestra una vez por motivos de seguridad. Por favor, compártela o cópiala antes de cerrar esta ventana.
+                </span>
+              </div>
+            </div>
+
+            <div className="adm-modal-footer">
+              <button
+                type="button"
+                className="adm-btn-secondary"
+                onClick={() => setCreatedCredentials(null)}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="adm-btn-primary"
+                onClick={handleCopyCredentials}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <i className={copiedToast ? "fa-solid fa-check" : "fa-solid fa-copy"}></i>
+                <span>{copiedToast ? '¡Credenciales Copiadas!' : 'Copiar Credenciales'}</span>
               </button>
             </div>
           </div>

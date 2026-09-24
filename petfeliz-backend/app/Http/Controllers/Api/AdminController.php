@@ -897,10 +897,12 @@ class AdminController extends Controller
             'correo.unique'   => 'Este correo electrónico ya se encuentra registrado en el sistema.',
         ]);
 
-        $vet = DB::transaction(function () use ($request) {
+        $tempPassword = 'Vet#' . rand(1000, 9999);
+
+        $vet = DB::transaction(function () use ($request, $tempPassword) {
             $user = User::create([
                 'email'           => strtolower(trim($request->correo)),
-                'contrasena_hash' => Hash::make(Str::random(16)),
+                'contrasena_hash' => Hash::make($tempPassword),
                 'rol'             => 'veterinario',
                 'activo'          => 1,
             ]);
@@ -918,8 +920,9 @@ class AdminController extends Controller
         $vet->load('usuario');
 
         return response()->json([
-            'message'     => 'Veterinario registrado con éxito en el sistema.',
-            'veterinario' => [
+            'message'             => 'Veterinario registrado con éxito en el sistema.',
+            'contrasena_temporal' => $tempPassword,
+            'veterinario'         => [
                 'id_veterinario' => $vet->id_veterinario,
                 'id_usuario'     => $vet->id_usuario,
                 'id_sucursal'    => $vet->id_sucursal,

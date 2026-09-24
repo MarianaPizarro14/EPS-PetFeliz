@@ -18,7 +18,29 @@ class WompiController extends Controller
         ]);
 
         $referencia = trim($request->referencia);
-        $montoPesos = $request->monto;
+        $montoPesos = (float) $request->monto;
+
+        if ($request->filled('id_servicio')) {
+            $servicio = \App\Models\Servicio::find($request->id_servicio);
+            if ($servicio) {
+                $user = $request->user();
+                $cliente = $user ? $user->cliente : null;
+                $afiliadoAlDia = $cliente && $cliente->es_afiliado && $cliente->estado_afiliacion === 'al_dia';
+
+                if ($afiliadoAlDia) {
+                    if ($servicio->incluido_en_plan) {
+                        $montoPesos = 0;
+                    } elseif ($servicio->precio_afiliado !== null && $servicio->precio_afiliado !== '') {
+                        $montoPesos = (float) $servicio->precio_afiliado;
+                    } else {
+                        $montoPesos = (float) ($servicio->precio_base ?? 70000);
+                    }
+                } else {
+                    $montoPesos = (float) ($servicio->precio_base ?? 70000);
+                }
+            }
+        }
+
         $montoCentavos = (int) round($montoPesos * 100);
 
         $currency = trim(config('services.wompi.currency', 'COP'));
@@ -56,14 +78,37 @@ class WompiController extends Controller
     }
 
     /**
-     * Webhook placeholder para recibir notificaciones asíncronas de Wompi.
+     * Webhook para recibir notificaciones asíncronas de Wompi (transacciones PENDING / APPROVED).
      */
     public function handleWebhook(Request $request)
     {
-        // Placeholder: Lógica de validación del webhook se implementará en una etapa posterior.
+        $payload = $request->all();
+
+        // 1. Validar la firma criptográfica (checksum SHA256) con WOMPI_EVENTS_SECRET
+        $isValidChecksum = \App\Services\WompiService::verificarChecksumWebhook($payload);
+        if (!$isValidChecksum) {
+            \Illuminate\Support\Facades\Log::warning('WOMPI WEBHOOK ERROR: Firma de evento (checksum) no coincide. Intento de origen no autorizado desestimado.', [
+                'ip' => $request->ip(),
+                'payload' => $payload,
+            ]);
+            return response()->json([
+                'status' => 'unauthorized',
+                'message' => 'Firma del evento inválida.'
+            ], 401);
+        }
+
+        $event = $payload['event'] ?? '';
+        $transaction = $payload['data']['transaction'] ?? null;
+
+        if ($event === 'transaction.updated' && $transaction) {
+            $wompiTxId = $transaction['id'] ?? '';
+            $status = $transaction['status'] ?? '';
+            \Illuminate\Support\Facades\Log::info("WOMPI WEBHOOK RECIBIDO: Transacción {$wompiTxId} cambió a estado '{$status}'.");
+        }
+
         return response()->json([
             'status' => 'received',
-            'message' => 'Notificación de Webhook Wompi recibida correctamente.'
+            'message' => 'Notificación de Webhook Wompi verificada y procesada correctamente.'
         ], 200);
     }
 }

@@ -314,26 +314,12 @@ class AgendarCitaController extends Controller
             ], 409);
         }
 
+        // 1. Recalcular precio en servidor (NUNCA confiar en montos del navegador)
         $servicio = Servicio::find($request->id_servicio);
         $motivoFinal = $servicio ? $servicio->nombre : 'Consulta General';
-
-        $cita = Cita::create([
-            'id_cliente' => $cliente->id_cliente,
-            'id_mascota' => $request->id_mascota,
-            'id_servicio' => $request->id_servicio,
-            'motivo' => $motivoFinal,
-            'fecha' => $reserva->fecha,
-            'hora' => $horaSql,
-            'observacion' => $request->observacion ?? 'Pago confirmado en línea',
-            'id_estado' => 2, // 2 = Confirmada
-            'id_veterinario' => $reserva->id_veterinario,
-        ]);
-
-        // Registrar Pago en la tabla `pagos`
         $monto = 70000;
         $tipoCobertura = 'particular';
 
-        // Verificar si el cliente cuenta con afiliación activa y AL DÍA (sin mora)
         $afiliadoAlDia = $cliente->es_afiliado && $cliente->estado_afiliacion === 'al_dia';
 
         if ($servicio && $afiliadoAlDia) {
@@ -348,19 +334,103 @@ class AgendarCitaController extends Controller
                 $tipoCobertura = 'particular';
             }
         } else {
-            // Usuario no afiliado o en estado de MORA: cobro a precio regular/particular
             $monto = $servicio ? ($servicio->precio_base ?? 70000) : 70000;
             $tipoCobertura = 'particular';
         }
 
+        $wompiTxId = $request->id_transaccion_wompi ?? $request->referencia_wompi;
+        $rawMetodo = 'CARD';
+
+        // 2. Si el cobro es mayor a $0, VERIFICACIÓN ESTRICTA EN API DE WOMPI
+        if ($monto > 0) {
+            if (empty($wompiTxId)) {
+                return response()->json([
+                    'message' => 'Se requiere el ID de la transacción de Wompi para confirmar el pago.',
+                ], 422);
+            }
+
+            // Unicidad: Prevenir Replay Attacks
+            if (\App\Models\Pago::where('wompi_transaction_id', $wompiTxId)->exists()) {
+                return response()->json([
+                    'message' => 'Esta transacción de Wompi ya fue procesada anteriormente.',
+                ], 409);
+            }
+
+            // Consulta REST directa a API Wompi
+            $txData = \App\Services\WompiService::consultarTransaccion($wompiTxId);
+
+            if (!$txData) {
+                return response()->json([
+                    'message' => 'No se pudo verificar la transacción con la API de Wompi. Por favor intenta de nuevo.',
+                ], 502);
+            }
+
+            // Criterio 1: Estado Aprobado
+            $status = $txData['status'] ?? 'UNKNOWN';
+            if ($status === 'PENDING') {
+                return response()->json([
+                    'message' => 'Tu transacción se encuentra PENDIENTE de autorización por tu entidad bancaria. Recibirás una notificación cuando sea aprobada.',
+                ], 202);
+            }
+
+            if ($status !== 'APPROVED') {
+                return response()->json([
+                    'message' => "La transacción no fue aprobada por Wompi (Estado: {$status}).",
+                ], 422);
+            }
+
+            // Criterio 2: Coincidencia de Monto en Centavos
+            $montoCentavosEsperado = (int) round($monto * 100);
+            $montoCentavosWompi = (int) ($txData['amount_in_cents'] ?? 0);
+            if ($montoCentavosWompi !== $montoCentavosEsperado) {
+                return response()->json([
+                    'message' => "El monto pagado en Wompi (\$" . number_format($montoCentavosWompi / 100, 0, ',', '.') . ") no coincide con la tarifa requerida (\$" . number_format($monto, 0, ',', '.') . ").",
+                ], 422);
+            }
+
+            // Criterio 3: Moneda COP
+            if (strtoupper($txData['currency'] ?? '') !== 'COP') {
+                return response()->json([
+                    'message' => 'La moneda de la transacción debe ser COP.',
+                ], 422);
+            }
+
+            // Extraer método real devuelto por Wompi
+            $rawMetodo = $txData['payment_method_type'] ?? ($txData['payment_method']['type'] ?? 'CARD');
+        } else {
+            $rawMetodo = 'eps';
+        }
+
         $metodoMap = [
-          'card' => 'Tarjeta de Crédito / Débito',
-          'pse' => 'PSE - Cuenta de Ahorros',
-          'nequi' => 'Nequi / Daviplata',
-          'eps' => 'Cobertura Plan EPS',
+            'CARD' => 'Tarjeta de Crédito / Débito',
+            'CARD_DEBIT' => 'Tarjeta Débito',
+            'NEQUI' => 'Nequi',
+            'PSE' => 'PSE (Wompi)',
+            'BANCOLOMBIA_TRANSFER' => 'Bancolombia (Transferencia)',
+            'BANCOLOMBIA_COLLECT' => 'Corresponsal Bancolombia',
+            'BANCOLOMBIA_QR' => 'QR Bancolombia',
+            'DAVIPLATA' => 'Daviplata',
+            'card' => 'Tarjeta de Crédito / Débito',
+            'nequi' => 'Nequi',
+            'eps' => 'Cobertura Plan EPS',
+            'wompi' => 'Wompi',
         ];
-        $rawMetodo = $request->metodo_pago ?? 'card';
-        $metodoFinal = $metodoMap[$rawMetodo] ?? $rawMetodo;
+        $metodoUpper = strtoupper($rawMetodo);
+        $metodoFinal = $monto == 0 ? 'Cobertura Plan EPS' : ($metodoMap[$rawMetodo] ?? ($metodoMap[$metodoUpper] ?? ucwords(strtolower(str_replace('_', ' ', $rawMetodo)))));
+
+        $cita = Cita::create([
+            'id_cliente' => $cliente->id_cliente,
+            'id_mascota' => $request->id_mascota,
+            'id_servicio' => $request->id_servicio,
+            'motivo' => $motivoFinal,
+            'fecha' => $reserva->fecha,
+            'hora' => $horaSql,
+            'observacion' => $request->observacion ?? 'Pago verificado con Wompi',
+            'id_estado' => 2, // 2 = Confirmada
+            'id_veterinario' => $reserva->id_veterinario,
+        ]);
+
+        $refTransaccion = $wompiTxId ? "WOMPI-{$wompiTxId}" : ('TX-' . strtoupper(Str::random(8)) . '-' . time());
 
         $pago = Pago::create([
             'id_cita' => $cita->id_cita,
@@ -369,7 +439,8 @@ class AgendarCitaController extends Controller
             'tipo_cobertura' => $tipoCobertura,
             'metodo_pago' => $metodoFinal,
             'estado' => 'confirmado',
-            'referencia_transaccion' => 'TX-' . strtoupper(Str::random(8)) . '-' . time(),
+            'referencia_transaccion' => $refTransaccion,
+            'wompi_transaction_id' => $monto > 0 ? $wompiTxId : null,
         ]);
 
         // Eliminar la reserva temporal al confirmar

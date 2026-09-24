@@ -227,27 +227,87 @@ class PagoController extends Controller
             'metodo_pago' => 'nullable|string',
             'monto' => 'nullable|numeric',
             'tipo_plan' => 'nullable|string',
+            'id_transaccion_wompi' => 'nullable|string',
+            'referencia_wompi' => 'nullable|string',
         ]);
 
-        $metodoMap = [
-            'card' => 'Tarjeta de Crédito / Débito',
-            'pse' => 'PSE - Cuenta de Ahorros',
-            'nequi' => 'Nequi / Daviplata',
-        ];
-        $rawMetodo = $request->metodo_pago ?? 'card';
-        $metodoFinal = $metodoMap[$rawMetodo] ?? $rawMetodo;
-
-        // Determinar monto: Individual ($39.900) o Familiar ($69.900)
+        // 1. Recalcular monto en servidor
         $monto = 69900;
         if ($request->monto && (int)$request->monto === 39900) {
             $monto = 39900;
         } elseif ($request->tipo_plan === 'individual') {
             $monto = 39900;
-        } elseif ($request->monto && (int)$request->monto === 69900) {
-            $monto = 69900;
         }
 
-        $referencia = 'TX-AFIL-' . strtoupper(\Illuminate\Support\Str::random(6)) . '-' . time();
+        $wompiTxId = $request->id_transaccion_wompi ?? $request->referencia_wompi;
+
+        if (empty($wompiTxId)) {
+            return response()->json([
+                'message' => 'Se requiere el ID de la transacción de Wompi para activar la afiliación.',
+            ], 422);
+        }
+
+        // 2. Unicidad: Prevenir Replay Attacks
+        if (Pago::where('wompi_transaction_id', $wompiTxId)->exists()) {
+            return response()->json([
+                'message' => 'Esta transacción de Wompi ya fue utilizada previamente.',
+            ], 409);
+        }
+
+        // 3. Verificación HTTP en API de Wompi
+        $txData = \App\Services\WompiService::consultarTransaccion($wompiTxId);
+
+        if (!$txData) {
+            return response()->json([
+                'message' => 'No se pudo verificar la transacción con la API de Wompi. Por favor intenta nuevamente.',
+            ], 502);
+        }
+
+        $status = $txData['status'] ?? 'UNKNOWN';
+        if ($status === 'PENDING') {
+            return response()->json([
+                'message' => 'Tu transacción de afiliación se encuentra PENDIENTE de aprobación bancaria.',
+            ], 202);
+        }
+
+        if ($status !== 'APPROVED') {
+            return response()->json([
+                'message' => "La transacción de afiliación no fue aprobada por Wompi (Estado: {$status}).",
+            ], 422);
+        }
+
+        $montoCentavosEsperado = (int) round($monto * 100);
+        $montoCentavosWompi = (int) ($txData['amount_in_cents'] ?? 0);
+        if ($montoCentavosWompi !== $montoCentavosEsperado) {
+            return response()->json([
+                'message' => "El monto pagado en Wompi (\$" . number_format($montoCentavosWompi / 100, 0, ',', '.') . ") no coincide con la cuota de afiliación (\$" . number_format($monto, 0, ',', '.') . ").",
+            ], 422);
+        }
+
+        if (strtoupper($txData['currency'] ?? '') !== 'COP') {
+            return response()->json([
+                'message' => 'La moneda de la transacción debe ser COP.',
+            ], 422);
+        }
+
+        $rawMetodo = $txData['payment_method_type'] ?? ($txData['payment_method']['type'] ?? 'CARD');
+        $metodoMap = [
+            'CARD' => 'Tarjeta de Crédito / Débito',
+            'CARD_DEBIT' => 'Tarjeta Débito',
+            'NEQUI' => 'Nequi',
+            'PSE' => 'PSE (Wompi)',
+            'BANCOLOMBIA_TRANSFER' => 'Bancolombia (Transferencia)',
+            'BANCOLOMBIA_COLLECT' => 'Corresponsal Bancolombia',
+            'BANCOLOMBIA_QR' => 'QR Bancolombia',
+            'DAVIPLATA' => 'Daviplata',
+            'card' => 'Tarjeta de Crédito / Débito',
+            'nequi' => 'Nequi',
+            'wompi' => 'Wompi',
+        ];
+        $metodoUpper = strtoupper($rawMetodo);
+        $metodoFinal = $metodoMap[$rawMetodo] ?? ($metodoMap[$metodoUpper] ?? ucwords(strtolower(str_replace('_', ' ', $rawMetodo))));
+
+        $referencia = "WOMPI-{$wompiTxId}";
 
         $pago = Pago::create([
             'id_cita' => null,
@@ -257,6 +317,7 @@ class PagoController extends Controller
             'metodo_pago' => $metodoFinal,
             'estado' => 'confirmado',
             'referencia_transaccion' => $referencia,
+            'wompi_transaction_id' => $wompiTxId,
         ]);
 
         // Activar la afiliación en el cliente y fijar la fecha si aún no la tenía

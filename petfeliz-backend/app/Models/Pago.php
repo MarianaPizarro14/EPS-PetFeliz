@@ -20,6 +20,7 @@ class Pago extends Model
         'metodo_pago',
         'estado',
         'referencia_transaccion',
+        'wompi_transaction_id',
     ];
 
     /**

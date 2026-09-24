@@ -39,6 +39,8 @@ return [
         'public_key' => env('WOMPI_PUBLIC_KEY'),
         'private_key' => env('WOMPI_PRIVATE_KEY'),
         'integrity_secret' => env('WOMPI_INTEGRITY_SECRET'),
+        'events_secret' => env('WOMPI_EVENTS_SECRET'),
+        'api_url' => env('WOMPI_API_URL', 'https://sandbox.wompi.co/v1'),
         'currency' => env('WOMPI_CURRENCY', 'COP'),
     ],
 

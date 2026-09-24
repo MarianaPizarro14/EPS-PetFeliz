@@ -72,7 +72,8 @@ function AgendarCitaFlow() {
   const [errorMsg, setErrorMsg] = useState('')
 
   // Formulario de Pago en Paso 2
-  const [paymentMethod, setPaymentMethod] = useState('card')
+  // TODO: PSE se habilitará más adelante a través de Wompi
+  const [paymentMethod, setPaymentMethod] = useState('wompi')
   const [cardForm, setCardForm] = useState({
     titular: '',
     numero: '',
@@ -412,8 +413,10 @@ function AgendarCitaFlow() {
   }
 
   // Confirmar Cita en Backend
-  const ejecutarConfirmacionBackend = async (referenciaWompi = null) => {
+  const ejecutarConfirmacionBackend = async (referenciaWompi = null, metodoRealWompi = null) => {
     const token = getStoredToken()
+    const montoCalculado = getPrecioCitaCalculado(selectedService)
+    const metodoPagoEnvio = montoCalculado === 0 ? 'eps' : (metodoRealWompi || 'wompi')
     try {
       setSubmitting(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/agendar/confirmar-pago`, {
@@ -428,7 +431,8 @@ function AgendarCitaFlow() {
           id_mascota: selectedPet?.id || selectedPet?.id_mascota,
           id_servicio: selectedService?.id_servicio,
           observacion: observacion,
-          metodo_pago: paymentMethod,
+          metodo_pago: metodoPagoEnvio,
+          id_transaccion_wompi: referenciaWompi,
           referencia_wompi: referenciaWompi,
         }),
       })
@@ -457,15 +461,15 @@ function AgendarCitaFlow() {
     }
   }
 
-  // Confirmar Pago en Paso 2 (Wompi para Tarjeta o directo para $0 / otros métodos)
+  // Confirmar Pago en Paso 2 (Wompi para cobro > $0 o directo para copago $0 de EPS)
   const handleConfirmarPago = async (e) => {
     if (e && e.preventDefault) e.preventDefault()
     setErrorMsg('')
 
     const montoCalculado = getPrecioCitaCalculado(selectedService)
 
-    // Integración con Wompi Sandbox para Tarjeta Crédito / Débito cuando el monto > 0
-    if (paymentMethod === 'card' && montoCalculado > 0) {
+    // Integración con Wompi para cobro > $0
+    if (montoCalculado > 0) {
       const token = getStoredToken()
       try {
         setSubmitting(true)
@@ -482,6 +486,7 @@ function AgendarCitaFlow() {
           body: JSON.stringify({
             referencia: refUnica,
             monto: montoCalculado,
+            id_servicio: selectedService?.id_servicio,
           }),
         })
 
@@ -495,7 +500,7 @@ function AgendarCitaFlow() {
         // 2. Cargar script de Wompi Widget
         const WidgetCheckout = await loadWompiScript()
 
-        // 3. Abrir Widget de Wompi Sandbox
+        // 3. Abrir Widget de Wompi
         const checkout = new WidgetCheckout({
           currency: dataFirma.moneda || 'COP',
           amountInCents: dataFirma.monto_centavos,
@@ -507,7 +512,8 @@ function AgendarCitaFlow() {
         checkout.open(async (result) => {
           const transaction = result?.transaction
           if (transaction?.status === 'APPROVED') {
-            await ejecutarConfirmacionBackend(transaction.id || dataFirma.referencia)
+            const metodoReal = transaction.payment_method_type || transaction.payment_method?.type || 'wompi'
+            await ejecutarConfirmacionBackend(transaction.id || dataFirma.referencia, metodoReal)
           } else if (transaction?.status === 'DECLINED') {
             setErrorMsg('La transacción fue rechazada por la entidad financiera emisora. Por favor verifica tu tarjeta o intenta con otro medio de pago.')
             setSubmitting(false)
@@ -529,8 +535,8 @@ function AgendarCitaFlow() {
       return
     }
 
-    // Para monto $0 o PSE / Nequi
-    await ejecutarConfirmacionBackend()
+    // Para monto $0 (cobertura EPS)
+    await ejecutarConfirmacionBackend(null, 'eps')
   }
 
   // Manejadores para carga de foto en modal
@@ -1107,38 +1113,74 @@ function AgendarCitaFlow() {
                       </span>
                     </div>
 
+                    {/* TODO: PSE se habilitará más adelante a través de Wompi */}
                     <h3 className="agendar-section-title">
-                      <i className="fa-solid fa-credit-card"></i> Método de Pago
+                      <i className="fa-solid fa-credit-card"></i> Confirma y Paga tu Cita
                     </h3>
 
-                    <div className="agendar-payment-tabs">
-                      <button
-                        type="button"
-                        className={`agendar-payment-tab ${paymentMethod === 'card' ? 'agendar-payment-tab--active' : ''}`}
-                        onClick={() => setPaymentMethod('card')}
-                      >
-                        <i className="fa-solid fa-credit-card"></i>
-                        <span>Tarjeta Crédito / Débito</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`agendar-payment-tab ${paymentMethod === 'pse' ? 'agendar-payment-tab--active' : ''}`}
-                        onClick={() => setPaymentMethod('pse')}
-                      >
-                        <i className="fa-solid fa-building-columns"></i>
-                        <span>PSE (Débito Bancario)</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`agendar-payment-tab ${paymentMethod === 'nequi' ? 'agendar-payment-tab--active' : ''}`}
-                        onClick={() => setPaymentMethod('nequi')}
-                      >
-                        <i className="fa-solid fa-mobile-screen-button"></i>
-                        <span>Nequi / Daviplata</span>
-                      </button>
-                    </div>
+                    {getPrecioCitaCalculado(selectedService) === 0 ? (
+                      <div className="agendar-payment-form">
+                        <div
+                          style={{
+                            background: '#f0fdf4',
+                            border: '1.5px solid #bbf7d0',
+                            borderRadius: '12px',
+                            padding: '1.15rem 1.25rem',
+                            marginBottom: '1.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: '#166534',
+                              color: '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '1rem',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <i className="fa-solid fa-shield-cat"></i>
+                          </div>
+                          <div>
+                            <strong style={{ color: '#166534', fontSize: '0.95rem', fontFamily: 'Sora, sans-serif' }}>
+                              Cobertura Plan EPS PetFeliz (Copago $0)
+                            </strong>
+                            <div style={{ fontSize: '0.8rem', color: '#15803d', marginTop: '0.15rem' }}>
+                              Este servicio está 100% cubierto por tu suscripción activa. No requiere ningún pago adicional.
+                            </div>
+                          </div>
+                        </div>
 
-                    {paymentMethod === 'card' && (
+                        <div className="agendar-form-actions">
+                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
+                            ← Volver
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-primary-pet"
+                            style={{ flex: 1 }}
+                            onClick={handleConfirmarPago}
+                            disabled={submitting}
+                          >
+                            {submitting ? (
+                              <>
+                                <i className="fa-solid fa-circle-notch fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                                <span>Confirmando cita...</span>
+                              </>
+                            ) : (
+                              'Confirmar Cita'
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
                       <div className="agendar-payment-form">
                         <div
                           style={{
@@ -1171,7 +1213,7 @@ function AgendarCitaFlow() {
                             </div>
                             <div>
                               <strong style={{ color: '#166534', fontSize: '0.95rem', fontFamily: 'Sora, sans-serif' }}>
-                                Pasarela de Pago Wompi (Modo Sandbox)
+                                Pasarela de Pago Wompi
                               </strong>
                               <div style={{ fontSize: '0.78rem', color: '#15803d' }}>
                                 Cifrado SSL de 256 bits y firmas criptográficas SHA256 de seguridad
@@ -1179,7 +1221,7 @@ function AgendarCitaFlow() {
                             </div>
                           </div>
                           <p style={{ margin: 0, fontSize: '0.82rem', color: '#334155', lineHeight: '1.45' }}>
-                            Al hacer clic en el botón de pago, se abrirá de forma segura la ventana del Widget de Wompi para ingresar los datos de tu tarjeta de crédito o débito de prueba.
+                            Al hacer clic en el botón de pago, se abrirá la pasarela oficial de Wompi para elegir tu medio de pago (Tarjeta, Nequi, etc.) y completar la transacción.
                           </p>
                         </div>
 
@@ -1202,69 +1244,6 @@ function AgendarCitaFlow() {
                             ) : (
                               `Pagar ${formatCOP(getPrecioCitaCalculado(selectedService))} con Wompi`
                             )}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'pse' && (
-                      <div className="agendar-payment-form">
-                        <div className="pet-form__field">
-                          <label>Selecciona tu Banco *</label>
-                          <select required defaultValue="">
-                            <option value="" disabled>-- Elige tu entidad financiera --</option>
-                            <option value="bancolombia">Bancolombia</option>
-                            <option value="banco_bogota">Banco de Bogotá</option>
-                            <option value="davivienda">Davivienda</option>
-                            <option value="bbva">BBVA Colombia</option>
-                            <option value="nequi">Nequi</option>
-                            <option value="rappipay">RappiPay</option>
-                          </select>
-                        </div>
-
-                        <div className="pet-form__row">
-                          <div className="pet-form__field">
-                            <label>Tipo de Cliente *</label>
-                            <select required defaultValue="natural">
-                              <option value="natural">Persona Natural</option>
-                              <option value="juridica">Persona Jurídica</option>
-                            </select>
-                          </div>
-
-                          <div className="pet-form__field">
-                            <label>Número de Documento *</label>
-                            <input type="text" placeholder="Número de C.C." required />
-                          </div>
-                        </div>
-
-                        <div className="agendar-form-actions">
-                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
-                            ← Volver
-                          </button>
-                          <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
-                            {submitting ? 'Procesando...' : 'Ir a PSE a Pagar'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'nequi' && (
-                      <div className="agendar-payment-form">
-                        <div className="pet-form__field">
-                          <label>Número Celular Registrado *</label>
-                          <input type="tel" placeholder="300 000 0000" maxLength="10" required />
-                        </div>
-
-                        <p className="text-muted" style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1rem' }}>
-                          Recibirás una notificación en tu app móvil para autorizar la transacción de manera segura.
-                        </p>
-
-                        <div className="agendar-form-actions">
-                          <button type="button" className="btn-modal-secondary" onClick={() => setStep(1)}>
-                            ← Volver
-                          </button>
-                          <button type="button" className="btn-primary-pet" style={{ flex: 1 }} onClick={handleConfirmarPago} disabled={submitting}>
-                            {submitting ? 'Procesando...' : `Continuar a ${paymentMethod === 'nequi' ? 'Nequi' : 'PSE'}`}
                           </button>
                         </div>
                       </div>

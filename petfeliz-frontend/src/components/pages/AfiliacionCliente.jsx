@@ -90,19 +90,51 @@ export default function AfiliacionCliente() {
     setShowPaymentModal(true)
   }
 
-  // Confirmación del pago de suscripción
+  // Helper para cargar script Wompi Widget
+  const loadWompiScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.WidgetCheckout) {
+        resolve(window.WidgetCheckout)
+        return
+      }
+      const existingScript = document.getElementById('wompi-widget-script')
+      if (existingScript) {
+        existingScript.onload = () => resolve(window.WidgetCheckout)
+        existingScript.onerror = () => reject(new Error('Error al cargar Widget de Wompi.'))
+        return
+      }
+      const script = document.createElement('script')
+      script.id = 'wompi-widget-script'
+      script.src = 'https://checkout.wompi.co/widget.js'
+      script.async = true
+      script.onload = () => {
+        if (window.WidgetCheckout) {
+          resolve(window.WidgetCheckout)
+        } else {
+          reject(new Error('WidgetCheckout no está disponible en window.'))
+        }
+      }
+      script.onerror = () => reject(new Error('No se pudo cargar la pasarela Wompi.'))
+      document.body.appendChild(script)
+    })
+  }
+
+  // TODO: PSE se habilitará más adelante a través de Wompi
+  // Confirmación del pago de suscripción a través de Wompi
   const handleConfirmarPagoSuscripcion = async (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     const token = getStoredToken()
     if (!token) return
 
     const montoCalculado = selectedPlanType === 'individual' ? 39900 : 69900
+    const refUnica = `TX-AFIL-${Date.now()}`
 
     try {
       setSubmittingPayment(true)
       setPaymentSuccessMsg('')
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/cliente/afiliacion/pagar`, {
+      // 1. Obtener firma criptográfica desde el Backend
+      const resFirma = await fetch(`${import.meta.env.VITE_API_URL}/wompi/generar-firma`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,43 +142,92 @@ export default function AfiliacionCliente() {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          metodo_pago: selectedMetodo,
+          referencia: refUnica,
           monto: montoCalculado,
-          tipo_plan: selectedPlanType,
         }),
       })
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        alert(data.message || 'Error al procesar el pago de afiliación.')
+      const dataFirma = await resFirma.json()
+      if (!resFirma.ok) {
+        alert(dataFirma.message || 'Error al conectar con Wompi.')
+        setSubmittingPayment(false)
         return
       }
 
-      const pagoCreado = data.pago
+      // 2. Cargar Widget
+      const WidgetCheckout = await loadWompiScript()
 
-      setPaymentSuccessMsg('¡Pago procesado con éxito! Tu Cobertura Integral EPS PetFeliz se encuentra activa.')
-      setTimeout(() => {
-        setShowPaymentModal(false)
-        setPaymentSuccessMsg('')
-        fetchAfiliacion()
+      // 3. Abrir Widget Wompi
+      const checkout = new WidgetCheckout({
+        currency: dataFirma.moneda || 'COP',
+        amountInCents: dataFirma.monto_centavos,
+        reference: dataFirma.referencia,
+        publicKey: dataFirma.publicKey,
+        signature: { integrity: dataFirma.signature },
+      })
 
-        // Abrir automáticamente el recibo de pago recién generado
-        if (pagoCreado) {
-          setSelectedReceipt({
-            referencia: pagoCreado.referencia_transaccion,
-            concepto: selectedPlanType === 'individual' ? 'Plan Mascota Individual EPS' : 'Plan Grupo Familiar EPS',
-            fecha_pago: new Date().toLocaleDateString('es-CO'),
-            metodo_pago: selectedMetodo === 'card' ? 'Tarjeta Crédito / Débito' : selectedMetodo === 'pse' ? 'PSE - Cuenta de Ahorros' : 'Nequi / Daviplata',
-            monto: montoCalculado,
-            estado: 'confirmado',
-          })
+      checkout.open(async (result) => {
+        const transaction = result?.transaction
+        if (transaction?.status === 'APPROVED') {
+          const metodoReal = transaction.payment_method_type || transaction.payment_method?.type || 'wompi'
+          try {
+            const resBackend = await fetch(`${import.meta.env.VITE_API_URL}/cliente/afiliacion/pagar`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+              },
+              body: JSON.stringify({
+                metodo_pago: metodoReal,
+                monto: montoCalculado,
+                tipo_plan: selectedPlanType,
+                id_transaccion_wompi: transaction.id || dataFirma.referencia,
+                referencia_wompi: transaction.id || dataFirma.referencia,
+              }),
+            })
+
+            const dataBackend = await resBackend.json()
+            if (!resBackend.ok) {
+              alert(dataBackend.message || 'Error al guardar pago de afiliación.')
+              setSubmittingPayment(false)
+              return
+            }
+
+            const pagoCreado = dataBackend.pago
+
+            setPaymentSuccessMsg('¡Pago procesado con éxito! Tu Cobertura Integral EPS PetFeliz se encuentra activa.')
+            setTimeout(() => {
+              setShowPaymentModal(false)
+              setPaymentSuccessMsg('')
+              fetchAfiliacion()
+
+              if (pagoCreado) {
+                setSelectedReceipt({
+                  referencia: pagoCreado.referencia_transaccion,
+                  concepto: selectedPlanType === 'individual' ? 'Plan Mascota Individual EPS' : 'Plan Grupo Familiar EPS',
+                  fecha_pago: new Date().toLocaleDateString('es-CO'),
+                  metodo_pago: pagoCreado.metodo_pago || 'Wompi',
+                  monto: montoCalculado,
+                  estado: 'confirmado',
+                })
+              }
+            }, 1600)
+          } catch (err) {
+            console.error(err)
+            alert('Error al confirmar transacción en el servidor.')
+            setSubmittingPayment(false)
+          }
+        } else if (transaction?.status === 'DECLINED') {
+          alert('La transacción fue rechazada.')
+          setSubmittingPayment(false)
+        } else {
+          setSubmittingPayment(false)
         }
-      }, 1600)
+      })
     } catch (err) {
-      console.error('Error al procesar pago:', err)
-      alert('Fallo de red al conectar con la pasarela de pagos.')
-    } finally {
+      console.error('Error al procesar pago de afiliación:', err)
+      alert('Fallo de red al conectar con la pasarela de pagos Wompi.')
       setSubmittingPayment(false)
     }
   }
@@ -549,45 +630,47 @@ export default function AfiliacionCliente() {
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '1.25rem' }}>
-                      <label className="afil-field-label">Selecciona el Método de Pago:</label>
-                      <div className="afil-methods-grid">
-                        <label className={`afil-method-option ${selectedMetodo === 'card' ? 'afil-method-option--selected' : ''}`}>
-                          <input
-                            type="radio"
-                            name="metodo_pago"
-                            value="card"
-                            checked={selectedMetodo === 'card'}
-                            onChange={(e) => setSelectedMetodo(e.target.value)}
-                          />
-                          <i className="fa-solid fa-credit-card"></i>
-                          <span>Tarjeta Crédito / Débito</span>
-                        </label>
-
-                        <label className={`afil-method-option ${selectedMetodo === 'pse' ? 'afil-method-option--selected' : ''}`}>
-                          <input
-                            type="radio"
-                            name="metodo_pago"
-                            value="pse"
-                            checked={selectedMetodo === 'pse'}
-                            onChange={(e) => setSelectedMetodo(e.target.value)}
-                          />
-                          <i className="fa-solid fa-building-columns"></i>
-                          <span>PSE - Cuenta de Ahorros</span>
-                        </label>
-
-                        <label className={`afil-method-option ${selectedMetodo === 'nequi' ? 'afil-method-option--selected' : ''}`}>
-                          <input
-                            type="radio"
-                            name="metodo_pago"
-                            value="nequi"
-                            checked={selectedMetodo === 'nequi'}
-                            onChange={(e) => setSelectedMetodo(e.target.value)}
-                          />
-                          <i className="fa-solid fa-mobile-screen"></i>
-                          <span>Nequi / Daviplata</span>
-                        </label>
+                    <div
+                      style={{
+                        background: '#f0fdf4',
+                        border: '1.5px solid #bbf7d0',
+                        borderRadius: '12px',
+                        padding: '1.15rem 1.25rem',
+                        marginTop: '1.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <div
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '8px',
+                            background: '#166534',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.95rem',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <i className="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                          <strong style={{ color: '#166534', fontSize: '0.95rem', fontFamily: 'Sora, sans-serif' }}>
+                            Pasarela de Pago Segura Wompi
+                          </strong>
+                          <div style={{ fontSize: '0.78rem', color: '#15803d' }}>
+                            Cifrado SSL de 256 bits y firmas criptográficas SHA256 de seguridad
+                          </div>
+                        </div>
                       </div>
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: '#334155', lineHeight: '1.45' }}>
+                        Al hacer clic en pagar, se abrirá la pasarela oficial de Wompi para elegir tu medio de pago (Tarjeta, Nequi, etc.) y completar la suscripción.
+                      </p>
                     </div>
                   </>
                 )}
@@ -662,7 +745,7 @@ export default function AfiliacionCliente() {
               </div>
               <div className="afil-receipt-field">
                 <label>Método de Pago:</label>
-                <span>{selectedReceipt.metodo_pago || 'Tarjeta / PSE'}</span>
+                <span>{selectedReceipt.metodo_pago || 'Wompi'}</span>
               </div>
             </div>
 

@@ -49,19 +49,28 @@ class VeterinarioSeeder extends Seeder
             $userId = 1000 + $vet['id'];
             $email = 'vet_' . $vet['id'] . '@petfeliz.com';
 
-            // Crear usuario si no existe
+            $tempPassword = 'Vet#' . str_pad($vet['id'], 4, '0', STR_PAD_LEFT);
+
+            // Crear o actualizar usuario
             $existingUser = DB::table('usuario')->where('id_usuario', $userId)->orWhere('email', $email)->first();
             if (!$existingUser) {
                 DB::table('usuario')->insert([
                     'id_usuario' => $userId,
                     'email' => $email,
-                    'contrasena_hash' => Hash::make(Str::random(16)),
+                    'contrasena_hash' => Hash::make($tempPassword),
+                    'rol' => 'veterinario',
                     'activo' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             } else {
                 $userId = $existingUser->id_usuario;
+                DB::table('usuario')->where('id_usuario', $userId)->update([
+                    'contrasena_hash' => Hash::make($tempPassword),
+                    'rol' => 'veterinario',
+                    'activo' => true,
+                    'updated_at' => now(),
+                ]);
             }
 
             // Crear o actualizar veterinario con id_veterinario exacto

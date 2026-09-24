@@ -35,112 +35,24 @@
   color: #64748b;
 }
 
-.adm-spec-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.adm-spec-badge--general {
-  background-color: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.adm-spec-badge--urgencias {
-  background-color: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
-}
-
-.adm-spec-badge--cirugia {
-  background-color: #e0e7ff;
-  color: #4338ca;
-  border: 1px solid #c7d2fe;
-}
-
-.adm-spec-badge--dermatologia {
-  background-color: #fce7f3;
-  color: #be185d;
-  border: 1px solid #fbcfe8;
-}
-
-.adm-spec-badge--vacunacion {
-  background-color: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-}
-
-.adm-spec-badge--desparasitacion {
-  background-color: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
-}
-
-.adm-spec-badge--odontologia {
-  background-color: #fae8ff;
-  color: #86198f;
-  border: 1px solid #f5d0fe;
-}
-
-.adm-spec-badge--laboratorio {
-  background-color: #f3e8ff;
-  color: #6b21a8;
-  border: 1px solid #e9d5ff;
-}
-
-.adm-spec-badge--director {
-  background-color: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fde68a;
-}
-
-.adm-location-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.adm-sede-text {
+.adm-tp-text {
+  font-family: 'Inter', sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
   color: #1e293b;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-}
-
-.adm-ciudad-text {
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
-.adm-contact-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.82rem;
 }
 
 .adm-contact-phone {
   color: #0f172a;
   font-weight: 500;
+  font-size: 0.88rem;
 }
 
 .adm-contact-email {
   color: #64748b;
-}
-
-.adm-address-text {
-  font-size: 0.82rem;
-  color: #475569;
-  max-width: 180px;
-  line-height: 1.3;
+  font-size: 0.88rem;
 }
 
 /* Modal Ficha del Veterinario */
@@ -156,8 +68,8 @@
 }
 
 .adm-vet-hero__img {
-  width: 80px;
-  height: 80px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #ffffff;
@@ -180,21 +92,14 @@
   gap: 0.5rem;
 }
 
-.adm-vet-hero__badges {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
 .adm-vet-body {
   padding: 1.5rem;
 }
 
 .adm-detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.25rem;
-  margin-bottom: 1.5rem;
 }
 
 .adm-detail-item {

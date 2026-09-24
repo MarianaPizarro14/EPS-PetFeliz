@@ -13,7 +13,10 @@ use App\Models\Pago;
 use App\Models\Mascota;
 use App\Models\Cliente;
 use App\Services\CloudinaryService;
+use App\Models\Veterinario;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -806,618 +809,195 @@ class AdminController extends Controller
     }
 
     /**
-     * Obtener el listado completo de Veterinarios con todos sus datos detallados.
+     * Obtener el listado completo de Veterinarios desde la base de datos real.
      */
     public function veterinariosIndex(Request $request)
     {
-        $rosterCompleto = [
-            [
-                'id_veterinario' => 1,
-                'nombre' => 'Dr. Andrés Gómez',
-                'cedula' => '1.020.456.789',
-                'numero_tarjeta' => 'TP-18452-COMVEZCOL',
-                'direccion' => 'Calle 33 #76-45, Laureles',
-                'telefono' => '300 456 7890',
-                'correo' => 'andres.gomez@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Lun–Vie 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673207/andres-gomez_nh7kqg.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 142,
-                'descripcion' => 'Atención primaria y seguimiento de salud integral para mascotas con 8 años de trayectoria.',
-            ],
-            [
-                'id_veterinario' => 2,
-                'nombre' => 'Dra. Luisa Fernanda Mora',
-                'cedula' => '1.035.678.901',
-                'numero_tarjeta' => 'TP-22104-COMVEZCOL',
-                'direccion' => 'Cra 43A #21S-10, El Poblado',
-                'telefono' => '312 890 1234',
-                'correo' => 'luisa.mora@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Envigado',
-                'sede' => 'Sede Envigado',
-                'horario' => 'Lun–Sáb 9:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/luisa-fernanda-mora_b8ix5z.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 118,
-                'descripcion' => 'Especialista en medicina preventiva y control de nutrición animal.',
-            ],
-            [
-                'id_veterinario' => 3,
-                'nombre' => 'Dr. Felipe Restrepo',
-                'cedula' => '1.017.234.567',
-                'numero_tarjeta' => 'TP-19820-COMVEZCOL',
-                'direccion' => 'Diag 55 #42-30, Niquía',
-                'telefono' => '315 234 5678',
-                'correo' => 'felipe.restrepo@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Mar–Sáb 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 165,
-                'descripcion' => 'Consulta general, diagnóstico clínico y tratamiento de enfermedades comunes.',
-            ],
-            [
-                'id_veterinario' => 4,
-                'nombre' => 'Dra. Natalia Ospina',
-                'cedula' => '1.028.345.678',
-                'numero_tarjeta' => 'TP-24115-COMVEZCOL',
-                'direccion' => 'Calle 37S #43A-12',
-                'telefono' => '301 345 6789',
-                'correo' => 'natalia.ospina@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Envigado',
-                'sede' => 'Sede Envigado',
-                'horario' => 'Lun–Vie 10:00 AM – 6:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673226/natalia-ospina_q0c9g2.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 94,
-                'descripcion' => 'Atención clínica personalizada con enfoque en bienestar y calidad de vida animal.',
-            ],
-            [
-                'id_veterinario' => 5,
-                'nombre' => 'Dr. Juan Pablo Vélez',
-                'cedula' => '1.022.456.789',
-                'numero_tarjeta' => 'TP-17630-COMVEZCOL',
-                'direccion' => 'Circular 4 #72-18, Laureles',
-                'telefono' => '316 456 7890',
-                'correo' => 'juan.velez@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Mié–Dom 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/juan-pablo-velez_gcneud.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 108,
-                'descripcion' => 'Medicina general con énfasis en geriatría y cuidado de mascotas mayores.',
-            ],
-            [
-                'id_veterinario' => 6,
-                'nombre' => 'Dra. Valentina Cruz',
-                'cedula' => '1.039.567.890',
-                'numero_tarjeta' => 'TP-25420-COMVEZCOL',
-                'direccion' => 'Av. Nutibara #68-24',
-                'telefono' => '300 567 8901',
-                'correo' => 'valentina.cruz@petfeliz.com',
-                'especialidad' => 'Dermatología',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles · Envigado',
-                'horario' => 'Lun–Vie 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673227/valentina-cruz_ktb3po.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 88,
-                'descripcion' => 'Especialista en alergias, patologías cutáneas y dermatología clínica.',
-            ],
-            [
-                'id_veterinario' => 7,
-                'nombre' => 'Dr. Sebastián Lozano',
-                'cedula' => '1.018.678.901',
-                'numero_tarjeta' => 'TP-20150-COMVEZCOL',
-                'direccion' => 'Cra 50 #48-15',
-                'telefono' => '317 678 9012',
-                'correo' => 'sebastian.lozano@petfeliz.com',
-                'especialidad' => 'Dermatología',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello · Laureles',
-                'horario' => 'Mar–Sáb 9:00 AM – 5:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673226/sebastian-lozano_d2y8p2.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 76,
-                'descripcion' => 'Tratamiento especializado de afecciones óticas, foliculitis y problemas dermatólogicos.',
-            ],
-            [
-                'id_veterinario' => 8,
-                'nombre' => 'Dra. Carolina Muñoz',
-                'cedula' => '1.026.789.012',
-                'numero_tarjeta' => 'TP-21890-COMVEZCOL',
-                'direccion' => 'Calle 50 #45-20',
-                'telefono' => '310 789 0123',
-                'correo' => 'carolina.munoz@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Medellín',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Turno Noche',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/carolina-mu%C3%B1oz_de5bpz.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 210,
-                'descripcion' => 'Atención de urgencias críticas, emergencias y soporte vital de pacientes.',
-            ],
-            [
-                'id_veterinario' => 9,
-                'nombre' => 'Dr. Esteban Cardona',
-                'cedula' => '1.037.890.123',
-                'numero_tarjeta' => 'TP-23410-COMVEZCOL',
-                'direccion' => 'Cra 48 #12S-30',
-                'telefono' => '302 890 1234',
-                'correo' => 'esteban.cardona@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Sabaneta',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Turno Mañana',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/esteban-cardona_su68zf.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 185,
-                'descripcion' => 'Manejo de traumatismos, cuadros agudos e intoxicaciones en caninos y felinos.',
-            ],
-            [
-                'id_veterinario' => 10,
-                'nombre' => 'Dra. Mariana Salazar',
-                'cedula' => '1.024.901.234',
-                'numero_tarjeta' => 'TP-19280-COMVEZCOL',
-                'direccion' => 'Calle 36D #27A-15',
-                'telefono' => '314 901 2345',
-                'correo' => 'mariana.salazar@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Envigado',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Turno Tarde',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/mariana-salazar_cgfsj4.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 198,
-                'descripcion' => 'Intensivista veterinaria encargada de monitorización continua e internación.',
-            ],
-            [
-                'id_veterinario' => 11,
-                'nombre' => 'Dr. Ricardo Herrera',
-                'cedula' => '1.029.012.345',
-                'numero_tarjeta' => 'TP-26150-COMVEZCOL',
-                'direccion' => 'Transversal 39 #74B-10',
-                'telefono' => '305 012 3456',
-                'correo' => 'ricardo.herrera@petfeliz.com',
-                'especialidad' => 'Desparasitación',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Lun–Sáb 8:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673226/ricardo-herrera_cri3jl.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 134,
-                'descripcion' => 'Planes preventivos anti-parasitarios internos y externos para familias multimascota.',
-            ],
-            [
-                'id_veterinario' => 12,
-                'nombre' => 'Dra. Isabela Tobón',
-                'cedula' => '1.019.123.456',
-                'numero_tarjeta' => 'TP-20940-COMVEZCOL',
-                'direccion' => 'Calle 53 #49-33',
-                'telefono' => '318 123 4567',
-                'correo' => 'isabela.tobon@petfeliz.com',
-                'especialidad' => 'Desparasitación',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Mar–Dom 9:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/isabela-tobon_uzmysl.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 122,
-                'descripcion' => 'Evaluación de carga parasitaria y programas profilácticos personalizados.',
-            ],
-            [
-                'id_veterinario' => 13,
-                'nombre' => 'Dr. Tomás Agudelo',
-                'cedula' => '1.036.234.567',
-                'numero_tarjeta' => 'TP-24830-COMVEZCOL',
-                'direccion' => 'Cra 42 #38S-22',
-                'telefono' => '301 234 5678',
-                'correo' => 'tomas.agudelo@petfeliz.com',
-                'especialidad' => 'Desparasitación',
-                'ciudad' => 'Envigado',
-                'sede' => 'Sede Envigado',
-                'horario' => 'Lun–Vie 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673227/tomas-agudelo_u6eohz.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 95,
-                'descripcion' => 'Control profiláctico y desparasitación de cachorros y felinos.',
-            ],
-            [
-                'id_veterinario' => 14,
-                'nombre' => 'Dra. Alejandra Patiño',
-                'cedula' => '1.021.345.678',
-                'numero_tarjeta' => 'TP-18970-COMVEZCOL',
-                'direccion' => 'Circular 1 #70-08',
-                'telefono' => '313 345 6789',
-                'correo' => 'alejandra.patino@petfeliz.com',
-                'especialidad' => 'Vacunación',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles · Envigado',
-                'horario' => 'Lun–Sáb 8:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673205/alejandra-pati%C3%B1o_m6h1gr.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 160,
-                'descripcion' => 'Inmunización clínica, certificados de vacunación oficial y esquemas puppy.',
-            ],
-            [
-                'id_veterinario' => 15,
-                'nombre' => 'Dr. Mauricio Londoño',
-                'cedula' => '1.016.456.789',
-                'numero_tarjeta' => 'TP-17450-COMVEZCOL',
-                'direccion' => 'Calle 46 #52-19',
-                'telefono' => '316 456 7891',
-                'correo' => 'mauricio.londono@petfeliz.com',
-                'especialidad' => 'Vacunación',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Mar–Dom 9:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673225/mauricio-londo%C3%B1o_yeonik.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 140,
-                'descripcion' => 'Esquemas completos de vacunación canina y felina con biológicos certificados.',
-            ],
-            [
-                'id_veterinario' => 16,
-                'nombre' => 'Dra. Diana Ríos',
-                'cedula' => '1.025.567.890',
-                'numero_tarjeta' => 'TP-21340-COMVEZCOL',
-                'direccion' => 'Av. San Juan #73-50',
-                'telefono' => '300 567 8902',
-                'correo' => 'diana.rios@petfeliz.com',
-                'especialidad' => 'Médico Director',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Lun–Vie 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673221/diana-rios_olk7ci.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 105,
-                'descripcion' => 'Co-fundadora y Directora Médica de la Sede Laureles EPS PetFeliz.',
-            ],
-            [
-                'id_veterinario' => 17,
-                'nombre' => 'Dr. Hernán Zapata',
-                'cedula' => '1.015.678.901',
-                'numero_tarjeta' => 'TP-16890-COMVEZCOL',
-                'direccion' => 'Cra 51 #50-12',
-                'telefono' => '311 678 9013',
-                'correo' => 'hernan.zapata@petfeliz.com',
-                'especialidad' => 'Médico Director',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Lun–Sáb 8:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673224/hernan-zapata_whxxms.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 98,
-                'descripcion' => 'Director Médico de la Sede Bello con 10 años de experiencia en clínica veterinaria.',
-            ],
-            [
-                'id_veterinario' => 18,
-                'nombre' => 'Dra. Paola Ríos',
-                'cedula' => '1.038.789.012',
-                'numero_tarjeta' => 'TP-25910-COMVEZCOL',
-                'direccion' => 'Calle 38S #43A-05',
-                'telefono' => '304 789 0124',
-                'correo' => 'paola.rios@petfeliz.com',
-                'especialidad' => 'Médico Director',
-                'ciudad' => 'Envigado',
-                'sede' => 'Sede Envigado',
-                'horario' => 'Lun–Vie 9:00 AM – 5:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673227/paola-rios_sydn3f.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 155,
-                'descripcion' => 'Directora Médica General EPS PetFeliz y coordinadora de auditoría clínica.',
-            ],
-            [
-                'id_veterinario' => 19,
-                'nombre' => 'Dr. Camilo Arango',
-                'cedula' => '1.023.890.123',
-                'numero_tarjeta' => 'TP-19560-COMVEZCOL',
-                'direccion' => 'Calle 33A #71-25',
-                'telefono' => '317 890 1235',
-                'correo' => 'camilo.arango@petfeliz.com',
-                'especialidad' => 'Cirugía',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Lun–Vie 7:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/camilo-arango_mn8o8q.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 130,
-                'descripcion' => 'Cirujano principal de tejidos blandos y traumatología ortopédica.',
-            ],
-            [
-                'id_veterinario' => 20,
-                'nombre' => 'Dra. Juliana Ossa',
-                'cedula' => '1.034.901.234',
-                'numero_tarjeta' => 'TP-23120-COMVEZCOL',
-                'direccion' => 'Cra 45 #32S-18',
-                'telefono' => '302 901 2346',
-                'correo' => 'juliana.ossa@petfeliz.com',
-                'especialidad' => 'Cirugía',
-                'ciudad' => 'Envigado',
-                'sede' => 'Sede Envigado',
-                'horario' => 'Mar–Sáb 7:00 AM – 2:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673223/juliana-ossa_bhom4f.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 112,
-                'descripcion' => 'Cirugía reconstructiva, esterilización profiláctica e intervenciones abdominales.',
-            ],
-            [
-                'id_veterinario' => 21,
-                'nombre' => 'Dr. Nicolás Gaviria',
-                'cedula' => '1.014.012.345',
-                'numero_tarjeta' => 'TP-15980-COMVEZCOL',
-                'direccion' => 'Calle 55 #47-08',
-                'telefono' => '319 012 3457',
-                'correo' => 'nicolas.gaviria@petfeliz.com',
-                'especialidad' => 'Cirugía',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Lun–Vie 7:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673225/nicolas-gaviria_f9m5i0.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 124,
-                'descripcion' => 'Procedimientos quirúrgicos mínimamente invasivos y oncología veterinaria.',
-            ],
-            [
-                'id_veterinario' => 22,
-                'nombre' => 'Dra. Blanca Montoya',
-                'cedula' => '1.027.123.456',
-                'numero_tarjeta' => 'TP-22870-COMVEZCOL',
-                'direccion' => 'Circular 3 #74-40',
-                'telefono' => '305 123 4568',
-                'correo' => 'blanca.montoya@petfeliz.com',
-                'especialidad' => 'Odontología',
-                'ciudad' => 'Medellín',
-                'sede' => 'Sede Laureles',
-                'horario' => 'Lun–Jue 9:00 AM – 3:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673219/blanca-montoya_ama4hq.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 89,
-                'descripcion' => 'Profilaxis ultrasonora, tratamiento periodontal y extracciones dentales.',
-            ],
-            [
-                'id_veterinario' => 23,
-                'nombre' => 'Dra. Fernanda Restrepo',
-                'cedula' => '1.033.234.567',
-                'numero_tarjeta' => 'TP-24190-COMVEZCOL',
-                'direccion' => 'Calle 36S #42-10',
-                'telefono' => '312 234 5679',
-                'correo' => 'fernanda.restrepo@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Envigado',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Nocturno',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691308/fernanda-restrepo_nsntfs.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 145,
-                'descripcion' => 'Atención de emergencias graves en turno nocturno y triaje.',
-            ],
-            [
-                'id_veterinario' => 24,
-                'nombre' => 'Dr. Julián Correa',
-                'cedula' => '1.013.345.678',
-                'numero_tarjeta' => 'TP-15340-COMVEZCOL',
-                'direccion' => 'Cra 49 #51-22',
-                'telefono' => '300 345 6780',
-                'correo' => 'julian.correa@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Bello',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Madrugada',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691307/julian-correa_furug7.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 138,
-                'descripcion' => 'Estabilización de pacientes traumáticos y soporte cardiorrespiratorio.',
-            ],
-            [
-                'id_veterinario' => 25,
-                'nombre' => 'Dra. Melissa Duarte',
-                'cedula' => '1.031.456.789',
-                'numero_tarjeta' => 'TP-23850-COMVEZCOL',
-                'direccion' => 'Transversal 74 #32-15',
-                'telefono' => '315 456 7892',
-                'correo' => 'melissa.duarte@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Medellín',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Mañana',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/melissa-duarte_surslq.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 129,
-                'descripcion' => 'Manejo de emergencias intoxicativas e insuficiencia metabólica aguda.',
-            ],
-            [
-                'id_veterinario' => 26,
-                'nombre' => 'Dr. Santiago Peláez',
-                'cedula' => '1.020.567.890',
-                'numero_tarjeta' => 'TP-18320-COMVEZCOL',
-                'direccion' => 'Calle 33B #78-04',
-                'telefono' => '318 567 8903',
-                'correo' => 'santiago.pelaez@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Medellín',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Tarde',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/santiago-pelaez_xwhbhq.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 140,
-                'descripcion' => 'Reanimación cerebro-cardiopulmonar y manejo de shock circulatorio.',
-            ],
-            [
-                'id_veterinario' => 27,
-                'nombre' => 'Dra. Camila Sepúlveda',
-                'cedula' => '1.032.678.901',
-                'numero_tarjeta' => 'TP-24670-COMVEZCOL',
-                'direccion' => 'Cra 43 #30S-14',
-                'telefono' => '301 678 9014',
-                'correo' => 'camila.sepulveda@petfeliz.com',
-                'especialidad' => 'Urgencias',
-                'ciudad' => 'Envigado',
-                'sede' => 'Todas las sedes',
-                'horario' => '24/7 Rotativo · Noche',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1784691306/camila-sepulveda_f3mf1g.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 152,
-                'descripcion' => 'Estabilización de hemorragias agudas y quemaduras severas.',
-            ],
-            [
-                'id_veterinario' => 28,
-                'nombre' => 'Dra. Laura Martínez',
-                'cedula' => '1.012.789.012',
-                'numero_tarjeta' => 'TP-14920-COMVEZCOL',
-                'direccion' => 'Calle 52 #48-40',
-                'telefono' => '316 789 0125',
-                'correo' => 'laura.martinez@petfeliz.com',
-                'especialidad' => 'Medicina General',
-                'ciudad' => 'Bello',
-                'sede' => 'Sede Bello',
-                'horario' => 'Mar–Sáb 8:00 AM – 4:00 PM',
-                'foto_perfil' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1788216413/pexels-eric-moura-859101902-32788234_flbyor.jpg',
-                'estado' => 'Activo',
-                'citas_atendidas' => 87,
-                'descripcion' => 'Atención integral con calidez y trato cercano a cada paciente y su familia.',
-            ],
-        ];
+        $vetsQuery = Veterinario::with('usuario')->orderBy('id_veterinario', 'desc')->get();
 
-        // 2. Traer registros de BD si existen
-        $dbVets = Veterinario::with('usuario')->get();
-        if ($dbVets->isNotEmpty()) {
-            foreach ($dbVets as $v) {
-                $exists = false;
-                foreach ($rosterCompleto as $r) {
-                    if ($r['id_veterinario'] == $v->id_veterinario) {
-                        $exists = true;
-                        break;
-                    }
-                }
-                if (!$exists) {
-                    $rosterCompleto[] = [
-                        'id_veterinario' => $v->id_veterinario,
-                        'nombre' => $v->nombre,
-                        'cedula' => '1.0' . rand(10, 99) . '.' . rand(100, 999) . '.' . rand(100, 999),
-                        'numero_tarjeta' => $v->numero_tarjeta ?? ('TP-' . rand(10000, 99999) . '-COMVEZCOL'),
-                        'direccion' => 'Sede Principal EPS PetFeliz',
-                        'telefono' => $v->telefono ?? '300 000 0000',
-                        'correo' => $v->usuario->email ?? 'veterinario@petfeliz.com',
-                        'especialidad' => 'Medicina General',
-                        'ciudad' => 'Medellín',
-                        'sede' => 'Sede Laureles',
-                        'horario' => 'Lun–Vie 8:00 AM – 4:00 PM',
-                        'foto_perfil' => $v->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
-                        'estado' => 'Activo',
-                        'citas_atendidas' => rand(10, 50),
-                        'descripcion' => 'Médico Veterinario registrado en la plataforma EPS PetFeliz.',
-                    ];
-                }
-            }
-        }
+        $formatted = $vetsQuery->map(function ($vet) {
+            return [
+                'id_veterinario' => $vet->id_veterinario,
+                'id_usuario'     => $vet->id_usuario,
+                'id_sucursal'    => $vet->id_sucursal ?? 1,
+                'nombre'         => $vet->nombre,
+                'telefono'       => $vet->telefono ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'foto_perfil'    => $vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'correo'         => $vet->usuario->email ?? '',
+            ];
+        });
 
-        $total = count($rosterCompleto);
-        $urgencias = count(array_filter($rosterCompleto, fn($v) => str_contains(strtolower($v['especialidad']), 'urgencia')));
-        $cirujanos = count(array_filter($rosterCompleto, fn($v) => str_contains(strtolower($v['especialidad']), 'cirug')));
-        $generales = count(array_filter($rosterCompleto, fn($v) => str_contains(strtolower($v['especialidad']), 'general')));
+        $total = $formatted->count();
+        $conTarjeta = $formatted->filter(fn($v) => !empty($v['numero_tarjeta']))->count();
+        $conTelefono = $formatted->filter(fn($v) => !empty($v['telefono']))->count();
+        $conFoto = $formatted->filter(fn($v) => !empty($v['foto_perfil']))->count();
 
         return response()->json([
-            'veterinarios' => $rosterCompleto,
+            'veterinarios' => $formatted->values(),
             'stats' => [
-                'total' => $total,
-                'urgencias' => $urgencias,
-                'cirujanos' => $cirujanos,
-                'generales' => $generales,
-                'sedes_activas' => 3,
+                'total'        => $total,
+                'con_tarjeta'  => $conTarjeta,
+                'con_telefono' => $conTelefono,
+                'con_foto'     => $conFoto,
             ]
         ], 200);
     }
 
     /**
-     * Obtener el detalle de un veterinario específico (Ficha médica).
+     * Obtener el detalle de un veterinario específico.
      */
     public function veterinariosShow($id)
     {
-        $all = $this->veterinariosIndex(request())->getData(true);
-        $vets = $all['veterinarios'] ?? [];
-
-        $found = null;
-        foreach ($vets as $v) {
-            if ($v['id_veterinario'] == $id) {
-                $found = $v;
-                break;
-            }
-        }
-
-        if (!$found) {
-            return response()->json(['message' => 'Veterinario no encontrado.'], 44);
-        }
-
-        // Simular citas atendidas recientes para la ficha
-        $citasAtendidas = Cita::with(['mascota', 'cliente', 'servicio'])
+        $vet = Veterinario::with(['usuario', 'citas.mascota', 'citas.cliente'])
             ->where('id_veterinario', $id)
-            ->orderBy('fecha', 'desc')
-            ->take(10)
-            ->get();
+            ->firstOrFail();
+
+        $citasRecientes = $vet->citas ? $vet->citas->take(10)->map(function ($c) {
+            return [
+                'id_cita' => $c->id_cita,
+                'fecha'   => $c->fecha,
+                'hora'    => $c->hora,
+                'motivo'  => $c->motivo,
+                'mascota' => $c->mascota->nombre ?? 'Paciente',
+                'cliente' => $c->cliente->nombre ?? 'Cliente',
+            ];
+        }) : [];
 
         return response()->json([
-            'veterinario' => $found,
-            'citas_recientes' => $citasAtendidas,
+            'veterinario' => [
+                'id_veterinario' => $vet->id_veterinario,
+                'id_usuario'     => $vet->id_usuario,
+                'id_sucursal'    => $vet->id_sucursal,
+                'nombre'         => $vet->nombre,
+                'telefono'       => $vet->telefono ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'foto_perfil'    => $vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'correo'         => $vet->usuario->email ?? '',
+            ],
+            'citas_recientes' => $citasRecientes,
         ], 200);
     }
 
     /**
-     * Crear un nuevo veterinario.
+     * Crear un nuevo veterinario en la base de datos real.
      */
     public function veterinariosStore(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:100',
-            'cedula' => 'nullable|string|max:50',
+            'nombre'         => 'required|string|max:100',
+            'correo'         => 'required|email|max:100|unique:usuario,email',
+            'telefono'       => 'nullable|string|max:20',
             'numero_tarjeta' => 'nullable|string|max:50',
-            'telefono' => 'nullable|string|max:20',
-            'correo' => 'nullable|email|max:100',
-            'especialidad' => 'nullable|string|max:100',
-            'ciudad' => 'nullable|string|max:100',
-            'sede' => 'nullable|string|max:100',
-            'direccion' => 'nullable|string|max:255',
-            'horario' => 'nullable|string|max:100',
-            'foto_perfil' => 'nullable|string',
+            'foto_perfil'    => 'nullable|string|max:255',
+        ], [
+            'nombre.required' => 'El nombre del veterinario es obligatorio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email'    => 'El correo electrónico no es válido.',
+            'correo.unique'   => 'Este correo electrónico ya se encuentra registrado en el sistema.',
         ]);
 
+        $vet = DB::transaction(function () use ($request) {
+            $user = User::create([
+                'email'           => strtolower(trim($request->correo)),
+                'contrasena_hash' => Hash::make(Str::random(16)),
+                'rol'             => 'veterinario',
+                'activo'          => 1,
+            ]);
+
+            return Veterinario::create([
+                'id_usuario'     => $user->id_usuario,
+                'id_sucursal'    => 1,
+                'nombre'         => trim($request->nombre),
+                'telefono'       => $request->telefono ? trim($request->telefono) : null,
+                'numero_tarjeta' => $request->numero_tarjeta ? trim($request->numero_tarjeta) : null,
+                'foto_perfil'    => $request->foto_perfil ? trim($request->foto_perfil) : null,
+            ]);
+        });
+
+        $vet->load('usuario');
+
         return response()->json([
-            'message' => 'Veterinario registrado con éxito en el sistema EPS PetFeliz.',
-            'veterinario' => array_merge($request->all(), [
-                'id_veterinario' => rand(100, 999),
-                'estado' => 'Activo',
-                'citas_atendidas' => 0,
-            ]),
+            'message'     => 'Veterinario registrado con éxito en el sistema.',
+            'veterinario' => [
+                'id_veterinario' => $vet->id_veterinario,
+                'id_usuario'     => $vet->id_usuario,
+                'id_sucursal'    => $vet->id_sucursal,
+                'nombre'         => $vet->nombre,
+                'telefono'       => $vet->telefono ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'foto_perfil'    => $vet->foto_perfil ?? '',
+                'correo'         => $vet->usuario->email ?? '',
+            ],
         ], 201);
     }
 
     /**
-     * Actualizar datos de un veterinario.
+     * Actualizar datos reales de un veterinario.
      */
     public function veterinariosUpdate(Request $request, $id)
     {
+        $vet = Veterinario::with('usuario')->where('id_veterinario', $id)->firstOrFail();
+
+        $userId = $vet->id_usuario;
+
+        $request->validate([
+            'nombre'         => 'sometimes|required|string|max:100',
+            'correo'         => 'sometimes|required|email|max:100|unique:usuario,email,' . $userId . ',id_usuario',
+            'telefono'       => 'nullable|string|max:20',
+            'numero_tarjeta' => 'nullable|string|max:50',
+            'foto_perfil'    => 'nullable|string|max:255',
+        ], [
+            'nombre.required' => 'El nombre del veterinario es obligatorio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email'    => 'El correo electrónico no es válido.',
+            'correo.unique'   => 'Este correo electrónico ya se encuentra registrado por otro usuario.',
+        ]);
+
+        DB::transaction(function () use ($request, $vet) {
+            $vetData = [];
+            if ($request->has('nombre')) $vetData['nombre'] = trim($request->nombre);
+            if ($request->has('telefono')) $vetData['telefono'] = $request->telefono ? trim($request->telefono) : null;
+            if ($request->has('numero_tarjeta')) $vetData['numero_tarjeta'] = $request->numero_tarjeta ? trim($request->numero_tarjeta) : null;
+            if ($request->has('foto_perfil')) $vetData['foto_perfil'] = $request->foto_perfil ? trim($request->foto_perfil) : null;
+
+            if (!empty($vetData)) {
+                $vet->update($vetData);
+            }
+
+            if ($request->has('correo') && $vet->usuario) {
+                $vet->usuario->update(['email' => strtolower(trim($request->correo))]);
+            }
+        });
+
+        $vet->refresh();
+        $vet->load('usuario');
+
         return response()->json([
-            'message' => 'Información del veterinario actualizada con éxito.',
+            'message'     => 'Información del veterinario actualizada con éxito.',
+            'veterinario' => [
+                'id_veterinario' => $vet->id_veterinario,
+                'id_usuario'     => $vet->id_usuario,
+                'id_sucursal'    => $vet->id_sucursal,
+                'nombre'         => $vet->nombre,
+                'telefono'       => $vet->telefono ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'foto_perfil'    => $vet->foto_perfil ?? '',
+                'correo'         => $vet->usuario->email ?? '',
+            ],
         ], 200);
     }
 
     /**
-     * Eliminar / Desactivar un veterinario.
+     * Eliminar (soft delete) un veterinario de la base de datos real.
      */
     public function veterinariosDestroy($id)
     {
+        $vet = Veterinario::where('id_veterinario', $id)->firstOrFail();
+        $vet->delete();
+
         return response()->json([
-            'message' => 'Veterinario desactivado correctamente.',
+            'message' => 'Veterinario eliminado correctamente.',
         ], 200);
     }
 }

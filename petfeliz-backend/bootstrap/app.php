@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'veterinario' => \App\Http\Middleware\EnsureIsVeterinario::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

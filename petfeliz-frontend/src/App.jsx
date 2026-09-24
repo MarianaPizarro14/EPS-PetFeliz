@@ -30,11 +30,13 @@ import AgendarCitaFlow from './components/pages/AgendarCitaFlow'
 import ResetPassword from './components/pages/ResetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import ProtectedRouteAdmin from './components/ProtectedRouteAdmin'
+import ProtectedRouteVet from './components/ProtectedRouteVet'
 import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadores'
 import AdminDashboard from './components/pages/AdminDashboard'
 import AdminCitas from './components/pages/AdminCitas'
 import AdminMascotas from './components/pages/AdminMascotas'
 import AdminVeterinarios from './components/pages/AdminVeterinarios'
+import DashboardVeterinario from './components/pages/DashboardVeterinario'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
@@ -42,7 +44,8 @@ const APP_ROUTES = [
   '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
-  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios'
+  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios',
+  '/veterinario/dashboard'
 ]
 
 function AppContent() {
@@ -245,6 +248,14 @@ function AppContent() {
             <ProtectedRoute>
               <AgendarCitaFlow />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/veterinario/dashboard"
+          element={
+            <ProtectedRouteVet>
+              <DashboardVeterinario />
+            </ProtectedRouteVet>
           }
         />
       </Routes>

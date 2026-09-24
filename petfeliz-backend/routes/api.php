@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\HistoriaCuidadorController;
 use App\Http\Controllers\Api\ContactoController;
 use App\Http\Controllers\Api\WompiController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\VeterinarioPortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:5,1')->post('/register', [AuthController::class, 'register']);
@@ -61,6 +62,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // Rutas de Administración de Historias de Cuidadores
         Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
         Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
+    });
+
+    // Rutas del Portal del Veterinario (requieren rol 'veterinario')
+    Route::middleware('veterinario')->prefix('veterinario')->group(function () {
+        Route::get('/dashboard', [VeterinarioPortalController::class, 'dashboard']);
+        Route::get('/pacientes', [VeterinarioPortalController::class, 'pacientes']);
+        Route::post('/citas/{id}/atender', [VeterinarioPortalController::class, 'atender']);
     });
 
     Route::apiResource('mascotas', MascotaController::class);

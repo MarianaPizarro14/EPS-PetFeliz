@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Cliente;
+use App\Models\Veterinario;
 
 class User extends Authenticatable
 {
@@ -49,8 +50,12 @@ class User extends Authenticatable
     }
 
     public function cliente()
-{
-    return $this->hasOne(Cliente::class, 'id_usuario', 'id_usuario');
-}
+    {
+        return $this->hasOne(Cliente::class, 'id_usuario', 'id_usuario');
+    }
 
+    public function veterinario()
+    {
+        return $this->hasOne(Veterinario::class, 'id_usuario', 'id_usuario');
+    }
 }

@@ -75,10 +75,23 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
         $cliente = $user->cliente;
+        $vet = $user->veterinario;
 
-        $primerNombre = $cliente
-            ? explode(' ', trim($cliente->nombre ?? 'Usuario'))[0]
-            : ($user->rol === 'admin' ? 'Administrador' : 'Usuario');
+        $primerNombre = 'Usuario';
+        if ($cliente) {
+            $primerNombre = explode(' ', trim($cliente->nombre ?? 'Usuario'))[0];
+        } elseif ($vet) {
+            $primerNombre = explode(' ', trim($vet->nombre ?? 'Dr. Veterinario'))[0];
+        } elseif ($user->rol === 'admin') {
+            $primerNombre = 'Administrador';
+        }
+
+        $nombreCompleto = $cliente ? $cliente->nombre : ($vet ? $vet->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''));
+        $foto = $cliente
+            ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
+            : ($vet
+                ? ($vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg')
+                : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg');
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso.',
@@ -86,13 +99,13 @@ class AuthController extends Controller
             'user' => [
                 'id_usuario' => $user->id_usuario,
                 'id_cliente' => $cliente ? $cliente->id_cliente : null,
+                'id_veterinario' => $vet ? $vet->id_veterinario : null,
                 'email' => $user->email,
                 'rol' => $user->rol ?? 'cliente',
                 'nombre' => $primerNombre,
-                'nombreCompleto' => $cliente ? $cliente->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''),
-                'foto' => $cliente
-                    ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
-                    : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'nombreCompleto' => $nombreCompleto,
+                'numero_tarjeta' => $vet ? $vet->numero_tarjeta : null,
+                'foto' => $foto,
             ],
         ], 200);
     }

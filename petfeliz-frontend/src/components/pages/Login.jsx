@@ -104,6 +104,8 @@ function Login() {
 
       if (data.user?.rol === 'admin') {
         navigate('/admin/dashboard')
+      } else if (data.user?.rol === 'veterinario') {
+        navigate('/veterinario/dashboard')
       } else {
         navigate('/dashboard-client')
       }

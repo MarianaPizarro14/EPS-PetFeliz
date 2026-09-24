@@ -314,29 +314,13 @@ class AgendarCitaController extends Controller
             ], 409);
         }
 
-        // 1. Recalcular precio en servidor (NUNCA confiar en montos del navegador)
+        // 1. Recalcular precio en servidor (Única fuente de verdad)
         $servicio = Servicio::find($request->id_servicio);
         $motivoFinal = $servicio ? $servicio->nombre : 'Consulta General';
-        $monto = 70000;
-        $tipoCobertura = 'particular';
 
-        $afiliadoAlDia = $cliente->es_afiliado && $cliente->estado_afiliacion === 'al_dia';
-
-        if ($servicio && $afiliadoAlDia) {
-            if ($servicio->incluido_en_plan) {
-                $monto = 0;
-                $tipoCobertura = 'eps';
-            } elseif ($servicio->precio_afiliado) {
-                $monto = $servicio->precio_afiliado;
-                $tipoCobertura = 'copago';
-            } else {
-                $monto = $servicio->precio_base ?? 70000;
-                $tipoCobertura = 'particular';
-            }
-        } else {
-            $monto = $servicio ? ($servicio->precio_base ?? 70000) : 70000;
-            $tipoCobertura = 'particular';
-        }
+        $calculoPrecio = $servicio ? $servicio->calcularPrecio($cliente) : ['monto' => 70000.0, 'tipo_cobertura' => 'particular'];
+        $monto = (float) $calculoPrecio['monto'];
+        $tipoCobertura = $calculoPrecio['tipo_cobertura'];
 
         $wompiTxId = $request->id_transaccion_wompi ?? $request->referencia_wompi;
         $rawMetodo = 'CARD';

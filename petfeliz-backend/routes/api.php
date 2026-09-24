@@ -38,24 +38,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/perfil/logout-all', [AuthController::class, 'logoutAll']);
     Route::post('/perfil/delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('/cliente/dashboard', [DashboardClientController::class, 'index']);
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
-    Route::get('/admin/citas', [AdminController::class, 'citas']);
-    Route::get('/admin/mascotas', [AdminController::class, 'mascotasIndex']);
-    Route::get('/admin/mascotas/{id}', [AdminController::class, 'mascotasShow']);
-    Route::post('/admin/mascotas', [AdminController::class, 'mascotasStore']);
-    Route::put('/admin/mascotas/{id}', [AdminController::class, 'mascotasUpdate']);
-    Route::delete('/admin/mascotas/{id}', [AdminController::class, 'mascotasDestroy']);
 
-    // Rutas de Administración de Veterinarios
-    Route::get('/admin/veterinarios', [AdminController::class, 'veterinariosIndex']);
-    Route::get('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosShow']);
-    Route::post('/admin/veterinarios', [AdminController::class, 'veterinariosStore']);
-    Route::put('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosUpdate']);
-    Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
+    // Rutas de Administración (requieren rol admin)
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/citas', [AdminController::class, 'citas']);
+        Route::get('/admin/mascotas', [AdminController::class, 'mascotasIndex']);
+        Route::get('/admin/mascotas/{id}', [AdminController::class, 'mascotasShow']);
+        Route::post('/admin/mascotas', [AdminController::class, 'mascotasStore']);
+        Route::put('/admin/mascotas/{id}', [AdminController::class, 'mascotasUpdate']);
+        Route::delete('/admin/mascotas/{id}', [AdminController::class, 'mascotasDestroy']);
 
-    // Rutas de Administración de Historias de Cuidadores
-    Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
-    Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
+        // Rutas de Administración de Veterinarios
+        Route::get('/admin/veterinarios', [AdminController::class, 'veterinariosIndex']);
+        Route::get('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosShow']);
+        Route::post('/admin/veterinarios', [AdminController::class, 'veterinariosStore']);
+        Route::put('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosUpdate']);
+        Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
+
+        // Rutas de Administración de Historias de Cuidadores
+        Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
+        Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);
+    });
 
     Route::apiResource('mascotas', MascotaController::class);
 

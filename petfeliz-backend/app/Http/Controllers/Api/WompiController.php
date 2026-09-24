@@ -25,19 +25,8 @@ class WompiController extends Controller
             if ($servicio) {
                 $user = $request->user();
                 $cliente = $user ? $user->cliente : null;
-                $afiliadoAlDia = $cliente && $cliente->es_afiliado && $cliente->estado_afiliacion === 'al_dia';
-
-                if ($afiliadoAlDia) {
-                    if ($servicio->incluido_en_plan) {
-                        $montoPesos = 0;
-                    } elseif ($servicio->precio_afiliado !== null && $servicio->precio_afiliado !== '') {
-                        $montoPesos = (float) $servicio->precio_afiliado;
-                    } else {
-                        $montoPesos = (float) ($servicio->precio_base ?? 70000);
-                    }
-                } else {
-                    $montoPesos = (float) ($servicio->precio_base ?? 70000);
-                }
+                $calculo = $servicio->calcularPrecio($cliente);
+                $montoPesos = (float) $calculo['monto'];
             }
         }
 

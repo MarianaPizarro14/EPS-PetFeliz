@@ -58,7 +58,7 @@
 /* Modal Ficha del Veterinario */
 .adm-vet-hero {
   background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
-  padding: 1.75rem 1.5rem;
+  padding: 1.5rem 1.5rem;
   border-radius: 16px 16px 0 0;
   color: #ffffff;
   display: flex;
@@ -68,8 +68,8 @@
 }
 
 .adm-vet-hero__img {
-  width: 76px;
-  height: 76px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #ffffff;
@@ -79,7 +79,7 @@
 .adm-vet-hero__info h2 {
   font-family: 'Sora', sans-serif;
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   margin: 0 0 0.3rem 0;
   color: #ffffff;
 }
@@ -93,18 +93,18 @@
 }
 
 .adm-vet-body {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .adm-detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .adm-detail-item {
   background: #f8fafc;
-  padding: 0.9rem 1.1rem;
+  padding: 0.85rem 1rem;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
 }
@@ -126,4 +126,95 @@
   font-size: 0.92rem;
   font-weight: 600;
   color: #0f172a;
+}
+
+/* Modal Formulario Compacto de Crear / Editar Veterinario */
+.adm-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.adm-form-group label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.adm-form-group input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.adm-form-group input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.adm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.adm-btn-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.adm-btn-secondary:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.adm-btn-primary {
+  background-color: #059669;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.adm-btn-primary:hover {
+  background-color: #047857;
+}
+
+.adm-btn-danger {
+  background-color: #dc2626;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.adm-btn-danger:hover {
+  background-color: #b91c1c;
 }

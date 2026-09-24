@@ -327,7 +327,7 @@ export default function AdminVeterinarios() {
         )}
 
         {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES ── */}
-        <div className="admin-dash-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="admin-dash-grid">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
               <span>Total Registrados</span>
@@ -481,30 +481,33 @@ export default function AdminVeterinarios() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                        <div className="action-buttons-group">
                           <button
                             type="button"
-                            className="adm-action-btn adm-action-btn--view"
+                            className="act-btn act-btn--view"
                             onClick={() => setSelectedFicha(vet)}
                             title="Ver ficha del veterinario"
                           >
                             <i className="fa-solid fa-eye"></i>
+                            <span>Ver</span>
                           </button>
                           <button
                             type="button"
-                            className="adm-action-btn adm-action-btn--edit"
+                            className="act-btn act-btn--edit"
                             onClick={() => handleOpenEditModal(vet)}
                             title="Editar datos del veterinario"
                           >
                             <i className="fa-solid fa-pen-to-square"></i>
+                            <span>Editar</span>
                           </button>
                           <button
                             type="button"
-                            className="adm-action-btn adm-action-btn--delete"
+                            className="act-btn act-btn--delete"
                             onClick={() => setDeletingVet(vet)}
                             title="Eliminar veterinario"
                           >
                             <i className="fa-solid fa-trash-can"></i>
+                            <span>Eliminar</span>
                           </button>
                         </div>
                       </td>
@@ -722,8 +725,13 @@ export default function AdminVeterinarios() {
             </div>
 
             <div className="adm-modal-body" style={{ padding: '1.25rem 0 0 0' }}>
+              <div className="dash-alert dash-alert--success" style={{ marginBottom: '1.25rem' }}>
+                <i className="fa-solid fa-circle-check"></i>
+                <span>¡Veterinario <strong>{createdCredentials.nombre}</strong> registrado con éxito en el sistema!</span>
+              </div>
+
               <p style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '1.2rem', lineHeight: '1.5' }}>
-                Se ha generado con éxito la cuenta de usuario para <strong>{createdCredentials.nombre}</strong>.
+                Se han generado las credenciales oficiales de acceso a la plataforma para el médico:
               </p>
 
               <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '12px', border: '1px solid #cbd5e1', marginBottom: '1rem' }}>

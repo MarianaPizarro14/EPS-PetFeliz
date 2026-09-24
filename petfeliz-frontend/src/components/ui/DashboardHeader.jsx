@@ -148,6 +148,30 @@ export default function DashboardHeader({
     }
   }
 
+  // Marcar una notificación individual como leída en frontend y backend
+  const handleNotificationClick = async (notif) => {
+    // Actualización reactiva e inmediata en UI
+    setNotifications((prev) =>
+      prev.map((item) => (item.id === notif.id ? { ...item, read: true } : item))
+    )
+
+    if (notif.read) return
+
+    const token = getStoredToken()
+    if (!token) return
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/notificaciones/${notif.id}/marcar-leida`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      })
+    } catch (err) {
+      console.error('Error al marcar notificación como leída en backend:', err)
+    }
+  }
+
   // Eliminar una notificación
   const handleRemoveNotif = async (id, e) => {
     e?.stopPropagation()
@@ -608,11 +632,7 @@ export default function DashboardHeader({
                     <div
                       key={n.id}
                       className={`dh-notif-item ${!n.read ? 'dh-notif-item--unread' : ''}`}
-                      onClick={() => {
-                        setNotifications((prev) =>
-                          prev.map((item) => (item.id === n.id ? { ...item, read: true } : item))
-                        )
-                      }}
+                      onClick={() => handleNotificationClick(n)}
                     >
                       <div className="dh-notif-icon">
                         <i className={n.icon || 'fa-regular fa-bell'}></i>

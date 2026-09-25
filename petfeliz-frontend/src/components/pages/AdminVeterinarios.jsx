@@ -652,9 +652,6 @@ export default function AdminVeterinarios() {
             </div>
 
             <div className="adm-drawer-footer">
-              <button className="adm-btn-secondary" onClick={() => setSelectedFicha(null)}>
-                Cerrar Ficha
-              </button>
               <button
                 className="adm-btn-primary"
                 onClick={() => {
@@ -662,6 +659,7 @@ export default function AdminVeterinarios() {
                   setSelectedFicha(null)
                   handleOpenEditModal(targetVet)
                 }}
+                style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
               >
                 <i className="fa-solid fa-pen-to-square" style={{ marginRight: '6px' }}></i>
                 Editar Datos

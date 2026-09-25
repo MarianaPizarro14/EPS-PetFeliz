@@ -1,7 +1,7 @@
 // src/components/pages/AdminVeterinarios.jsx
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarAdmin from '../ui/SidebarAdmin'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -33,7 +33,7 @@ const ROSTER_FALLBACK = [
     numero_tarjeta: 'MP-00003',
     telefono: '3000000003',
     correo: 'vet_3@petfeliz.com',
-    foto_perfil: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+    foto_perfil: '',
   },
   {
     id_veterinario: 4,
@@ -60,7 +60,7 @@ export default function AdminVeterinarios() {
   const [usuario] = useState({
     nombre: storedUser?.nombre || 'Administrador',
     nombreCompleto: storedUser?.nombreCompleto || 'Director Administrativo',
-    foto: storedUser?.foto || storedUser?.foto_perfil || null,
+    foto: isValidAvatarUrl(storedUser?.foto || storedUser?.foto_perfil) ? (storedUser?.foto || storedUser?.foto_perfil) : null,
   })
 
   const [veterinarios, setVeterinarios] = useState(ROSTER_FALLBACK)
@@ -124,7 +124,7 @@ export default function AdminVeterinarios() {
     const total = list.length
     const con_tarjeta = list.filter((v) => Boolean(v.numero_tarjeta)).length
     const con_telefono = list.filter((v) => Boolean(v.telefono)).length
-    const con_foto = list.filter((v) => Boolean(v.foto_perfil)).length
+    const con_foto = list.filter((v) => isValidAvatarUrl(v.foto_perfil)).length
     setStats({
       total,
       con_tarjeta,
@@ -211,7 +211,7 @@ export default function AdminVeterinarios() {
       correo: vet.correo || '',
       telefono: vet.telefono || '',
       numero_tarjeta: vet.numero_tarjeta || '',
-      foto_perfil: vet.foto_perfil || '',
+      foto_perfil: isValidAvatarUrl(vet.foto_perfil) ? vet.foto_perfil : '',
     })
     setIsEditing(true)
     setEditingId(vet.id_veterinario)
@@ -476,7 +476,7 @@ export default function AdminVeterinarios() {
                     <tr key={vet.id_veterinario}>
                       <td>
                         <div className="adm-vet-avatar-cell">
-                          {vet.foto_perfil ? (
+                          {isValidAvatarUrl(vet.foto_perfil) ? (
                             <img
                               src={vet.foto_perfil}
                               alt={vet.nombre}
@@ -557,7 +557,7 @@ export default function AdminVeterinarios() {
           <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-vet-hero">
               <div className="adm-vet-hero__avatar-wrap">
-                {selectedFicha.foto_perfil ? (
+                {isValidAvatarUrl(selectedFicha.foto_perfil) ? (
                   <img
                     src={selectedFicha.foto_perfil}
                     alt={selectedFicha.nombre}

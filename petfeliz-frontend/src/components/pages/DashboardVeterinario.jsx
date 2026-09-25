@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -13,7 +13,7 @@ export default function DashboardVeterinario() {
   const [usuario, setUsuario] = useState({
     nombre: storedUser?.nombre || 'Dr. Veterinario',
     nombreCompleto: storedUser?.nombre || 'Médico Veterinario',
-    foto: storedUser?.foto || storedUser?.foto_perfil || null,
+    foto: isValidAvatarUrl(storedUser?.foto || storedUser?.foto_perfil) ? (storedUser?.foto || storedUser?.foto_perfil) : null,
     rol: 'veterinario',
     email: storedUser?.email || '',
   })

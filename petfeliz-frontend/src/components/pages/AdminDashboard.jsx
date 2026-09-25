@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarAdmin from '../ui/SidebarAdmin'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
   const [usuario, setUsuario] = useState({
     nombre: storedUser?.nombre || 'Administrador',
     nombreCompleto: storedUser?.nombreCompleto || 'Director Administrativo',
-    foto: storedUser?.foto || storedUser?.foto_perfil || null,
+    foto: isValidAvatarUrl(storedUser?.foto || storedUser?.foto_perfil) ? (storedUser?.foto || storedUser?.foto_perfil) : null,
   })
 
   const [dashboardData, setDashboardData] = useState({

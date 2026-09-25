@@ -471,7 +471,7 @@ class AdminController extends Controller
                         'id_veterinario' => 2,
                         'nombre' => 'Dr. Felipe Restrepo',
                         'especialidad' => 'Cirugía Veterinaria',
-                        'foto' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                        'foto' => null,
                     ],
                     'estado' => 'Confirmada',
                     'id_estado' => 2,
@@ -823,7 +823,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? null,
+                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
                 'correo'         => $vet->usuario->email ?? '',
             ];
         });
@@ -872,7 +872,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? null,
+                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
             'citas_recientes' => $citasRecientes,
@@ -944,7 +944,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? '',
+                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
         ], 201);
@@ -1000,7 +1000,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? '',
+                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
         ], 200);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import { DEPARTAMENTOS_Y_CIUDADES_COLOMBIA } from '../../data/departamentosYCiudadesColombia'
 import { DEFAULT_USER_AVATAR } from '../../constants/images'
-import { getStoredToken, clearStoredAuth } from '../../utils/authStorage'
+import { getStoredToken, clearStoredAuth, isValidAvatarUrl } from '../../utils/authStorage'
 import './DashboardHeader.css'
 
 // Helper para obtener iniciales del nombre
@@ -566,7 +566,7 @@ export default function DashboardHeader({
 
   const userFullName = usuario?.nombreCompleto || usuario?.nombre || 'Usuario'
   const userRoleFormatted = getFormattedRole(usuario?.rol)
-  const hasAvatarPhoto = usuario?.foto && usuario?.foto !== 'default.jpg' && !usuario?.foto.includes('default.jpg')
+  const hasAvatarPhoto = isValidAvatarUrl(usuario?.foto)
 
   return (
     <header className="dash-header">

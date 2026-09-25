@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Helpers\PhoneHelper;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -315,7 +316,16 @@ class AuthController extends Controller
 
         $request->validate([
             'nombre' => 'nullable|string|max:150',
-            'telefono' => 'nullable|string|max:50',
+            'telefono' => [
+                'nullable',
+                'string',
+                'max:50',
+                function ($attribute, $value, $fail) use ($cliente) {
+                    if (!empty($value) && !PhoneHelper::isUniquePhone($value, $cliente->id_cliente, null)) {
+                        $fail('Este número de teléfono o celular ya se encuentra registrado por otro usuario en el sistema.');
+                    }
+                },
+            ],
             'direccion' => 'nullable|string|max:200',
             'cedula' => 'nullable|string|max:50',
             'fecha_nacimiento' => 'nullable|date',

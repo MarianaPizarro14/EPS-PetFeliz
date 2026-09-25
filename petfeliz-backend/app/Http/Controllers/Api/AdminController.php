@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Pago;
 use App\Models\Mascota;
 use App\Models\Cliente;
+use App\Helpers\PhoneHelper;
 use App\Services\CloudinaryService;
 use App\Models\Veterinario;
 use Illuminate\Support\Facades\DB;
@@ -902,7 +903,16 @@ class AdminController extends Controller
         $request->validate([
             'nombre'         => 'required|string|max:100',
             'correo'         => 'required|email|max:100|unique:usuario,email',
-            'telefono'       => 'nullable|string|max:20',
+            'telefono'       => [
+                'nullable',
+                'string',
+                'max:30',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !PhoneHelper::isUniquePhone($value)) {
+                        $fail('Este número de teléfono o celular ya se encuentra registrado por otro usuario en el sistema.');
+                    }
+                },
+            ],
             'numero_tarjeta' => 'nullable|string|max:50',
             'foto_perfil'    => 'nullable',
             'foto'           => 'nullable',
@@ -978,7 +988,16 @@ class AdminController extends Controller
         $request->validate([
             'nombre'         => 'sometimes|required|string|max:100',
             'correo'         => 'sometimes|required|email|max:100|unique:usuario,email,' . $userId . ',id_usuario',
-            'telefono'       => 'nullable|string|max:20',
+            'telefono'       => [
+                'nullable',
+                'string',
+                'max:30',
+                function ($attribute, $value, $fail) use ($id) {
+                    if (!empty($value) && !PhoneHelper::isUniquePhone($value, null, $id)) {
+                        $fail('Este número de teléfono o celular ya se encuentra registrado por otro usuario en el sistema.');
+                    }
+                },
+            ],
             'numero_tarjeta' => 'nullable|string|max:50',
             'foto_perfil'    => 'nullable',
             'foto'           => 'nullable',

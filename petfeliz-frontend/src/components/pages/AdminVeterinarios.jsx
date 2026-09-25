@@ -330,7 +330,8 @@ export default function AdminVeterinarios() {
         fetchVeterinariosData()
       } else {
         const errData = await res.json().catch(() => ({}))
-        setFormError(errData.message || 'No se pudo guardar la información del veterinario.')
+        const firstErr = errData.errors ? Object.values(errData.errors)[0][0] : errData.message
+        setFormError(firstErr || 'No se pudo guardar la información del veterinario.')
       }
     } catch (err) {
       console.error('Error al guardar veterinario:', err)

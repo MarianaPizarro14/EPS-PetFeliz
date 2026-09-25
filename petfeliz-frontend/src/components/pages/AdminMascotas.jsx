@@ -557,11 +557,6 @@ export default function AdminMascotas() {
                 <option value="Otros">Otras especies</option>
               </select>
             </div>
-
-            <button type="button" className="admin-btn-csv" onClick={handleOpenCreateModal} style={{ height: '42px', padding: '0 1.2rem' }}>
-              <i className="fa-solid fa-plus"></i>
-              <span>Nueva Mascota</span>
-            </button>
           </div>
         </div>
 
@@ -907,12 +902,12 @@ export default function AdminMascotas() {
             <div className="adm-drawer-header">
               <div className="adm-drawer-header__title-group">
                 <div className="adm-drawer-header__icon">
-                  <i className={`fa-solid ${isEditing ? 'fa-pen-to-square' : 'fa-paw'}`}></i>
+                  <i className="fa-solid fa-pen-to-square"></i>
                 </div>
                 <div>
-                  <h3>{isEditing ? 'Editar Datos de Mascota' : 'Registrar Nueva Mascota'}</h3>
+                  <h3>Editar Datos de Mascota</h3>
                   <span className="adm-drawer-header__sub">
-                    {isEditing ? 'Actualiza la ficha médica y del paciente' : 'Ingresa los datos para dar de alta al paciente en la EPS'}
+                    Actualiza la ficha médica y la información del paciente
                   </span>
                 </div>
               </div>
@@ -1107,7 +1102,7 @@ export default function AdminMascotas() {
                       <span>Guardando...</span>
                     </>
                   ) : (
-                    <span>{isEditing ? 'Guardar Cambios' : 'Registrar Mascota'}</span>
+                    <span>Guardar Cambios</span>
                   )}
                 </button>
               </div>

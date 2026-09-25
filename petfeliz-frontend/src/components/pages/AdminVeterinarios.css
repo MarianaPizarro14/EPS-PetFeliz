@@ -55,16 +55,208 @@
   font-size: 0.88rem;
 }
 
-/* Modal Ficha del Veterinario */
+/* ── DRAWER Y MODALES DE VETERINARIOS (POSITION FIXED REAL) ── */
+
+/* Overlay global fijo para cubrir pantalla completa */
+.adm-drawer-overlay,
+.adm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: admFadeIn 0.25s ease-out forwards;
+}
+
+/* Overlay centrado para confirmaciones y credenciales */
+.adm-modal-overlay--center {
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+/* Panel del Drawer lateral (Ver / Crear / Editar) */
+.adm-drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 10000;
+  animation: admSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+}
+
+@keyframes admFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes admSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Header del Drawer */
+.adm-drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.adm-drawer-header h3 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.adm-drawer-close {
+  background: #f1f5f9;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.adm-drawer-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Cuerpo con scroll propio del Drawer */
+.adm-drawer-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Footer del Drawer */
+.adm-drawer-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Tarjeta Modal flotante en centro (Eliminar / Credenciales) */
+.adm-modal-card {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: admPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 10001;
+  position: relative;
+  margin: auto;
+}
+
+@keyframes admPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.adm-modal-header {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.adm-modal-header h3 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.adm-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.adm-modal-close:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.adm-modal-body {
+  padding: 1.5rem;
+}
+
+.adm-modal-footer {
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Modal Ficha del Veterinario Hero Header */
 .adm-vet-hero {
   background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
-  padding: 1.5rem 1.5rem;
-  border-radius: 16px 16px 0 0;
+  padding: 1.5rem;
   color: #ffffff;
   display: flex;
   align-items: center;
   gap: 1.25rem;
   position: relative;
+  flex-shrink: 0;
 }
 
 .adm-vet-hero__img {
@@ -128,7 +320,7 @@
   color: #0f172a;
 }
 
-/* Modal Formulario Compacto de Crear / Editar Veterinario */
+/* Modal Formulario Compacto */
 .adm-form-group {
   display: flex;
   flex-direction: column;
@@ -144,7 +336,7 @@
 
 .adm-form-group input {
   width: 100%;
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
   font-family: 'Inter', sans-serif;
@@ -159,21 +351,13 @@
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
 }
 
-.adm-modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
-}
-
 .adm-btn-secondary {
   background-color: #f1f5f9;
   color: #475569;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -191,7 +375,7 @@
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -208,7 +392,7 @@
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -218,3 +402,71 @@
 .adm-btn-danger:hover {
   background-color: #b91c1c;
 }
+
+/* ── TOAST NOTIFICATION DE CONFIRMACIÓN ── */
+.adm-toast {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.35rem;
+  background: #047857;
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(4, 120, 87, 0.35);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  animation: admToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.adm-toast--error {
+  background: #dc2626;
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.35);
+}
+
+.adm-toast__icon {
+  font-size: 1.15rem;
+}
+
+.adm-toast__close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 2px 4px;
+  margin-left: 0.5rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.adm-toast__close:hover {
+  color: #ffffff;
+}
+
+@keyframes admToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .adm-drawer-panel {
+    max-width: 100%;
+  }
+  .adm-toast {
+    left: 1rem;
+    right: 1rem;
+    top: 1rem;
+  }
+}
+

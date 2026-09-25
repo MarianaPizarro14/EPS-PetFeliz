@@ -75,7 +75,17 @@ export default function AdminVeterinarios() {
   const [errorGlobal, setErrorGlobal] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Modales
+  // Toast de confirmación flotante
+  const [toast, setToast] = useState(null)
+
+  const triggerToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => {
+      setToast(null)
+    }, 4000)
+  }
+
+  // Drawers y Modales
   const [selectedFicha, setSelectedFicha] = useState(null)
   const [showModalForm, setShowModalForm] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -252,8 +262,10 @@ export default function AdminVeterinarios() {
           setVeterinarios((prev) =>
             prev.map((v) => (v.id_veterinario === editingId ? { ...v, ...savedVet } : v))
           )
+          triggerToast('Veterinario actualizado exitosamente.', 'success')
         } else {
           setVeterinarios((prev) => [savedVet, ...prev])
+          triggerToast('Veterinario agregado exitosamente.', 'success')
           if (responseData.contrasena_temporal) {
             setCreatedCredentials({
               nombre: savedVet.nombre,
@@ -293,12 +305,14 @@ export default function AdminVeterinarios() {
 
       if (res.ok) {
         setVeterinarios((prev) => prev.filter((v) => v.id_veterinario !== deletingVet.id_veterinario))
+        triggerToast('Veterinario eliminado exitosamente.', 'success')
         setDeletingVet(null)
         fetchVeterinariosData()
       }
     } catch (err) {
       console.error('Error al eliminar veterinario:', err)
       setVeterinarios((prev) => prev.filter((v) => v.id_veterinario !== deletingVet.id_veterinario))
+      triggerToast('Veterinario eliminado del registro.', 'success')
       setDeletingVet(null)
     } finally {
       setSubmittingDelete(false)
@@ -308,6 +322,17 @@ export default function AdminVeterinarios() {
   return (
     <div className="dash">
       <SidebarAdmin />
+
+      {/* ── TOAST NOTIFICATION FLOTANTE DE CONFIRMACIÓN ── */}
+      {toast && (
+        <div className={`adm-toast ${toast.type === 'error' ? 'adm-toast--error' : ''}`}>
+          <i className={`adm-toast__icon fa-solid ${toast.type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}`}></i>
+          <span>{toast.message}</span>
+          <button className="adm-toast__close" onClick={() => setToast(null)} title="Cerrar notificación">
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      )}
 
       <main className="dash-main">
         <DashboardHeader
@@ -520,10 +545,10 @@ export default function AdminVeterinarios() {
         </div>
       </main>
 
-      {/* ── MODAL: FICHA DEL VETERINARIO ── */}
+      {/* ── DRAWER LATERAL: FICHA DEL VETERINARIO (VER) ── */}
       {selectedFicha && (
-        <div className="adm-modal-overlay" onClick={() => setSelectedFicha(null)}>
-          <div className="adm-modal-card" style={{ maxWidth: '540px', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+        <div className="adm-drawer-overlay" onClick={() => setSelectedFicha(null)}>
+          <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-vet-hero">
               <img
                 src={selectedFicha.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg'}
@@ -542,13 +567,16 @@ export default function AdminVeterinarios() {
                   )}
                 </div>
               </div>
-              <button className="adm-modal-close" style={{ color: '#ffffff' }} onClick={() => setSelectedFicha(null)}>
+              <button className="adm-drawer-close" style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff' }} onClick={() => setSelectedFicha(null)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            <div className="adm-vet-body">
-              <div className="adm-detail-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="adm-drawer-body">
+              <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.95rem', color: '#0f172a', marginBottom: '1.2rem', fontWeight: 600 }}>
+                Detalles del Perfil Profesional
+              </h4>
+              <div className="adm-detail-grid" style={{ gridTemplateColumns: '1fr', gap: '0.85rem' }}>
                 <div className="adm-detail-item">
                   <span className="adm-detail-item__label"><i className="fa-solid fa-user-doctor"></i> Nombre Completo</span>
                   <span className="adm-detail-item__val">{selectedFicha.nombre}</span>
@@ -568,39 +596,50 @@ export default function AdminVeterinarios() {
               </div>
             </div>
 
-            <div className="adm-modal-footer">
+            <div className="adm-drawer-footer">
               <button className="adm-btn-secondary" onClick={() => setSelectedFicha(null)}>
-                Cerrar
+                Cerrar Ficha
+              </button>
+              <button
+                className="adm-btn-primary"
+                onClick={() => {
+                  const targetVet = selectedFicha
+                  setSelectedFicha(null)
+                  handleOpenEditModal(targetVet)
+                }}
+              >
+                <i className="fa-solid fa-pen-to-square" style={{ marginRight: '6px' }}></i>
+                Editar Datos
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── MODAL: CREAR / EDITAR VETERINARIO ── */}
+      {/* ── DRAWER LATERAL: CREAR / EDITAR VETERINARIO ── */}
       {showModalForm && (
-        <div className="adm-modal-overlay" onClick={() => setShowModalForm(false)}>
-          <div className="adm-modal-card" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="adm-modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="adm-drawer-overlay" onClick={() => setShowModalForm(false)}>
+          <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-drawer-header">
+              <h3>
                 <i className={`fa-solid ${isEditing ? 'fa-pen-to-square' : 'fa-user-plus'}`} style={{ color: '#059669' }}></i>
-                <h3>{isEditing ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}</h3>
-              </div>
-              <button className="adm-modal-close" onClick={() => setShowModalForm(false)}>
+                {isEditing ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}
+              </h3>
+              <button className="adm-drawer-close" onClick={() => setShowModalForm(false)}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            <form onSubmit={handleSubmitForm} className="adm-modal-body">
-              {formError && (
-                <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1rem' }}>
-                  <i className="fa-solid fa-circle-exclamation"></i>
-                  <span>{formError}</span>
-                </div>
-              )}
+            <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div className="adm-drawer-body">
+                {formError && (
+                  <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.2rem' }}>
+                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <span>{formError}</span>
+                  </div>
+                )}
 
-              <div className="adm-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="adm-form-group" style={{ gridColumn: 'span 2' }}>
+                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
                   <label>Nombre Completo del Veterinario *</label>
                   <input
                     type="text"
@@ -611,7 +650,7 @@ export default function AdminVeterinarios() {
                   />
                 </div>
 
-                <div className="adm-form-group" style={{ gridColumn: 'span 2' }}>
+                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
                   <label>Correo Electrónico (Usuario) *</label>
                   <input
                     type="email"
@@ -622,7 +661,7 @@ export default function AdminVeterinarios() {
                   />
                 </div>
 
-                <div className="adm-form-group">
+                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
                   <label>Teléfono de Contacto</label>
                   <input
                     type="text"
@@ -632,7 +671,7 @@ export default function AdminVeterinarios() {
                   />
                 </div>
 
-                <div className="adm-form-group">
+                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
                   <label>Tarjeta Profesional (MP)</label>
                   <input
                     type="text"
@@ -642,7 +681,7 @@ export default function AdminVeterinarios() {
                   />
                 </div>
 
-                <div className="adm-form-group" style={{ gridColumn: 'span 2' }}>
+                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
                   <label>URL Foto de Perfil (Opcional)</label>
                   <input
                     type="url"
@@ -653,7 +692,7 @@ export default function AdminVeterinarios() {
                 </div>
               </div>
 
-              <div className="adm-modal-footer" style={{ marginTop: '1.5rem' }}>
+              <div className="adm-drawer-footer">
                 <button type="button" className="adm-btn-secondary" onClick={() => setShowModalForm(false)}>
                   Cancelar
                 </button>
@@ -674,10 +713,10 @@ export default function AdminVeterinarios() {
         </div>
       )}
 
-      {/* ── MODAL: CONFIRMAR ELIMINACIÓN ── */}
+      {/* ── MODAL CENTRADO: CONFIRMAR ELIMINACIÓN ── */}
       {deletingVet && (
-        <div className="adm-modal-overlay" onClick={() => setDeletingVet(null)}>
-          <div className="adm-modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setDeletingVet(null)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="adm-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
                 <i className="fa-solid fa-triangle-exclamation"></i>
@@ -690,7 +729,7 @@ export default function AdminVeterinarios() {
 
             <div className="adm-modal-body">
               <p style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.5', margin: 0 }}>
-                ¿Estás seguro de que deseas eliminar al veterinario <strong>{deletingVet.nombre}</strong>?
+                ¿Estás seguro de que deseas eliminar al veterinario <strong>{deletingVet.nombre}</strong>? Esta acción no se puede deshacer.
               </p>
             </div>
 
@@ -710,10 +749,10 @@ export default function AdminVeterinarios() {
         </div>
       )}
 
-      {/* ── MODAL: CREDENCIALES DE ACCESO CREADAS ── */}
+      {/* ── MODAL CENTRADO: CREDENCIALES DE ACCESO CREADAS ── */}
       {createdCredentials && (
-        <div className="adm-modal-overlay" onClick={() => setCreatedCredentials(null)}>
-          <div className="adm-modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setCreatedCredentials(null)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#059669' }}>
                 <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
@@ -724,7 +763,7 @@ export default function AdminVeterinarios() {
               </button>
             </div>
 
-            <div className="adm-modal-body" style={{ padding: '1.25rem 0 0 0' }}>
+            <div className="adm-modal-body">
               <div className="dash-alert dash-alert--success" style={{ marginBottom: '1.25rem' }}>
                 <i className="fa-solid fa-circle-check"></i>
                 <span>¡Veterinario <strong>{createdCredentials.nombre}</strong> registrado con éxito en el sistema!</span>
@@ -754,7 +793,7 @@ export default function AdminVeterinarios() {
                 </div>
               </div>
 
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem', marginBottom: '1.2rem' }}>
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
                 <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginTop: '2px', fontSize: '0.95rem' }}></i>
                 <span style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
                   <strong>Importante:</strong> Esta contraseña temporal solo se muestra una vez por motivos de seguridad. Por favor, compártela o cópiala antes de cerrar esta ventana.

@@ -685,9 +685,6 @@ export default function AdminVeterinarios() {
                   </span>
                 </div>
               </div>
-              <button className="adm-drawer-close" onClick={() => setShowModalForm(false)} title="Cerrar formulario">
-                <i className="fa-solid fa-xmark"></i>
-              </button>
             </div>
 
             <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>

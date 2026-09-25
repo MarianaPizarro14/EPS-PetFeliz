@@ -15,7 +15,7 @@ export default function AdminCitas() {
   const [usuario, setUsuario] = useState({
     nombre: storedUser?.nombre || 'Administrador',
     nombreCompleto: storedUser?.nombreCompleto || 'Director Administrativo',
-    foto: storedUser?.foto || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+    foto: storedUser?.foto || storedUser?.foto_perfil || null,
   })
 
   const [citas, setCitas] = useState([])

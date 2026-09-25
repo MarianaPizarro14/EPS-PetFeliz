@@ -56,7 +56,7 @@ class AdminController extends Controller
                 'rol' => $user->rol,
                 'nombre' => 'Administrador',
                 'nombreCompleto' => 'Director Administrativo EPS PetFeliz',
-                'foto' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'foto' => null,
             ],
         ], 200);
     }
@@ -276,7 +276,7 @@ class AdminController extends Controller
                 'veterinario' => [
                     'nombre' => $c->veterinario->nombre ?? 'Médico Asignado',
                     'especialidad' => $c->veterinario->especialidad ?? 'Medicina General',
-                    'foto' => $c->veterinario->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                    'foto' => $c->veterinario->foto_perfil ?? null,
                 ],
                 'estado' => $c->estado->nombre_estado ?? ($c->id_estado == 2 ? 'Confirmada' : 'Pendiente'),
                 'id_estado' => $c->id_estado,
@@ -404,7 +404,7 @@ class AdminController extends Controller
                     'id_veterinario' => $c->veterinario->id_veterinario ?? null,
                     'nombre' => $c->veterinario->nombre ?? 'Médico Asignado',
                     'especialidad' => $c->veterinario->especialidad ?? 'Medicina General',
-                    'foto' => $c->veterinario->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                    'foto' => $c->veterinario->foto_perfil ?? null,
                 ],
                 'estado' => $c->estado->nombre_estado ?? ($c->id_estado == 2 ? 'Confirmada' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente')),
                 'id_estado' => $c->id_estado,
@@ -823,7 +823,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ];
         });
@@ -872,7 +872,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => $vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
             'citas_recientes' => $citasRecientes,

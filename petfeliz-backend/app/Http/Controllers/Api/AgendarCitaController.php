@@ -58,7 +58,7 @@ class AgendarCitaController extends Controller
                     'especialidad' => $especialidades[$v->id_veterinario] ?? 'Medicina General',
                     'sede' => $sedes[$v->id_veterinario] ?? 'Sede Laureles',
                     'calificacion' => $ratings[$v->id_veterinario] ?? 4.8,
-                    'foto' => $v->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                    'foto' => $v->foto_perfil ?? null,
                 ];
             });
 

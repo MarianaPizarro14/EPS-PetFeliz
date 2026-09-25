@@ -88,10 +88,10 @@ class AuthController extends Controller
 
         $nombreCompleto = $cliente ? $cliente->nombre : ($vet ? $vet->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''));
         $foto = $cliente
-            ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
+            ? ($cliente->foto_perfil ?? null)
             : ($vet
-                ? ($vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg')
-                : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg');
+                ? ($vet->foto_perfil ?? null)
+                : null);
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso.',
@@ -253,9 +253,7 @@ class AuthController extends Controller
                     'rol' => $user->rol ?? 'cliente',
                     'nombre' => $primerNombre,
                     'nombreCompleto' => $cliente ? $cliente->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''),
-                    'foto' => $cliente
-                        ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg')
-                        : 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                    'foto' => $cliente ? ($cliente->foto_perfil ?? null) : null,
                 ],
             ], 200);
 

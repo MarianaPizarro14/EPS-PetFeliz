@@ -78,7 +78,7 @@ class VeterinarioPortalController extends Controller
                 'nombre' => $vet->nombre,
                 'telefono' => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil' => $vet->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+                'foto_perfil' => $vet->foto_perfil ?? null,
                 'correo' => $user->email,
             ],
             'stats' => [

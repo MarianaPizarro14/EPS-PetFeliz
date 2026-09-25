@@ -471,7 +471,7 @@ export default function AdminMascotas() {
           </div>
         )}
 
-        {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES (GRID UNIFORME DE 4 COLUMNAS) ── */}
+        {/* ── 5 TARJETAS DE ESTADÍSTICAS REALES (GRID UNIFORME DE 5 COLUMNAS) ── */}
         <div className="admin-dash-grid">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
@@ -517,14 +517,28 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
+              <span>Otras Especies</span>
+              <h3>{loading ? '...' : (stats.otros !== undefined ? stats.otros : Math.max(0, stats.total - (stats.caninos + stats.felinos)))}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#7e22ce', background: '#f3e8ff', borderColor: '#e9d5ff' }}>
+                <i className="fa-solid fa-dove"></i>
+                <span>Aves, Exóticos y Más</span>
+              </div>
+            </div>
+            <div className="admin-stat-card__icon" style={{ background: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff' }}>
+              <i className="fa-solid fa-otter"></i>
+            </div>
+          </div>
+
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
               <span>Con Alergias / Alertas</span>
               <h3>{loading ? '...' : stats.con_alergias}</h3>
-              <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#dc2626', background: '#fef2f2' }}>
+              <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#dc2626', background: '#fef2f2', borderColor: '#fecaca' }}>
                 <i className="fa-solid fa-notes-medical"></i>
                 <span>Atención Especial</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon" style={{ background: '#fce7f3', color: '#ec4899' }}>
+            <div className="admin-stat-card__icon" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
               <i className="fa-solid fa-notes-medical"></i>
             </div>
           </div>

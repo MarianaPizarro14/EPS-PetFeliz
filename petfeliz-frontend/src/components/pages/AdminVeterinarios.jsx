@@ -99,6 +99,9 @@ export default function AdminVeterinarios() {
     foto_perfil: '',
   })
 
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState('')
+
   const [submittingForm, setSubmittingForm] = useState(false)
   const [formError, setFormError] = useState('')
 
@@ -192,6 +195,8 @@ export default function AdminVeterinarios() {
 
   // Abrir Modal Crear
   const handleOpenCreateModal = () => {
+    setSelectedFile(null)
+    setPhotoPreview('')
     setFormVet({
       nombre: '',
       correo: '',
@@ -207,17 +212,34 @@ export default function AdminVeterinarios() {
 
   // Abrir Modal Editar
   const handleOpenEditModal = (vet) => {
+    setSelectedFile(null)
+    const currentPhoto = isValidAvatarUrl(vet.foto_perfil) ? vet.foto_perfil : ''
+    setPhotoPreview(currentPhoto)
     setFormVet({
       nombre: vet.nombre || '',
       correo: vet.correo || '',
       telefono: vet.telefono || '',
       numero_tarjeta: vet.numero_tarjeta || '',
-      foto_perfil: isValidAvatarUrl(vet.foto_perfil) ? vet.foto_perfil : '',
+      foto_perfil: currentPhoto,
     })
     setIsEditing(true)
     setEditingId(vet.id_veterinario)
     setFormError('')
     setShowModalForm(true)
+  }
+
+  const handlePhotoUrlChange = (e) => {
+    const val = e.target.value
+    setFormVet((prev) => ({ ...prev, foto_perfil: val }))
+    if (selectedFile) setSelectedFile(null)
+    setPhotoPreview(val.trim())
+  }
+
+  const handlePhotoFileChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setSelectedFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
   }
 
   // Enviar Formulario (Crear / Editar)
@@ -243,17 +265,46 @@ export default function AdminVeterinarios() {
         ? `${import.meta.env.VITE_API_URL}/admin/veterinarios/${editingId}`
         : `${import.meta.env.VITE_API_URL}/admin/veterinarios`
 
-      const method = isEditing ? 'PUT' : 'POST'
+      let res
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(formVet),
-      })
+      if (selectedFile) {
+        const formData = new FormData()
+        formData.append('nombre', formVet.nombre.trim())
+        formData.append('correo', formVet.correo.trim())
+        if (formVet.telefono) formData.append('telefono', formVet.telefono.trim())
+        if (formVet.numero_tarjeta) formData.append('numero_tarjeta', formVet.numero_tarjeta.trim())
+        formData.append('foto', selectedFile)
+        if (isEditing) formData.append('_method', 'PUT')
+
+        res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+          body: formData,
+        })
+      } else {
+        let cleanUrl = (formVet.foto_perfil || '').trim()
+        if (cleanUrl && !cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+          cleanUrl = 'https://' + cleanUrl
+        }
+
+        const payload = {
+          ...formVet,
+          foto_perfil: cleanUrl,
+        }
+
+        res = await fetch(url, {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+      }
 
       if (res.ok || res.status === 201) {
         const responseData = await res.json()
@@ -771,14 +822,43 @@ export default function AdminVeterinarios() {
                   </div>
 
                   <div className="adm-form-group">
-                    <label>URL Foto de Perfil (Opcional)</label>
+                    <label>Foto de Perfil del Veterinario</label>
+
+                    {/* Previsualización circular reactiva */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', margin: '0.4rem 0 0.75rem 0' }}>
+                      {isValidAvatarUrl(photoPreview) ? (
+                        <img
+                          src={photoPreview}
+                          alt="Vista previa"
+                          style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #059669', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
+                        />
+                      ) : (
+                        <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '1.25rem', border: '2px dashed #cbd5e1' }}>
+                          <i className="fa-solid fa-user-doctor"></i>
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <label className="act-btn act-btn--view" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.4rem 0.75rem', fontSize: '0.82rem', fontWeight: 600 }}>
+                          <i className="fa-solid fa-cloud-arrow-up"></i> Subir desde dispositivo
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={{ display: 'none' }}
+                            onChange={handlePhotoFileChange}
+                          />
+                        </label>
+                        {selectedFile && <span style={{ fontSize: '0.78rem', color: '#059669', display: 'block', marginTop: '0.2rem', fontWeight: 600 }}>✓ {selectedFile.name}</span>}
+                      </div>
+                    </div>
+
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>O ingresa/pega un enlace o URL de Cloudinary:</span>
                     <div className="adm-input-wrap">
-                      <i className="fa-solid fa-camera input-icon"></i>
+                      <i className="fa-solid fa-link input-icon"></i>
                       <input
-                        type="url"
+                        type="text"
                         placeholder="Ej. https://res.cloudinary.com/..."
                         value={formVet.foto_perfil}
-                        onChange={(e) => setFormVet({ ...formVet, foto_perfil: e.target.value })}
+                        onChange={handlePhotoUrlChange}
                       />
                     </div>
                   </div>

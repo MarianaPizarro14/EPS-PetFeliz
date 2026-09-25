@@ -904,7 +904,8 @@ class AdminController extends Controller
             'correo'         => 'required|email|max:100|unique:usuario,email',
             'telefono'       => 'nullable|string|max:20',
             'numero_tarjeta' => 'nullable|string|max:50',
-            'foto_perfil'    => 'nullable|string|max:255',
+            'foto_perfil'    => 'nullable',
+            'foto'           => 'nullable',
         ], [
             'nombre.required' => 'El nombre del veterinario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
@@ -912,9 +913,24 @@ class AdminController extends Controller
             'correo.unique'   => 'Este correo electrónico ya se encuentra registrado en el sistema por un usuario activo.',
         ]);
 
+        $fotoUrl = null;
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+        } elseif ($request->hasFile('foto_perfil')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+        } elseif ($request->filled('foto_perfil') && is_string($request->foto_perfil)) {
+            $rawUrl = trim($request->foto_perfil);
+            if (!empty($rawUrl)) {
+                if (!str_starts_with($rawUrl, 'http://') && !str_starts_with($rawUrl, 'https://')) {
+                    $rawUrl = 'https://' . $rawUrl;
+                }
+                $fotoUrl = $rawUrl;
+            }
+        }
+
         $tempPassword = 'Vet#' . rand(1000, 9999);
 
-        $vet = DB::transaction(function () use ($request, $tempPassword, $emailClean) {
+        $vet = DB::transaction(function () use ($request, $tempPassword, $emailClean, $fotoUrl) {
             $user = User::create([
                 'email'           => $emailClean,
                 'contrasena_hash' => Hash::make($tempPassword),
@@ -928,7 +944,7 @@ class AdminController extends Controller
                 'nombre'         => trim($request->nombre),
                 'telefono'       => $request->telefono ? trim($request->telefono) : null,
                 'numero_tarjeta' => $request->numero_tarjeta ? trim($request->numero_tarjeta) : null,
-                'foto_perfil'    => $request->foto_perfil ? trim($request->foto_perfil) : null,
+                'foto_perfil'    => $fotoUrl,
             ]);
         });
 
@@ -964,7 +980,8 @@ class AdminController extends Controller
             'correo'         => 'sometimes|required|email|max:100|unique:usuario,email,' . $userId . ',id_usuario',
             'telefono'       => 'nullable|string|max:20',
             'numero_tarjeta' => 'nullable|string|max:50',
-            'foto_perfil'    => 'nullable|string|max:255',
+            'foto_perfil'    => 'nullable',
+            'foto'           => 'nullable',
         ], [
             'nombre.required' => 'El nombre del veterinario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
@@ -972,12 +989,32 @@ class AdminController extends Controller
             'correo.unique'   => 'Este correo electrónico ya se encuentra registrado por otro usuario.',
         ]);
 
-        DB::transaction(function () use ($request, $vet) {
+        $fotoUrl = null;
+        $hasFotoParam = false;
+
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+            $hasFotoParam = true;
+        } elseif ($request->hasFile('foto_perfil')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+            $hasFotoParam = true;
+        } elseif ($request->has('foto_perfil')) {
+            $hasFotoParam = true;
+            $rawUrl = is_string($request->foto_perfil) ? trim($request->foto_perfil) : '';
+            if (!empty($rawUrl)) {
+                if (!str_starts_with($rawUrl, 'http://') && !str_starts_with($rawUrl, 'https://')) {
+                    $rawUrl = 'https://' . $rawUrl;
+                }
+                $fotoUrl = $rawUrl;
+            }
+        }
+
+        DB::transaction(function () use ($request, $vet, $hasFotoParam, $fotoUrl) {
             $vetData = [];
             if ($request->has('nombre')) $vetData['nombre'] = trim($request->nombre);
             if ($request->has('telefono')) $vetData['telefono'] = $request->telefono ? trim($request->telefono) : null;
             if ($request->has('numero_tarjeta')) $vetData['numero_tarjeta'] = $request->numero_tarjeta ? trim($request->numero_tarjeta) : null;
-            if ($request->has('foto_perfil')) $vetData['foto_perfil'] = $request->foto_perfil ? trim($request->foto_perfil) : null;
+            if ($hasFotoParam) $vetData['foto_perfil'] = $fotoUrl;
 
             if (!empty($vetData)) {
                 $vet->update($vetData);

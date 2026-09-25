@@ -550,48 +550,103 @@ export default function AdminVeterinarios() {
         <div className="adm-drawer-overlay" onClick={() => setSelectedFicha(null)}>
           <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-vet-hero">
-              <img
-                src={selectedFicha.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg'}
-                alt={selectedFicha.nombre}
-                className="adm-vet-hero__img"
-              />
+              <div className="adm-vet-hero__avatar-wrap">
+                <img
+                  src={selectedFicha.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg'}
+                  alt={selectedFicha.nombre}
+                  className="adm-vet-hero__img"
+                />
+                <span className="adm-vet-hero__online-badge" title="Personal Médico Activo"></span>
+              </div>
               <div className="adm-vet-hero__info">
+                <div className="adm-vet-hero__tag">
+                  <i className="fa-solid fa-user-doctor"></i>
+                  <span>Personal Veterinario</span>
+                </div>
                 <h2>{selectedFicha.nombre}</h2>
                 <div className="adm-vet-hero__tp">
-                  <span>ID #{selectedFicha.id_veterinario}</span>
+                  <span className="adm-vet-hero__badge">ID #{selectedFicha.id_veterinario}</span>
                   {selectedFicha.numero_tarjeta && (
-                    <>
-                      <span>&bull;</span>
-                      <span>{selectedFicha.numero_tarjeta}</span>
-                    </>
+                    <span className="adm-vet-hero__badge adm-vet-hero__badge--tp">
+                      <i className="fa-solid fa-id-card"></i> {selectedFicha.numero_tarjeta}
+                    </span>
                   )}
                 </div>
               </div>
-              <button className="adm-drawer-close" style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff' }} onClick={() => setSelectedFicha(null)}>
+              <button className="adm-drawer-close adm-drawer-close--white" onClick={() => setSelectedFicha(null)} title="Cerrar Ficha">
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
 
             <div className="adm-drawer-body">
-              <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.95rem', color: '#0f172a', marginBottom: '1.2rem', fontWeight: 600 }}>
-                Detalles del Perfil Profesional
-              </h4>
-              <div className="adm-detail-grid" style={{ gridTemplateColumns: '1fr', gap: '0.85rem' }}>
-                <div className="adm-detail-item">
-                  <span className="adm-detail-item__label"><i className="fa-solid fa-user-doctor"></i> Nombre Completo</span>
-                  <span className="adm-detail-item__val">{selectedFicha.nombre}</span>
+              {/* Status Highlight Banner */}
+              <div className="adm-vet-status-banner">
+                <div className="adm-vet-status-banner__icon">
+                  <i className="fa-solid fa-circle-check"></i>
                 </div>
-                <div className="adm-detail-item">
-                  <span className="adm-detail-item__label"><i className="fa-solid fa-id-card"></i> Tarjeta Profesional</span>
-                  <span className="adm-detail-item__val">{selectedFicha.numero_tarjeta || 'No registrada'}</span>
+                <div>
+                  <span className="adm-vet-status-banner__title">Perfil de Médico Verificado</span>
+                  <span className="adm-vet-status-banner__sub">Registrado oficialmente en el sistema administrativo de EPS PetFeliz</span>
                 </div>
-                <div className="adm-detail-item">
-                  <span className="adm-detail-item__label"><i className="fa-solid fa-envelope"></i> Correo Electrónico</span>
-                  <span className="adm-detail-item__val">{selectedFicha.correo || 'Sin correo registrado'}</span>
+              </div>
+
+              {/* Section: Información de Contacto */}
+              <div className="adm-drawer-section">
+                <h4 className="adm-drawer-section-title">
+                  <i className="fa-solid fa-address-card" style={{ color: '#059669' }}></i>
+                  Información de Contacto
+                </h4>
+
+                <div className="adm-info-list">
+                  <div className="adm-info-row">
+                    <div className="adm-info-row__icon adm-info-row__icon--blue">
+                      <i className="fa-solid fa-envelope"></i>
+                    </div>
+                    <div className="adm-info-row__content">
+                      <span className="adm-info-row__label">Correo Electrónico</span>
+                      <span className="adm-info-row__val">{selectedFicha.correo || 'Sin correo registrado'}</span>
+                    </div>
+                  </div>
+
+                  <div className="adm-info-row">
+                    <div className="adm-info-row__icon adm-info-row__icon--cyan">
+                      <i className="fa-solid fa-phone"></i>
+                    </div>
+                    <div className="adm-info-row__content">
+                      <span className="adm-info-row__label">Teléfono Principal</span>
+                      <span className="adm-info-row__val">{selectedFicha.telefono || 'Sin teléfono registrado'}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="adm-detail-item">
-                  <span className="adm-detail-item__label"><i className="fa-solid fa-phone"></i> Teléfono</span>
-                  <span className="adm-detail-item__val">{selectedFicha.telefono || 'Sin teléfono'}</span>
+              </div>
+
+              {/* Section: Datos de Matrícula Profesional */}
+              <div className="adm-drawer-section">
+                <h4 className="adm-drawer-section-title">
+                  <i className="fa-solid fa-id-card" style={{ color: '#0284c7' }}></i>
+                  Matrícula y Registro
+                </h4>
+
+                <div className="adm-info-list">
+                  <div className="adm-info-row">
+                    <div className="adm-info-row__icon adm-info-row__icon--green">
+                      <i className="fa-solid fa-file-medical"></i>
+                    </div>
+                    <div className="adm-info-row__content">
+                      <span className="adm-info-row__label">Tarjeta Profesional (MP)</span>
+                      <span className="adm-info-row__val">{selectedFicha.numero_tarjeta || 'No registrada'}</span>
+                    </div>
+                  </div>
+
+                  <div className="adm-info-row">
+                    <div className="adm-info-row__icon adm-info-row__icon--purple">
+                      <i className="fa-solid fa-hashtag"></i>
+                    </div>
+                    <div className="adm-info-row__content">
+                      <span className="adm-info-row__label">Identificador Interno</span>
+                      <span className="adm-info-row__val">VET-00{selectedFicha.id_veterinario}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -621,11 +676,18 @@ export default function AdminVeterinarios() {
         <div className="adm-drawer-overlay" onClick={() => setShowModalForm(false)}>
           <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-drawer-header">
-              <h3>
-                <i className={`fa-solid ${isEditing ? 'fa-pen-to-square' : 'fa-user-plus'}`} style={{ color: '#059669' }}></i>
-                {isEditing ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}
-              </h3>
-              <button className="adm-drawer-close" onClick={() => setShowModalForm(false)}>
+              <div className="adm-drawer-header__title-group">
+                <div className="adm-drawer-header__icon">
+                  <i className={`fa-solid ${isEditing ? 'fa-pen-to-square' : 'fa-user-plus'}`}></i>
+                </div>
+                <div>
+                  <h3>{isEditing ? 'Editar Veterinario' : 'Registrar Nuevo Veterinario'}</h3>
+                  <span className="adm-drawer-header__sub">
+                    {isEditing ? 'Actualiza la información médica del profesional' : 'Ingresa los datos para dar de alta al médico en el portal'}
+                  </span>
+                </div>
+              </div>
+              <button className="adm-drawer-close" onClick={() => setShowModalForm(false)} title="Cerrar formulario">
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -639,56 +701,79 @@ export default function AdminVeterinarios() {
                   </div>
                 )}
 
-                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
-                  <label>Nombre Completo del Veterinario *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Dr. Andrés Gómez"
-                    value={formVet.nombre}
-                    onChange={(e) => setFormVet({ ...formVet, nombre: e.target.value })}
-                  />
+                <div className="adm-form-section">
+                  <h5 className="adm-form-section-title">Información Básica</h5>
+
+                  <div className="adm-form-group">
+                    <label>Nombre Completo del Veterinario *</label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-user-doctor input-icon"></i>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej. Dr. Andrés Gómez"
+                        value={formVet.nombre}
+                        onChange={(e) => setFormVet({ ...formVet, nombre: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="adm-form-group">
+                    <label>Correo Electrónico (Usuario) *</label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-envelope input-icon"></i>
+                      <input
+                        type="email"
+                        required
+                        placeholder="Ej. andres.gomez@petfeliz.com"
+                        value={formVet.correo}
+                        onChange={(e) => setFormVet({ ...formVet, correo: e.target.value })}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
-                  <label>Correo Electrónico (Usuario) *</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Ej. andres.gomez@petfeliz.com"
-                    value={formVet.correo}
-                    onChange={(e) => setFormVet({ ...formVet, correo: e.target.value })}
-                  />
-                </div>
+                <div className="adm-form-section">
+                  <h5 className="adm-form-section-title">Contacto y Matrícula</h5>
 
-                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
-                  <label>Teléfono de Contacto</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. 300 456 7890"
-                    value={formVet.telefono}
-                    onChange={(e) => setFormVet({ ...formVet, telefono: e.target.value })}
-                  />
-                </div>
+                  <div className="adm-form-group">
+                    <label>Teléfono de Contacto</label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-phone input-icon"></i>
+                      <input
+                        type="text"
+                        placeholder="Ej. 300 456 7890"
+                        value={formVet.telefono}
+                        onChange={(e) => setFormVet({ ...formVet, telefono: e.target.value })}
+                      />
+                    </div>
+                  </div>
 
-                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
-                  <label>Tarjeta Profesional (MP)</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. MP-00001"
-                    value={formVet.numero_tarjeta}
-                    onChange={(e) => setFormVet({ ...formVet, numero_tarjeta: e.target.value })}
-                  />
-                </div>
+                  <div className="adm-form-group">
+                    <label>Tarjeta Profesional (MP)</label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-id-card input-icon"></i>
+                      <input
+                        type="text"
+                        placeholder="Ej. MP-00001"
+                        value={formVet.numero_tarjeta}
+                        onChange={(e) => setFormVet({ ...formVet, numero_tarjeta: e.target.value })}
+                      />
+                    </div>
+                  </div>
 
-                <div className="adm-form-group" style={{ marginBottom: '1.1rem' }}>
-                  <label>URL Foto de Perfil (Opcional)</label>
-                  <input
-                    type="url"
-                    placeholder="Ej. https://res.cloudinary.com/..."
-                    value={formVet.foto_perfil}
-                    onChange={(e) => setFormVet({ ...formVet, foto_perfil: e.target.value })}
-                  />
+                  <div className="adm-form-group">
+                    <label>URL Foto de Perfil (Opcional)</label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-camera input-icon"></i>
+                      <input
+                        type="url"
+                        placeholder="Ej. https://res.cloudinary.com/..."
+                        value={formVet.foto_perfil}
+                        onChange={(e) => setFormVet({ ...formVet, foto_perfil: e.target.value })}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -702,9 +787,13 @@ export default function AdminVeterinarios() {
                       <i className="fa-solid fa-spinner fa-spin"></i> Guardando...
                     </>
                   ) : isEditing ? (
-                    'Guardar Cambios'
+                    <>
+                      <i className="fa-solid fa-check" style={{ marginRight: '6px' }}></i> Guardar Cambios
+                    </>
                   ) : (
-                    'Registrar Veterinario'
+                    <>
+                      <i className="fa-solid fa-user-plus" style={{ marginRight: '6px' }}></i> Registrar Veterinario
+                    </>
                   )}
                 </button>
               </div>

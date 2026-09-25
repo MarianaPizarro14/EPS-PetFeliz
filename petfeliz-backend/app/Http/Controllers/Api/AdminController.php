@@ -884,6 +884,21 @@ class AdminController extends Controller
      */
     public function veterinariosStore(Request $request)
     {
+        $emailClean = strtolower(trim($request->correo ?? ''));
+
+        // Liberar correo si pertenecía a un usuario huérfano (cuyo veterinario/cliente fue eliminado previamente)
+        if (!empty($emailClean)) {
+            $orphanUser = User::where('email', $emailClean)->first();
+            if ($orphanUser) {
+                $hasVet = Veterinario::where('id_usuario', $orphanUser->id_usuario)->exists();
+                $hasCliente = Cliente::where('id_usuario', $orphanUser->id_usuario)->exists();
+                if (!$hasVet && !$hasCliente) {
+                    $orphanUser->tokens()->delete();
+                    $orphanUser->delete();
+                }
+            }
+        }
+
         $request->validate([
             'nombre'         => 'required|string|max:100',
             'correo'         => 'required|email|max:100|unique:usuario,email',
@@ -894,14 +909,14 @@ class AdminController extends Controller
             'nombre.required' => 'El nombre del veterinario es obligatorio.',
             'correo.required' => 'El correo electrónico es obligatorio.',
             'correo.email'    => 'El correo electrónico no es válido.',
-            'correo.unique'   => 'Este correo electrónico ya se encuentra registrado en el sistema.',
+            'correo.unique'   => 'Este correo electrónico ya se encuentra registrado en el sistema por un usuario activo.',
         ]);
 
         $tempPassword = 'Vet#' . rand(1000, 9999);
 
-        $vet = DB::transaction(function () use ($request, $tempPassword) {
+        $vet = DB::transaction(function () use ($request, $tempPassword, $emailClean) {
             $user = User::create([
-                'email'           => strtolower(trim($request->correo)),
+                'email'           => $emailClean,
                 'contrasena_hash' => Hash::make($tempPassword),
                 'rol'             => 'veterinario',
                 'activo'          => 1,
@@ -992,15 +1007,31 @@ class AdminController extends Controller
     }
 
     /**
-     * Eliminar (soft delete) un veterinario de la base de datos real.
+     * Eliminar un veterinario y su cuenta de usuario asociada de la base de datos real.
      */
     public function veterinariosDestroy($id)
     {
-        $vet = Veterinario::where('id_veterinario', $id)->firstOrFail();
-        $vet->delete();
+        $vet = Veterinario::with('usuario')->where('id_veterinario', $id)->first();
+
+        if (!$vet) {
+            return response()->json([
+                'message' => 'El veterinario no fue encontrado en la base de datos.',
+            ], 404);
+        }
+
+        DB::transaction(function () use ($vet) {
+            if ($vet->usuario) {
+                // Revocar tokens activos del usuario para cerrar sesión si estaba conectado
+                $vet->usuario->tokens()->delete();
+                // Eliminar el usuario de la tabla usuario para liberar completamente el correo
+                $vet->usuario->delete();
+            }
+            // Eliminar definitivamente el registro del veterinario
+            $vet->forceDelete();
+        });
 
         return response()->json([
-            'message' => 'Veterinario eliminado correctamente.',
+            'message' => 'Veterinario y cuenta de usuario eliminados correctamente.',
         ], 200);
     }
 }

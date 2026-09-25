@@ -156,7 +156,8 @@ export default function AdminVeterinarios() {
 
       if (res.ok) {
         const data = await res.json()
-        const vetsList = data.veterinarios && data.veterinarios.length > 0 ? data.veterinarios : ROSTER_FALLBACK
+        const rawList = data.veterinarios && data.veterinarios.length > 0 ? data.veterinarios : ROSTER_FALLBACK
+        const vetsList = [...rawList].sort((a, b) => Number(a.id_veterinario) - Number(b.id_veterinario))
         setVeterinarios(vetsList)
         calculateStats(vetsList, data.stats)
       } else {
@@ -264,7 +265,7 @@ export default function AdminVeterinarios() {
           )
           triggerToast('Veterinario actualizado exitosamente.', 'success')
         } else {
-          setVeterinarios((prev) => [savedVet, ...prev])
+          setVeterinarios((prev) => [...prev, savedVet])
           triggerToast('Veterinario agregado exitosamente.', 'success')
           if (responseData.contrasena_temporal) {
             setCreatedCredentials({

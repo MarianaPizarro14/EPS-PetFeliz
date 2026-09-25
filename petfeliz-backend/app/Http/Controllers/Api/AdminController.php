@@ -813,7 +813,7 @@ class AdminController extends Controller
      */
     public function veterinariosIndex(Request $request)
     {
-        $vetsQuery = Veterinario::with('usuario')->orderBy('id_veterinario', 'desc')->get();
+        $vetsQuery = Veterinario::with('usuario')->orderBy('id_veterinario', 'asc')->get();
 
         $formatted = $vetsQuery->map(function ($vet) {
             return [

@@ -13,7 +13,7 @@ export default function DashboardVeterinario() {
   const [usuario, setUsuario] = useState({
     nombre: storedUser?.nombre || 'Dr. Veterinario',
     nombreCompleto: storedUser?.nombre || 'Médico Veterinario',
-    foto: storedUser?.foto || storedUser?.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+    foto: storedUser?.foto || storedUser?.foto_perfil || null,
     rol: 'veterinario',
     email: storedUser?.email || '',
   })

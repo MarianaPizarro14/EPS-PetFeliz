@@ -60,7 +60,7 @@ export default function AdminVeterinarios() {
   const [usuario] = useState({
     nombre: storedUser?.nombre || 'Administrador',
     nombreCompleto: storedUser?.nombreCompleto || 'Director Administrativo',
-    foto: storedUser?.foto || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
+    foto: storedUser?.foto || storedUser?.foto_perfil || null,
   })
 
   const [veterinarios, setVeterinarios] = useState(ROSTER_FALLBACK)
@@ -476,11 +476,17 @@ export default function AdminVeterinarios() {
                     <tr key={vet.id_veterinario}>
                       <td>
                         <div className="adm-vet-avatar-cell">
-                          <img
-                            src={vet.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg'}
-                            alt={vet.nombre}
-                            className="adm-vet-avatar"
-                          />
+                          {vet.foto_perfil ? (
+                            <img
+                              src={vet.foto_perfil}
+                              alt={vet.nombre}
+                              className="adm-vet-avatar"
+                            />
+                          ) : (
+                            <div className="adm-vet-avatar adm-vet-avatar--fallback" title={vet.nombre}>
+                              <i className="fa-solid fa-user-doctor"></i>
+                            </div>
+                          )}
                           <div className="adm-vet-name-box">
                             <span className="adm-vet-name">{vet.nombre}</span>
                             <span className="adm-vet-id">ID Veterinario #{vet.id_veterinario}</span>
@@ -551,11 +557,17 @@ export default function AdminVeterinarios() {
           <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-vet-hero">
               <div className="adm-vet-hero__avatar-wrap">
-                <img
-                  src={selectedFicha.foto_perfil || 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg'}
-                  alt={selectedFicha.nombre}
-                  className="adm-vet-hero__img"
-                />
+                {selectedFicha.foto_perfil ? (
+                  <img
+                    src={selectedFicha.foto_perfil}
+                    alt={selectedFicha.nombre}
+                    className="adm-vet-hero__img"
+                  />
+                ) : (
+                  <div className="adm-vet-hero__img--fallback" title={selectedFicha.nombre}>
+                    <i className="fa-solid fa-user-doctor"></i>
+                  </div>
+                )}
                 <span className="adm-vet-hero__online-badge" title="Personal Médico Activo"></span>
               </div>
               <div className="adm-vet-hero__info">

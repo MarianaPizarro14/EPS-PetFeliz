@@ -2,9 +2,50 @@
 
 .admin-dash-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-  gap: 1.1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 1.25rem !important;
+  margin-bottom: 1.75rem !important;
+}
+
+.admin-stat-card {
+  padding: 1.5rem 1.6rem !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+.admin-stat-card__info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.45rem !important;
+}
+
+.admin-stat-card__info span {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  margin-bottom: 0.15rem !important;
+}
+
+.admin-stat-card__info h3 {
+  font-family: 'Sora', sans-serif !important;
+  font-size: 2.1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0.15rem 0 0.25rem 0 !important;
+  line-height: 1.1 !important;
 }
 
 .adm-toolbar {
@@ -197,14 +238,33 @@
 }
 
 .species-pill {
-  display: inline-block;
-  background-color: #f1f5f9;
-  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
   width: fit-content;
+  border: 1px solid transparent;
+}
+
+.species-pill--canino {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+
+.species-pill--felino {
+  background-color: #fffbe6;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.species-pill--otros {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border-color: #e9d5ff;
 }
 
 .owner-cell {

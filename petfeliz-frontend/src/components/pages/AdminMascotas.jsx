@@ -30,6 +30,18 @@ function getSpeciesIcon(especie = '') {
   return 'fa-paw'
 }
 
+// Helper para obtener la clase CSS de la insignia por especie
+function getSpeciesBadgeClass(especie = '') {
+  const norm = especie.toLowerCase().trim()
+  if (norm.includes('canin') || norm.includes('perro') || norm === 'dog') {
+    return 'species-pill--canino'
+  }
+  if (norm.includes('felin') || norm.includes('gato') || norm === 'cat') {
+    return 'species-pill--felino'
+  }
+  return 'species-pill--otros'
+}
+
 // Componente helper para Avatar de Mascota con fallback por especie usando FontAwesome
 function PetAvatar({ mascota, size = '44px', fontSize = '1.2rem', style = {} }) {
   const photoUrl = mascota?.foto || mascota?.foto_mascota
@@ -475,7 +487,7 @@ export default function AdminMascotas() {
         <div className="admin-dash-grid">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Total Mascotas</span>
+              <span style={{ color: '#059669' }}>Total Mascotas</span>
               <h3>{loading ? '...' : stats.total}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-paw"></i>
@@ -489,7 +501,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Caninos Registrados</span>
+              <span style={{ color: '#0284c7' }}>Caninos Registrados</span>
               <h3>{loading ? '...' : stats.caninos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-dog"></i>
@@ -503,7 +515,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Felinos Registrados</span>
+              <span style={{ color: '#d97706' }}>Felinos Registrados</span>
               <h3>{loading ? '...' : stats.felinos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-cat"></i>
@@ -517,7 +529,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Otras Especies</span>
+              <span style={{ color: '#7e22ce' }}>Otras Especies</span>
               <h3>{loading ? '...' : (stats.otros !== undefined ? stats.otros : Math.max(0, stats.total - (stats.caninos + stats.felinos)))}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#7e22ce', background: '#f3e8ff', borderColor: '#e9d5ff' }}>
                 <i className="fa-solid fa-dove"></i>
@@ -531,7 +543,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span>Con Alergias / Alertas</span>
+              <span style={{ color: '#dc2626' }}>Con Alergias / Alertas</span>
               <h3>{loading ? '...' : stats.con_alergias}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#dc2626', background: '#fef2f2', borderColor: '#fecaca' }}>
                 <i className="fa-solid fa-notes-medical"></i>
@@ -631,7 +643,7 @@ export default function AdminMascotas() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span className="species-pill">
+                          <span className={`species-pill ${getSpeciesBadgeClass(m.especie)}`}>
                             <i className={`fa-solid ${getSpeciesIcon(m.especie)}`} style={{ marginRight: '6px' }}></i>
                             {m.especie}
                           </span>

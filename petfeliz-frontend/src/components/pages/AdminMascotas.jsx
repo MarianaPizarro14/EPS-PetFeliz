@@ -483,11 +483,11 @@ export default function AdminMascotas() {
           </div>
         )}
 
-        {/* ── 5 TARJETAS DE ESTADÍSTICAS REALES (GRID UNIFORME DE 5 COLUMNAS) ── */}
+        {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES (GRID DE 4 COLUMNAS) ── */}
         <div className="admin-dash-grid">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#059669' }}>Total Mascotas</span>
+              <span style={{ color: '#059669', fontWeight: 700 }}>Total Mascotas</span>
               <h3>{loading ? '...' : stats.total}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-paw"></i>
@@ -501,7 +501,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#0284c7' }}>Caninos Registrados</span>
+              <span style={{ color: '#0284c7', fontWeight: 700 }}>Caninos Registrados</span>
               <h3>{loading ? '...' : stats.caninos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-dog"></i>
@@ -515,7 +515,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#d97706' }}>Felinos Registrados</span>
+              <span style={{ color: '#d97706', fontWeight: 700 }}>Felinos Registrados</span>
               <h3>{loading ? '...' : stats.felinos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-cat"></i>
@@ -529,7 +529,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#7e22ce' }}>Otras Especies</span>
+              <span style={{ color: '#7e22ce', fontWeight: 700 }}>Otras Especies</span>
               <h3>{loading ? '...' : (stats.otros !== undefined ? stats.otros : Math.max(0, stats.total - (stats.caninos + stats.felinos)))}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#7e22ce', background: '#f3e8ff', borderColor: '#e9d5ff' }}>
                 <i className="fa-solid fa-dove"></i>
@@ -538,20 +538,6 @@ export default function AdminMascotas() {
             </div>
             <div className="admin-stat-card__icon" style={{ background: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff' }}>
               <i className="fa-solid fa-otter"></i>
-            </div>
-          </div>
-
-          <div className="admin-stat-card">
-            <div className="admin-stat-card__info">
-              <span style={{ color: '#dc2626' }}>Con Alergias / Alertas</span>
-              <h3>{loading ? '...' : stats.con_alergias}</h3>
-              <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#dc2626', background: '#fef2f2', borderColor: '#fecaca' }}>
-                <i className="fa-solid fa-notes-medical"></i>
-                <span>Atención Especial</span>
-              </div>
-            </div>
-            <div className="admin-stat-card__icon" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
-              <i className="fa-solid fa-notes-medical"></i>
             </div>
           </div>
         </div>
@@ -672,9 +658,24 @@ export default function AdminMascotas() {
                         )}
                       </td>
                       <td>
-                        <span className="citas-count-badge">
-                          <i className="fa-regular fa-calendar-check"></i> {m.total_citas} citas
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          <span className="citas-count-badge">
+                            <i className="fa-regular fa-calendar-check"></i> {m.total_citas || 0} citas
+                          </span>
+                          {m.citas_urgencias > 0 || m.ultima_cita?.es_urgencia ? (
+                            <span className="cita-tag-badge cita-tag-badge--urgencia">
+                              <i className="fa-solid fa-truck-medical"></i> Urgencias
+                            </span>
+                          ) : m.citas_atendidas > 0 || m.ultima_cita?.asistio || (m.total_citas > 0) ? (
+                            <span className="cita-tag-badge cita-tag-badge--asistio">
+                              <i className="fa-solid fa-circle-check"></i> Asistió a Cita
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                              Sin atención previa
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <div className="action-buttons-group">

@@ -564,7 +564,7 @@ class AdminController extends Controller
      */
     public function mascotasIndex(Request $request)
     {
-        $mascotas = Mascota::with(['cliente', 'citas'])->orderBy('id_mascota', 'desc')->get();
+        $mascotas = Mascota::with(['cliente', 'citas.servicio'])->orderBy('id_mascota', 'desc')->get();
 
         $clientes = Cliente::orderBy('nombre', 'asc')->get(['id_cliente', 'nombre', 'telefono', 'cedula']);
 
@@ -579,6 +579,29 @@ class AdminController extends Controller
                     $meses = (int) $nacimiento->diffInMonths(Carbon::now());
                     $edadTexto = $meses . ($meses === 1 ? ' Mes' : ' Meses');
                 }
+            }
+
+            $citasList = $mascota->citas;
+            $totalCitas = $citasList->count();
+            $atendidasCount = $citasList->whereIn('id_estado', [2, 4])->count();
+            $urgenciasCount = $citasList->filter(function($c) {
+                $motivo = mb_strtolower($c->motivo ?? ($c->servicio->nombre ?? ''));
+                return str_contains($motivo, 'urgenc') || str_contains($motivo, 'emergenc');
+            })->count();
+
+            $ultimaCita = $citasList->sortByDesc('fecha')->first();
+            $ultimaInfo = null;
+            if ($ultimaCita) {
+                $mot = mb_strtolower($ultimaCita->motivo ?? ($ultimaCita->servicio->nombre ?? ''));
+                $esUrgencia = str_contains($mot, 'urgenc') || str_contains($mot, 'emergenc');
+                $asistio = ($ultimaCita->id_estado == 2 || $ultimaCita->id_estado == 4);
+                $ultimaInfo = [
+                    'tipo' => $esUrgencia ? 'Urgencias' : 'Cita Médica',
+                    'estado' => $asistio ? 'Asistió' : ($ultimaCita->id_estado == 3 ? 'Cancelada' : 'Pendiente'),
+                    'fecha' => $ultimaCita->fecha,
+                    'asistio' => $asistio,
+                    'es_urgencia' => $esUrgencia,
+                ];
             }
 
             return [
@@ -601,7 +624,10 @@ class AdminController extends Controller
                     'cedula' => $mascota->cliente->cedula ?? '',
                     'es_afiliado' => (bool) ($mascota->cliente->es_afiliado ?? false),
                 ] : null,
-                'total_citas' => $mascota->citas->count(),
+                'total_citas' => $totalCitas,
+                'citas_atendidas' => $atendidasCount,
+                'citas_urgencias' => $urgenciasCount,
+                'ultima_cita' => $ultimaInfo,
             ];
         });
 

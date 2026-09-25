@@ -2,9 +2,21 @@
 
 .admin-dash-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 1.25rem !important;
   margin-bottom: 1.75rem !important;
+}
+
+@media (max-width: 1024px) {
+  .admin-dash-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dash-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .admin-stat-card {
@@ -32,8 +44,8 @@
 
 .admin-stat-card__info span {
   font-family: 'Inter', sans-serif !important;
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.03em !important;
   margin-bottom: 0.15rem !important;
@@ -290,6 +302,44 @@
   font-weight: 600;
   padding: 0.3rem 0.7rem;
   border-radius: 16px;
+  width: fit-content;
+}
+
+.cita-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  width: fit-content;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.cita-tag-badge--asistio {
+  background-color: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.cita-tag-badge--urgencia {
+  background-color: #fffbe6;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.cita-tag-badge--cita {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+
+.cita-tag-badge--pendiente {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
 }
 
 /* Botones de Acción */

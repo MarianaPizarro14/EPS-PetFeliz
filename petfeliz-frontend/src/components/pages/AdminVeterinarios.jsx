@@ -33,7 +33,7 @@ const ROSTER_FALLBACK = [
     numero_tarjeta: 'MP-00003',
     telefono: '3000000003',
     correo: 'vet_3@petfeliz.com',
-    foto_perfil: '',
+    foto_perfil: 'https://res.cloudinary.com/dedroug6v/image/upload/v1782673220/felipe-restrepo_qjvdxd.jpg',
   },
   {
     id_veterinario: 4,

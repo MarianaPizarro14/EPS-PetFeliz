@@ -9,7 +9,28 @@ import './AdminDashboard.css'
 import './AdminCitas.css'
 import './AdminMascotas.css'
 
-// Componente helper para Avatar de Mascota con fallback por especie
+// Helper para obtener el icono FontAwesome exacto por especie (Sin Emojis)
+function getSpeciesIcon(especie = '') {
+  const norm = especie.toLowerCase().trim()
+  if (norm.includes('canin') || norm.includes('perro') || norm === 'dog') {
+    return 'fa-dog'
+  }
+  if (norm.includes('felin') || norm.includes('gato') || norm === 'cat') {
+    return 'fa-cat'
+  }
+  if (norm.includes('ave') || norm.includes('pájaro') || norm.includes('pajaro') || norm.includes('bird')) {
+    return 'fa-dove'
+  }
+  if (norm.includes('pez') || norm.includes('fish')) {
+    return 'fa-fish'
+  }
+  if (norm.includes('reptil') || norm.includes('exót') || norm.includes('exot')) {
+    return 'fa-otter'
+  }
+  return 'fa-paw'
+}
+
+// Componente helper para Avatar de Mascota con fallback por especie usando FontAwesome
 function PetAvatar({ mascota, size = '44px', fontSize = '1.2rem', style = {} }) {
   const photoUrl = mascota?.foto || mascota?.foto_mascota
   const [imgError, setImgError] = useState(false)
@@ -21,20 +42,20 @@ function PetAvatar({ mascota, size = '44px', fontSize = '1.2rem', style = {} }) 
   const especie = (mascota?.especie || '').toLowerCase()
   let bg = '#ecfdf5'
   let color = '#059669'
-  let icon = 'fa-solid fa-dog'
+  let icon = 'fa-solid ' + getSpeciesIcon(especie)
 
   if (especie.includes('felin') || especie.includes('gato') || especie === 'cat') {
     bg = '#fef3c7'
     color = '#d97706'
-    icon = 'fa-solid fa-cat'
   } else if (especie.includes('ave') || especie.includes('pájaro') || especie.includes('pajaro')) {
     bg = '#e0f2fe'
     color = '#0284c7'
-    icon = 'fa-solid fa-crow'
   } else if (especie.includes('exót') || especie.includes('exot') || especie.includes('otr')) {
     bg = '#fce7f3'
     color = '#ec4899'
-    icon = 'fa-solid fa-paw'
+  } else if (especie.includes('pez')) {
+    bg = '#e0f2fe'
+    color = '#0284c7'
   }
 
   if (isValidAvatarUrl(photoUrl) && !imgError) {
@@ -422,7 +443,7 @@ export default function AdminMascotas() {
   })
 
   return (
-    <div className="dash-layout">
+    <div className="dash">
       <SidebarAdmin />
 
       {/* Toast Notification Flotante */}
@@ -443,212 +464,232 @@ export default function AdminMascotas() {
           usuario={usuario}
         />
 
-        <div className="dash-content">
-          {errorGlobal && (
-            <div className="dash-alert dash-alert--error" style={{ marginBottom: '1.25rem' }}>
-              <i className="fa-solid fa-triangle-exclamation"></i>
-              <span>{errorGlobal}</span>
-            </div>
-          )}
+        {errorGlobal && (
+          <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.5rem' }}>
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <span>{errorGlobal}</span>
+          </div>
+        )}
 
-          {/* Tarjetas de Estadísticas */}
-          <div className="dash-stats-grid" style={{ marginBottom: '1.5rem' }}>
-            <div className="dash-stat-card">
-              <div className="dash-stat-card__icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+        {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES (GRID UNIFORME DE 4 COLUMNAS) ── */}
+        <div className="admin-dash-grid">
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Total Mascotas</span>
+              <h3>{loading ? '...' : stats.total}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-paw"></i>
-              </div>
-              <div className="dash-stat-card__info">
-                <span className="dash-stat-card__label">Total Mascotas</span>
-                <span className="dash-stat-card__value">{stats.total}</span>
+                <span>Directorio Global</span>
               </div>
             </div>
+            <div className="admin-stat-card__icon admin-stat-card__icon--green">
+              <i className="fa-solid fa-paw"></i>
+            </div>
+          </div>
 
-            <div className="dash-stat-card">
-              <div className="dash-stat-card__icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Caninos Registrados</span>
+              <h3>{loading ? '...' : stats.caninos}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-dog"></i>
-              </div>
-              <div className="dash-stat-card__info">
-                <span className="dash-stat-card__label">Caninos Registrados</span>
-                <span className="dash-stat-card__value">{stats.caninos}</span>
+                <span>Pacientes Caninos</span>
               </div>
             </div>
+            <div className="admin-stat-card__icon admin-stat-card__icon--blue">
+              <i className="fa-solid fa-dog"></i>
+            </div>
+          </div>
 
-            <div className="dash-stat-card">
-              <div className="dash-stat-card__icon" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Felinos Registrados</span>
+              <h3>{loading ? '...' : stats.felinos}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-cat"></i>
-              </div>
-              <div className="dash-stat-card__info">
-                <span className="dash-stat-card__label">Felinos Registrados</span>
-                <span className="dash-stat-card__value">{stats.felinos}</span>
+                <span>Pacientes Felinos</span>
               </div>
             </div>
+            <div className="admin-stat-card__icon admin-stat-card__icon--amber">
+              <i className="fa-solid fa-cat"></i>
+            </div>
+          </div>
 
-            <div className="dash-stat-card">
-              <div className="dash-stat-card__icon" style={{ backgroundColor: '#fce7f3', color: '#ec4899' }}>
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Con Alergias / Alertas</span>
+              <h3>{loading ? '...' : stats.con_alergias}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#dc2626', background: '#fef2f2' }}>
                 <i className="fa-solid fa-notes-medical"></i>
+                <span>Atención Especial</span>
               </div>
-              <div className="dash-stat-card__info">
-                <span className="dash-stat-card__label">Con Alergias / Alertas</span>
-                <span className="dash-stat-card__value">{stats.con_alergias}</span>
-              </div>
+            </div>
+            <div className="admin-stat-card__icon" style={{ background: '#fce7f3', color: '#ec4899' }}>
+              <i className="fa-solid fa-notes-medical"></i>
             </div>
           </div>
+        </div>
 
-          {/* Barra de Búsqueda y Botón Nuevo */}
-          <div className="adm-toolbar">
-            <div className="adm-toolbar__search">
-              <i className="fa-solid fa-magnifying-glass search-icon"></i>
-              <input
-                type="text"
-                placeholder="Buscar por nombre, especie, raza o cliente/dueño..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchTerm && (
-                <button type="button" className="clear-btn" onClick={() => setSearchTerm('')}>
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-              )}
-            </div>
-
-            <div className="adm-toolbar__filters">
-              <div className="adm-filter-group">
-                <label>Especie:</label>
-                <select value={especieFilter} onChange={(e) => setEspecieFilter(e.target.value)}>
-                  <option value="todas">Todas las especies</option>
-                  <option value="Canino">Caninos 🐶</option>
-                  <option value="Felino">Felinos 🐱</option>
-                  <option value="Otros">Otras especies 🐾</option>
-                </select>
-              </div>
-
-              <button type="button" className="btn-primary-adm" onClick={handleOpenCreateModal}>
-                <i className="fa-solid fa-plus"></i>
-                <span>Nueva Mascota</span>
+        {/* ── BARRA DE HERRAMIENTAS: BÚSQUEDA Y NUEVA MASCOTA ── */}
+        <div className="adm-toolbar">
+          <div className="adm-toolbar__search">
+            <i className="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+              type="text"
+              placeholder="Buscar por nombre, especie, raza o cliente/dueño..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button type="button" className="clear-btn" onClick={() => setSearchTerm('')}>
+                <i className="fa-solid fa-xmark"></i>
               </button>
-            </div>
-          </div>
-
-          {/* Tabla Principal de Mascotas */}
-          <div className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div className="dash-card__header" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <i className="fa-solid fa-paw" style={{ color: '#059669', fontSize: '1.1rem' }}></i>
-                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
-                  Directorio de Mascotas
-                </h2>
-              </div>
-              <span className="pet-badge-count">{mascotasFiltradas.length} {mascotasFiltradas.length === 1 ? 'mascota' : 'mascotas'}</span>
-            </div>
-
-            {loading ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-                <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '2rem', color: '#059669', marginBottom: '0.75rem' }}></i>
-                <p>Cargando pacientes veterinarios...</p>
-              </div>
-            ) : mascotasFiltradas.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-                <i className="fa-solid fa-paw" style={{ fontSize: '2.5rem', color: '#cbd5e1', marginBottom: '0.75rem' }}></i>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#334155' }}>No se encontraron mascotas</h3>
-                <p style={{ fontSize: '0.9rem' }}>Intenta ajustar los criterios de búsqueda o registra una nueva mascota.</p>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="pet-admin-table">
-                  <thead>
-                    <tr>
-                      <th>PACIENTE</th>
-                      <th>ESPECIE & RAZA</th>
-                      <th>EDAD & PESO</th>
-                      <th>CLIENTE / DUEÑO</th>
-                      <th>CITAS</th>
-                      <th style={{ textAlign: 'right', paddingRight: '1.25rem' }}>ACCIONES</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mascotasFiltradas.map((m) => (
-                      <tr key={m.id_mascota}>
-                        <td>
-                          <div className="pet-info-cell">
-                            <PetAvatar mascota={m} size="44px" fontSize="1.15rem" />
-                            <div>
-                              <strong className="pet-name">{m.nombre}</strong>
-                              <span className="pet-meta-sub">
-                                ID: #{m.id_mascota} • {m.sexo}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span className="species-pill">
-                              {m.especie === 'Canino' ? '🐶 Canino' : m.especie === 'Felino' ? '🐱 Felino' : '🐾 ' + m.especie}
-                            </span>
-                            <span style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>{m.raza}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ fontSize: '0.88rem', color: '#1e293b' }}>
-                            <div><span>{m.edad || 'No calc.'}</span></div>
-                            <div style={{ color: '#64748b', fontSize: '0.8rem' }}>
-                              {m.peso ? `${m.peso} kg` : 'Peso N/A'}
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          {m.dueno ? (
-                            <div className="owner-cell">
-                              <span style={{ fontWeight: 600, color: '#334155' }}>{m.dueno.nombre}</span>
-                              <span className="owner-sub">
-                                <i className="fa-solid fa-phone" style={{ fontSize: '0.75rem', marginRight: '4px' }}></i>
-                                {m.dueno.telefono}
-                              </span>
-                            </div>
-                          ) : (
-                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Sin cliente asignado</span>
-                          )}
-                        </td>
-                        <td>
-                          <span className="citas-count-badge">
-                            <i className="fa-regular fa-calendar-check"></i> {m.total_citas} citas
-                          </span>
-                        </td>
-                        <td>
-                          <div className="action-buttons-group">
-                            <button
-                              type="button"
-                              className="act-btn act-btn--view"
-                              title="Ver Ficha Clínica"
-                              onClick={() => handleOpenFicha(m.id_mascota)}
-                            >
-                              <i className="fa-solid fa-notes-medical"></i>
-                              <span>Ficha</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="act-btn act-btn--edit"
-                              title="Editar Mascota"
-                              onClick={() => handleOpenEditModal(m)}
-                            >
-                              <i className="fa-solid fa-pen"></i>
-                            </button>
-                            <button
-                              type="button"
-                              className="act-btn act-btn--delete"
-                              title="Eliminar Mascota"
-                              onClick={() => setDeletingMascota(m)}
-                            >
-                              <i className="fa-solid fa-trash-can"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             )}
           </div>
+
+          <div className="adm-toolbar__filters">
+            <div className="adm-filter-group">
+              <label>Especie:</label>
+              <select value={especieFilter} onChange={(e) => setEspecieFilter(e.target.value)}>
+                <option value="todas">Todas las especies</option>
+                <option value="Canino">Caninos</option>
+                <option value="Felino">Felinos</option>
+                <option value="Otros">Otras especies</option>
+              </select>
+            </div>
+
+            <button type="button" className="admin-btn-csv" onClick={handleOpenCreateModal} style={{ height: '42px', padding: '0 1.2rem' }}>
+              <i className="fa-solid fa-plus"></i>
+              <span>Nueva Mascota</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── TABLA PRINCIPAL DE MASCOTAS ── */}
+        <div className="admin-card">
+          <div className="admin-card__header">
+            <div className="admin-card__title">
+              <div className="admin-card__title-icon" style={{ background: '#ecfdf5', color: '#047857' }}>
+                <i className="fa-solid fa-paw"></i>
+              </div>
+              <h3>Directorio de Mascotas</h3>
+            </div>
+            <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
+              {mascotasFiltradas.length} Registradas
+            </span>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+              <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.8rem', color: '#059669', marginBottom: '0.5rem' }}></i>
+              <p>Cargando pacientes veterinarios...</p>
+            </div>
+          ) : mascotasFiltradas.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+              <i className="fa-solid fa-paw" style={{ fontSize: '2rem', color: '#cbd5e1', marginBottom: '0.5rem' }}></i>
+              <p>No se encontraron mascotas con los criterios ingresados.</p>
+            </div>
+          ) : (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>PACIENTE</th>
+                    <th>ESPECIE & RAZA</th>
+                    <th>EDAD & PESO</th>
+                    <th>CLIENTE / DUEÑO</th>
+                    <th>CITAS</th>
+                    <th style={{ textAlign: 'center' }}>ACCIONES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mascotasFiltradas.map((m) => (
+                    <tr key={m.id_mascota}>
+                      <td>
+                        <div className="pet-info-cell">
+                          <PetAvatar mascota={m} size="44px" fontSize="1.15rem" />
+                          <div>
+                            <strong className="pet-name">{m.nombre}</strong>
+                            <span className="pet-meta-sub">
+                              ID: #{m.id_mascota} • {m.sexo === 'Macho' ? (
+                                <span><i className="fa-solid fa-mars" style={{ color: '#0284c7', marginRight: '3px' }}></i> Macho</span>
+                              ) : (
+                                <span><i className="fa-solid fa-venus" style={{ color: '#ec4899', marginRight: '3px' }}></i> Hembra</span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span className="species-pill">
+                            <i className={`fa-solid ${getSpeciesIcon(m.especie)}`} style={{ marginRight: '6px' }}></i>
+                            {m.especie}
+                          </span>
+                          <span style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>{m.raza}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '0.88rem', color: '#1e293b' }}>
+                          <div><span>{m.edad || 'No registrada'}</span></div>
+                          <div style={{ color: '#64748b', fontSize: '0.8rem' }}>
+                            {m.peso ? `${m.peso} kg` : 'Peso N/A'}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {m.dueno ? (
+                          <div className="owner-cell">
+                            <span style={{ fontWeight: 600, color: '#334155' }}>{m.dueno.nombre}</span>
+                            <span className="owner-sub">
+                              <i className="fa-solid fa-phone" style={{ fontSize: '0.75rem', marginRight: '4px', color: '#0284c7' }}></i>
+                              {m.dueno.telefono}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Sin cliente asignado</span>
+                        )}
+                      </td>
+                      <td>
+                        <span className="citas-count-badge">
+                          <i className="fa-regular fa-calendar-check"></i> {m.total_citas} citas
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <div className="action-buttons-group">
+                          <button
+                            type="button"
+                            className="act-btn act-btn--view"
+                            title="Ver Ficha Clínica"
+                            onClick={() => handleOpenFicha(m.id_mascota)}
+                          >
+                            <i className="fa-solid fa-notes-medical"></i>
+                            <span>Ficha</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="act-btn act-btn--edit"
+                            title="Editar Mascota"
+                            onClick={() => handleOpenEditModal(m)}
+                          >
+                            <i className="fa-solid fa-pen"></i>
+                          </button>
+                          <button
+                            type="button"
+                            className="act-btn act-btn--delete"
+                            title="Eliminar Mascota"
+                            onClick={() => setDeletingMascota(m)}
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
 
@@ -676,6 +717,7 @@ export default function AdminMascotas() {
                     <div className="adm-vet-hero__tp">
                       <span className="adm-vet-hero__badge">ID #{selectedFicha.id_mascota}</span>
                       <span className="adm-vet-hero__badge adm-vet-hero__badge--tp">
+                        <i className={`fa-solid ${getSpeciesIcon(selectedFicha.especie)}`} style={{ marginRight: '4px' }}></i>
                         {selectedFicha.especie} • {selectedFicha.sexo}
                       </span>
                     </div>
@@ -882,7 +924,7 @@ export default function AdminMascotas() {
             <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
               <div className="adm-drawer-body">
                 {formError && (
-                  <div className="dash-alert dash-alert--error" style={{ marginBottom: '1.2rem' }}>
+                  <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.2rem' }}>
                     <i className="fa-solid fa-circle-exclamation"></i>
                     <span>{formError}</span>
                   </div>
@@ -936,10 +978,10 @@ export default function AdminMascotas() {
                           value={formMascota.especie}
                           onChange={(e) => setFormMascota({ ...formMascota, especie: e.target.value })}
                         >
-                          <option value="Canino">Canino (Perro) 🐶</option>
-                          <option value="Felino">Felino (Gato) 🐱</option>
-                          <option value="Ave">Ave 🦜</option>
-                          <option value="Exótico">Exótico / Otro 🐾</option>
+                          <option value="Canino">Canino (Perro)</option>
+                          <option value="Felino">Felino (Gato)</option>
+                          <option value="Ave">Ave</option>
+                          <option value="Exótico">Exótico / Otro</option>
                         </select>
                       </div>
                     </div>
@@ -967,8 +1009,8 @@ export default function AdminMascotas() {
                           value={formMascota.sexo}
                           onChange={(e) => setFormMascota({ ...formMascota, sexo: e.target.value })}
                         >
-                          <option value="Macho">Macho ♂</option>
-                          <option value="Hembra">Hembra ♀</option>
+                          <option value="Macho">Macho</option>
+                          <option value="Hembra">Hembra</option>
                         </select>
                       </div>
                     </div>

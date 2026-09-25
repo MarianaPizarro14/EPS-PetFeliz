@@ -42,13 +42,15 @@
   gap: 0.45rem !important;
 }
 
-.admin-stat-card__info span {
-  font-family: 'Inter', sans-serif !important;
-  font-size: 0.84rem !important;
-  font-weight: 700 !important;
+.admin-stat-card__info span:first-child,
+.admin-stat-card__title {
+  font-family: 'Sora', 'Inter', sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.03em !important;
-  margin-bottom: 0.15rem !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 0.2rem !important;
+  display: block !important;
 }
 
 .admin-stat-card__info h3 {

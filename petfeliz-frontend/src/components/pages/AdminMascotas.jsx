@@ -487,7 +487,7 @@ export default function AdminMascotas() {
         <div className="admin-dash-grid">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#059669', fontWeight: 700 }}>Total Mascotas</span>
+              <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 800, fontSize: '0.95rem' }}>Total Mascotas</span>
               <h3>{loading ? '...' : stats.total}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-paw"></i>
@@ -501,7 +501,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#0284c7', fontWeight: 700 }}>Caninos Registrados</span>
+              <span className="admin-stat-card__title" style={{ color: '#0284c7', fontWeight: 800, fontSize: '0.95rem' }}>Caninos Registrados</span>
               <h3>{loading ? '...' : stats.caninos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-dog"></i>
@@ -515,7 +515,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#d97706', fontWeight: 700 }}>Felinos Registrados</span>
+              <span className="admin-stat-card__title" style={{ color: '#d97706', fontWeight: 800, fontSize: '0.95rem' }}>Felinos Registrados</span>
               <h3>{loading ? '...' : stats.felinos}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive">
                 <i className="fa-solid fa-cat"></i>
@@ -529,7 +529,7 @@ export default function AdminMascotas() {
 
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
-              <span style={{ color: '#7e22ce', fontWeight: 700 }}>Otras Especies</span>
+              <span className="admin-stat-card__title" style={{ color: '#7e22ce', fontWeight: 800, fontSize: '0.95rem' }}>Otras Especies</span>
               <h3>{loading ? '...' : (stats.otros !== undefined ? stats.otros : Math.max(0, stats.total - (stats.caninos + stats.felinos)))}</h3>
               <div className="admin-trend-badge admin-trend-badge--positive" style={{ color: '#7e22ce', background: '#f3e8ff', borderColor: '#e9d5ff' }}>
                 <i className="fa-solid fa-dove"></i>

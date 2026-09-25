@@ -934,7 +934,7 @@ export default function AdminVeterinarios() {
             <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#059669' }}>
                 <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
-                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif' }}>Credenciales de Acceso Creadas</h3>
+                <h3 style={{ margin: 0, fontFamily: 'Inter, sans-serif' }}>Credenciales de Acceso Creadas</h3>
               </div>
               <button className="adm-modal-close" onClick={() => setCreatedCredentials(null)}>
                 <i className="fa-solid fa-xmark"></i>

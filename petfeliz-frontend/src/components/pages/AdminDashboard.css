@@ -35,7 +35,7 @@
 }
 
 .admin-stat-card__info h3 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.85rem;
   font-weight: 700;
   color: #0f172a;
@@ -125,7 +125,7 @@
 }
 
 .admin-card__title h3 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   color: #0f172a;
@@ -344,7 +344,7 @@
 }
 
 .admin-reminder-card__title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   color: #0f172a;
@@ -442,7 +442,7 @@
 }
 
 .admin-timeline-title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: #0f172a;

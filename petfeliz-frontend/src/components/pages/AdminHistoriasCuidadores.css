@@ -19,7 +19,7 @@
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   border-radius: 12px;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.92rem;
   font-weight: 600;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -43,7 +43,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   color: #006780;
@@ -54,7 +54,7 @@
 }
 
 .zadmin-header h1 {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 2rem;
   color: #0f1f16;
@@ -139,7 +139,7 @@
 }
 
 .zadmin-stat-card__num {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 1.6rem;
   font-weight: 700;
   color: #0f1f16;
@@ -147,7 +147,7 @@
 }
 
 .zadmin-stat-card__label {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: #64748b;
@@ -173,7 +173,7 @@
 }
 
 .zadmin-table-toolbar h2 {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 1.25rem;
   color: #0f1f16;
@@ -196,7 +196,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.85rem;
   padding: 0.5rem 1rem;
@@ -225,7 +225,7 @@
 }
 
 .zadmin-table th {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.82rem;
   color: #64748b;
@@ -253,7 +253,7 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   color: #0f1f16;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   padding: 0.25rem 0.6rem;
@@ -289,7 +289,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.3rem 0.7rem;
@@ -323,7 +323,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.4rem 0.75rem;
@@ -381,7 +381,7 @@
 }
 
 .zadmin-empty-state h3 {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   color: #1e293b;
   margin-top: 1rem;
@@ -455,7 +455,7 @@
 }
 
 .zadmin-modal-id-badge {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   background: #f1f5f9;
@@ -465,7 +465,7 @@
 }
 
 .zadmin-modal-header h3 {
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 1.35rem;
   color: #0f1f16;
@@ -486,7 +486,7 @@
 
 .zadmin-meta-item label {
   display: block;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   color: #64748b;
@@ -501,7 +501,7 @@
 
 .zadmin-modal-story-body label {
   display: block;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: #0f1f16;
@@ -513,7 +513,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 12px;
   padding: 1.25rem;
-  font-family: var(--font-body, 'Inter', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-size: 0.95rem;
   color: #334155;
   line-height: 1.7;
@@ -534,7 +534,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--font-head, 'Sora', sans-serif);
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   padding: 0.65rem 1.25rem;
   border-radius: 8px;

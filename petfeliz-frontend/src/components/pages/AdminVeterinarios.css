@@ -35,7 +35,7 @@
 }
 
 .adm-vet-name {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
   color: #0f172a;
@@ -163,7 +163,7 @@
 }
 
 .adm-drawer-header h3 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 1.1rem;
   color: #0f172a;
@@ -276,7 +276,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -290,7 +290,7 @@
 }
 
 .adm-vet-hero__info h2 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 1.3rem;
   margin: 0 0 0.4rem 0;
@@ -358,7 +358,7 @@
 
 .adm-vet-status-banner__title {
   display: block;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
   color: #14532d;
@@ -377,7 +377,7 @@
 }
 
 .adm-drawer-section-title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.92rem;
   color: #0f172a;
@@ -475,7 +475,7 @@
 }
 
 .adm-form-section-title {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   color: #059669;
@@ -575,7 +575,7 @@
 }
 
 .adm-modal-header h3 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 1.1rem;
   margin: 0;

@@ -823,7 +823,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ];
         });
@@ -872,7 +872,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
             'citas_recientes' => $citasRecientes,
@@ -960,7 +960,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
         ], 201);
@@ -1037,7 +1037,7 @@ class AdminController extends Controller
                 'nombre'         => $vet->nombre,
                 'telefono'       => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
-                'foto_perfil'    => ($vet->foto_perfil && !str_contains($vet->foto_perfil, 'felipe-restrepo')) ? $vet->foto_perfil : null,
+                'foto_perfil'    => $vet->foto_perfil ?? null,
                 'correo'         => $vet->usuario->email ?? '',
             ],
         ], 200);

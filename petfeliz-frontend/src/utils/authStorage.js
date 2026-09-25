@@ -26,7 +26,6 @@ export function isValidAvatarUrl(url) {
   const trimmed = url.trim()
   if (!trimmed) return false
   if (trimmed === 'default.jpg' || trimmed.includes('default.jpg')) return false
-  if (trimmed.includes('felipe-restrepo')) return false
   if (trimmed.includes('vector_usuario')) return false
   return true
 }

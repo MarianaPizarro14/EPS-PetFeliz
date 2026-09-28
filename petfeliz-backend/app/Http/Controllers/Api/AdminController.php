@@ -1436,6 +1436,144 @@ class AdminController extends Controller
             'cliente' => $cliente,
         ], 200);
     }
+
+    /**
+     * Listado de pagos/transacciones para el módulo de Administración de Pagos.
+     */
+    public function pagosIndex(Request $request)
+    {
+        $pagosQuery = Pago::with(['cliente.usuario', 'cita.servicio', 'cita.mascota', 'cita.veterinario'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $mesActual = now()->month;
+        $anioActual = now()->year;
+
+        $totalRecaudado = (float) $pagosQuery->where('estado', 'confirmado')->sum('monto');
+        $pagosMesMonto = (float) $pagosQuery->filter(function ($p) use ($mesActual, $anioActual) {
+            return strtolower($p->estado) === 'confirmado' &&
+                   $p->created_at &&
+                   $p->created_at->month === $mesActual &&
+                   $p->created_at->year === $anioActual;
+        })->sum('monto');
+
+        $pagosMesCantidad = $pagosQuery->filter(function ($p) use ($mesActual, $anioActual) {
+            return $p->created_at &&
+                   $p->created_at->month === $mesActual &&
+                   $p->created_at->year === $anioActual;
+        })->count();
+
+        $pagosExitosos = $pagosQuery->where('estado', 'confirmado')->count();
+        $pagosRechazados = $pagosQuery->whereIn('estado', ['fallido', 'reembolsado'])->count();
+
+        $pagosFormateados = $pagosQuery->map(function ($pago) {
+            $clienteNombre = $pago->cliente ? $pago->cliente->nombre : 'Cliente EPS';
+            $clienteEmail = $pago->cliente && $pago->cliente->usuario ? $pago->cliente->usuario->email : 'Sin correo';
+            $clienteFoto = $pago->cliente ? ($pago->cliente->foto_perfil ?? null) : null;
+            $servicioNombre = $pago->cita && $pago->cita->servicio ? $pago->cita->servicio->nombre : 'Afiliación EPS / Cobertura Plan';
+            $mascotaNombre = $pago->cita && $pago->cita->mascota ? $pago->cita->mascota->nombre : null;
+
+            return [
+                'id_pago' => $pago->id_pago,
+                'id_cliente' => $pago->id_cliente,
+                'id_cita' => $pago->id_cita,
+                'cliente' => [
+                    'id_cliente' => $pago->id_cliente,
+                    'nombre' => $clienteNombre,
+                    'email' => $clienteEmail,
+                    'foto' => $clienteFoto,
+                ],
+                'servicio' => $servicioNombre,
+                'mascota' => $mascotaNombre,
+                'monto' => (float) $pago->monto,
+                'monto_formateado' => '$' . number_format($pago->monto, 0, ',', '.'),
+                'tipo_cobertura' => strtoupper($pago->tipo_cobertura ?? 'EPS'),
+                'metodo_pago' => $pago->metodo_pago ?? 'Wompi - Tarjeta',
+                'estado' => strtolower($pago->estado ?? 'confirmado'),
+                'referencia_transaccion' => $pago->referencia_transaccion ?? ('PAY-' . $pago->id_pago),
+                'wompi_transaction_id' => $pago->wompi_transaction_id ?? null,
+                'fecha' => $pago->created_at ? $pago->created_at->format('d/m/Y h:i A') : date('d/m/Y h:i A'),
+                'fecha_raw' => $pago->created_at ? $pago->created_at->format('Y-m-d') : date('Y-m-d'),
+                'url_factura_pdf' => "/api/cliente/documentos/factura/{$pago->id_pago}/pdf",
+            ];
+        });
+
+        return response()->json([
+            'stats' => [
+                'total_recaudado' => $totalRecaudado,
+                'total_recaudado_formateado' => '$' . number_format($totalRecaudado, 0, ',', '.'),
+                'pagos_mes_monto' => $pagosMesMonto,
+                'pagos_mes_monto_formateado' => '$' . number_format($pagosMesMonto, 0, ',', '.'),
+                'pagos_mes_cantidad' => $pagosMesCantidad,
+                'pagos_exitosos' => $pagosExitosos,
+                'pagos_rechazados' => $pagosRechazados,
+                'total_transacciones' => $pagosQuery->count(),
+            ],
+            'pagos' => $pagosFormateados,
+        ], 200);
+    }
+
+    /**
+     * Detalle individual de pago.
+     */
+    public function pagosShow($id)
+    {
+        $pago = Pago::with(['cliente.usuario', 'cita.servicio', 'cita.mascota', 'cita.veterinario'])
+            ->where('id_pago', $id)
+            ->firstOrFail();
+
+        $clienteNombre = $pago->cliente ? $pago->cliente->nombre : 'Cliente EPS';
+        $clienteEmail = $pago->cliente && $pago->cliente->usuario ? $pago->cliente->usuario->email : 'Sin correo';
+        $clienteTelefono = $pago->cliente ? $pago->cliente->telefono : 'Sin teléfono';
+        $servicioNombre = $pago->cita && $pago->cita->servicio ? $pago->cita->servicio->nombre : 'Afiliación EPS / Cobertura Plan';
+
+        return response()->json([
+            'pago' => [
+                'id_pago' => $pago->id_pago,
+                'id_cliente' => $pago->id_cliente,
+                'id_cita' => $pago->id_cita,
+                'cliente' => [
+                    'id_cliente' => $pago->id_cliente,
+                    'nombre' => $clienteNombre,
+                    'email' => $clienteEmail,
+                    'telefono' => $clienteTelefono,
+                    'foto' => $pago->cliente ? $pago->cliente->foto_perfil : null,
+                ],
+                'servicio' => $servicioNombre,
+                'mascota' => $pago->cita && $pago->cita->mascota ? $pago->cita->mascota->nombre : null,
+                'veterinario' => $pago->cita && $pago->cita->veterinario ? $pago->cita->veterinario->nombre : null,
+                'monto' => (float) $pago->monto,
+                'monto_formateado' => '$' . number_format($pago->monto, 0, ',', '.'),
+                'tipo_cobertura' => strtoupper($pago->tipo_cobertura ?? 'EPS'),
+                'metodo_pago' => $pago->metodo_pago ?? 'Wompi - Tarjeta',
+                'estado' => strtolower($pago->estado ?? 'confirmado'),
+                'referencia_transaccion' => $pago->referencia_transaccion ?? ('PAY-' . $pago->id_pago),
+                'wompi_transaction_id' => $pago->wompi_transaction_id ?? null,
+                'fecha' => $pago->created_at ? $pago->created_at->format('d/m/Y h:i A') : date('d/m/Y h:i A'),
+                'url_factura_pdf' => "/api/cliente/documentos/factura/{$pago->id_pago}/pdf",
+            ],
+        ], 200);
+    }
+
+    /**
+     * Datos de configuración de la plataforma EPS PetFeliz.
+     */
+    public function configuracionIndex()
+    {
+        return response()->json([
+            'plataforma' => [
+                'nombre' => 'EPS Veterinario PetFeliz Colombia',
+                'nit' => '901.458.923-4',
+                'email_contacto' => 'contacto@petfeliz.com.co',
+                'telefono_soporte' => '+57 (604) 444-8920',
+                'direccion' => 'Calle 33 # 74B-12, Medellín, Colombia',
+                'horario_atencion' => 'Lunes a Sábado: 7:00 AM - 7:00 PM | Emergencias 24/7',
+                'wompi_mode' => 'sandbox',
+                'moneda' => 'COP ($)',
+            ],
+            'nota' => 'La configuración institucional de la EPS está centralizada.',
+        ], 200);
+    }
 }
 
 

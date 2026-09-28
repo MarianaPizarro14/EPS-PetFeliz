@@ -71,6 +71,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/clientes/{id}', [AdminController::class, 'clientesShow']);
         Route::put('/admin/clientes/{id}', [AdminController::class, 'clientesUpdate']);
 
+        // Rutas de Administración de Pagos y Transacciones
+        Route::get('/admin/pagos', [AdminController::class, 'pagosIndex']);
+        Route::get('/admin/pagos/{id}', [AdminController::class, 'pagosShow']);
+
+        // Rutas de Administración de Configuración
+        Route::get('/admin/configuracion', [AdminController::class, 'configuracionIndex']);
+
         // Rutas de Administración de Historias de Cuidadores
         Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);
         Route::patch('/admin/historias-cuidadores/{id}', [HistoriaCuidadorController::class, 'updateEstado']);

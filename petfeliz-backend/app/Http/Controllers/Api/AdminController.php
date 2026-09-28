@@ -1117,5 +1117,325 @@ class AdminController extends Controller
             'message' => 'Veterinario y cuenta de usuario eliminados correctamente.',
         ], 200);
     }
+
+    /**
+     * Listado completo de Servicios para Administración.
+     */
+    public function serviciosIndex(Request $request)
+    {
+        $servicios = \App\Models\Servicio::orderBy('id_servicio', 'desc')->get();
+
+        $formatted = $servicios->map(function ($s) {
+            return [
+                'id_servicio' => $s->id_servicio,
+                'nombre' => $s->nombre,
+                'descripcion' => $s->descripcion ?? '',
+                'precio_base' => (float) ($s->precio_base ?? 0),
+                'precio_afiliado' => $s->precio_afiliado !== null ? (float) $s->precio_afiliado : null,
+                'incluido_en_plan' => (bool) $s->incluido_en_plan,
+                'limite_mensual_incluido' => $s->limite_mensual_incluido,
+                'activo' => (bool) $s->activo,
+            ];
+        });
+
+        $total = $formatted->count();
+        $activos = $formatted->where('activo', true)->count();
+        $inactivos = $formatted->where('activo', false)->count();
+        $incluidosPlan = $formatted->where('incluido_en_plan', true)->count();
+
+        return response()->json([
+            'servicios' => $formatted->values(),
+            'stats' => [
+                'total' => $total,
+                'activos' => $activos,
+                'inactivos' => $inactivos,
+                'incluidos_plan' => $incluidosPlan,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Obtener el detalle de un servicio específico.
+     */
+    public function serviciosShow($id)
+    {
+        $s = \App\Models\Servicio::where('id_servicio', $id)->firstOrFail();
+
+        return response()->json([
+            'servicio' => [
+                'id_servicio' => $s->id_servicio,
+                'nombre' => $s->nombre,
+                'descripcion' => $s->descripcion ?? '',
+                'precio_base' => (float) ($s->precio_base ?? 0),
+                'precio_afiliado' => $s->precio_afiliado !== null ? (float) $s->precio_afiliado : null,
+                'incluido_en_plan' => (bool) $s->incluido_en_plan,
+                'limite_mensual_incluido' => $s->limite_mensual_incluido,
+                'activo' => (bool) $s->activo,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Crear un nuevo servicio en el catálogo clínico.
+     */
+    public function serviciosStore(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'descripcion' => 'nullable|string',
+            'precio_base' => 'required|numeric|min:0',
+            'precio_afiliado' => 'nullable|numeric|min:0',
+            'incluido_en_plan' => 'nullable|boolean',
+            'limite_mensual_incluido' => 'nullable|integer|min:0',
+            'activo' => 'nullable|boolean',
+        ]);
+
+        $servicio = \App\Models\Servicio::create([
+            'nombre' => trim($request->nombre),
+            'descripcion' => $request->descripcion ? trim($request->descripcion) : null,
+            'precio_base' => (float) $request->precio_base,
+            'precio_afiliado' => $request->filled('precio_afiliado') && $request->precio_afiliado !== null ? (float) $request->precio_afiliado : null,
+            'incluido_en_plan' => filter_var($request->incluido_en_plan, FILTER_VALIDATE_BOOLEAN),
+            'limite_mensual_incluido' => $request->filled('limite_mensual_incluido') ? (int) $request->limite_mensual_incluido : null,
+            'activo' => $request->has('activo') ? filter_var($request->activo, FILTER_VALIDATE_BOOLEAN) : true,
+        ]);
+
+        return response()->json([
+            'message' => 'Servicio creado exitosamente.',
+            'servicio' => $servicio,
+        ], 201);
+    }
+
+    /**
+     * Actualizar la información de un servicio del catálogo.
+     */
+    public function serviciosUpdate(Request $request, $id)
+    {
+        $servicio = \App\Models\Servicio::where('id_servicio', $id)->firstOrFail();
+
+        $request->validate([
+            'nombre' => 'sometimes|required|string|max:100',
+            'descripcion' => 'nullable|string',
+            'precio_base' => 'sometimes|required|numeric|min:0',
+            'precio_afiliado' => 'nullable|numeric|min:0',
+            'incluido_en_plan' => 'nullable|boolean',
+            'limite_mensual_incluido' => 'nullable|integer|min:0',
+            'activo' => 'nullable|boolean',
+        ]);
+
+        if ($request->has('nombre')) $servicio->nombre = trim($request->nombre);
+        if ($request->has('descripcion')) $servicio->descripcion = $request->descripcion ? trim($request->descripcion) : null;
+        if ($request->has('precio_base')) $servicio->precio_base = (float) $request->precio_base;
+        if ($request->has('precio_afiliado')) {
+            $servicio->precio_afiliado = ($request->precio_afiliado !== null && $request->precio_afiliado !== '') ? (float) $request->precio_afiliado : null;
+        }
+        if ($request->has('incluido_en_plan')) $servicio->incluido_en_plan = filter_var($request->incluido_en_plan, FILTER_VALIDATE_BOOLEAN);
+        if ($request->has('limite_mensual_incluido')) {
+            $servicio->limite_mensual_incluido = ($request->limite_mensual_incluido !== null && $request->limite_mensual_incluido !== '') ? (int) $request->limite_mensual_incluido : null;
+        }
+        if ($request->has('activo')) $servicio->activo = filter_var($request->activo, FILTER_VALIDATE_BOOLEAN);
+
+        $servicio->save();
+
+        return response()->json([
+            'message' => 'Servicio actualizado exitosamente.',
+            'servicio' => $servicio,
+        ], 200);
+    }
+
+    /**
+     * Alternar estado activo / inactivo de un servicio.
+     */
+    public function serviciosToggleActivo($id)
+    {
+        $servicio = \App\Models\Servicio::where('id_servicio', $id)->firstOrFail();
+        $servicio->activo = !$servicio->activo;
+        $servicio->save();
+
+        $estadoStr = $servicio->activo ? 'activado' : 'desactivado';
+
+        return response()->json([
+            'message' => "Servicio {$estadoStr} exitosamente.",
+            'activo' => (bool) $servicio->activo,
+        ], 200);
+    }
+
+    /**
+     * Listado completo de Clientes / Afiliados para Administración.
+     */
+    public function clientesIndex(Request $request)
+    {
+        $clientes = Cliente::with(['usuario', 'mascotas', 'citas.servicio'])
+            ->orderBy('id_cliente', 'desc')
+            ->get();
+
+        $formatted = $clientes->map(function ($c) {
+            $citasList = $c->citas;
+            $mascotasList = $c->mascotas->map(function ($m) {
+                return [
+                    'id_mascota' => $m->id_mascota,
+                    'nombre' => $m->nombre,
+                    'especie' => $m->especie ?? 'Canino',
+                    'raza' => $m->raza ?? 'Criollo',
+                    'foto' => $m->foto_mascota ?? null,
+                ];
+            });
+
+            return [
+                'id_cliente' => $c->id_cliente,
+                'id_usuario' => $c->id_usuario,
+                'nombre' => $c->nombre,
+                'email' => $c->usuario->email ?? 'Sin correo',
+                'telefono' => $c->telefono ?? 'Sin teléfono',
+                'direccion' => $c->direccion ?? '',
+                'cedula' => $c->cedula ?? '',
+                'fecha_nacimiento' => $c->fecha_nacimiento,
+                'fecha_afiliacion' => $c->fecha_afiliacion ? Carbon::parse($c->fecha_afiliacion)->format('d/m/Y') : null,
+                'departamento' => $c->departamento ?? '',
+                'ciudad' => $c->ciudad ?? '',
+                'contacto_emergencia_nombre' => $c->contacto_emergencia_nombre ?? '',
+                'contacto_emergencia_telefono' => $c->contacto_emergencia_telefono ?? '',
+                'es_afiliado' => (bool) $c->es_afiliado,
+                'estado_afiliacion' => $c->estado_afiliacion,
+                'dias_mora' => $c->dias_mora,
+                'foto' => $c->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+                'total_mascotas' => $mascotasList->count(),
+                'mascotas' => $mascotasList->values(),
+                'total_citas' => $citasList->count(),
+            ];
+        });
+
+        $total = $formatted->count();
+        $afiliados = $formatted->where('es_afiliado', true)->where('estado_afiliacion', 'al_dia')->count();
+        $enMora = $formatted->where('estado_afiliacion', 'en_mora')->count();
+        $desafiliados = $formatted->where('es_afiliado', false)->count();
+
+        return response()->json([
+            'clientes' => $formatted->values(),
+            'stats' => [
+                'total' => $total,
+                'afiliados' => $afiliados,
+                'en_mora' => $enMora,
+                'desafiliados' => $desafiliados,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Obtener el perfil completo de un cliente y sus mascotas asociadas.
+     */
+    public function clientesShow($id)
+    {
+        $c = Cliente::with(['usuario', 'mascotas.citas', 'citas.servicio', 'citas.veterinario', 'citas.estado'])
+            ->where('id_cliente', $id)
+            ->firstOrFail();
+
+        $mascotasFormateadas = $c->mascotas->map(function ($m) {
+            return [
+                'id_mascota' => $m->id_mascota,
+                'nombre' => $m->nombre,
+                'especie' => $m->especie ?? 'Canino',
+                'raza' => $m->raza ?? 'Criollo',
+                'sexo' => $m->sexo ?? 'Macho',
+                'peso' => $m->peso,
+                'alergias' => $m->alergias ?? 'Ninguna',
+                'foto' => $m->foto_mascota ?? null,
+                'total_citas' => $m->citas ? $m->citas->count() : 0,
+            ];
+        });
+
+        $citasFormateadas = $c->citas->map(function ($cita) {
+            return [
+                'id_cita' => $cita->id_cita,
+                'fecha' => $cita->fecha,
+                'fecha_formateada' => Carbon::parse($cita->fecha)->format('d/m/Y'),
+                'hora' => Carbon::parse($cita->hora)->format('h:i A'),
+                'servicio' => $cita->servicio ? $cita->servicio->nombre : ($cita->motivo ?? 'Consulta General'),
+                'veterinario' => $cita->veterinario ? $cita->veterinario->nombre : 'Médico Asignado',
+                'estado' => $cita->estado ? $cita->estado->nombre : 'Confirmada',
+                'id_estado' => $cita->id_estado,
+                'observacion' => $cita->observacion ?? '',
+            ];
+        });
+
+        return response()->json([
+            'cliente' => [
+                'id_cliente' => $c->id_cliente,
+                'id_usuario' => $c->id_usuario,
+                'nombre' => $c->nombre,
+                'email' => $c->usuario->email ?? 'Sin correo',
+                'telefono' => $c->telefono ?? '',
+                'direccion' => $c->direccion ?? '',
+                'cedula' => $c->cedula ?? '',
+                'fecha_nacimiento' => $c->fecha_nacimiento,
+                'fecha_afiliacion' => $c->fecha_afiliacion ? Carbon::parse($c->fecha_afiliacion)->format('d/m/Y') : null,
+                'departamento' => $c->departamento ?? '',
+                'ciudad' => $c->ciudad ?? '',
+                'contacto_emergencia_nombre' => $c->contacto_emergencia_nombre ?? '',
+                'contacto_emergencia_telefono' => $c->contacto_emergencia_telefono ?? '',
+                'es_afiliado' => (bool) $c->es_afiliado,
+                'estado_afiliacion' => $c->estado_afiliacion,
+                'dias_mora' => $c->dias_mora,
+                'foto' => $c->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+            ],
+            'mascotas' => $mascotasFormateadas,
+            'citas' => $citasFormateadas,
+        ], 200);
+    }
+
+    /**
+     * Actualizar datos del perfil de cliente desde el panel de Administración.
+     */
+    public function clientesUpdate(Request $request, $id)
+    {
+        $cliente = Cliente::where('id_cliente', $id)->firstOrFail();
+
+        $request->validate([
+            'nombre' => 'sometimes|required|string|max:150',
+            'telefono' => [
+                'nullable',
+                'string',
+                'max:50',
+                function ($attribute, $value, $fail) use ($cliente) {
+                    if (!empty($value) && !PhoneHelper::isUniquePhone($value, $cliente->id_cliente, null)) {
+                        $fail('Este número de teléfono ya se encuentra registrado por otro usuario.');
+                    }
+                },
+            ],
+            'direccion' => 'nullable|string|max:200',
+            'cedula' => 'nullable|string|max:50',
+            'fecha_nacimiento' => 'nullable|date',
+            'departamento' => 'nullable|string|max:100',
+            'ciudad' => 'nullable|string|max:100',
+            'contacto_emergencia_nombre' => 'nullable|string|max:150',
+            'contacto_emergencia_telefono' => 'nullable|string|max:50',
+            'es_afiliado' => 'nullable|boolean',
+        ]);
+
+        if ($request->has('nombre')) $cliente->nombre = trim($request->nombre);
+        if ($request->has('telefono')) $cliente->telefono = $request->telefono ? trim($request->telefono) : null;
+        if ($request->has('direccion')) $cliente->direccion = $request->direccion ? trim($request->direccion) : null;
+        if ($request->has('cedula')) $cliente->cedula = $request->cedula ? trim($request->cedula) : null;
+        if ($request->has('fecha_nacimiento')) $cliente->fecha_nacimiento = $request->fecha_nacimiento ?: null;
+        if ($request->has('departamento')) $cliente->departamento = $request->departamento ? trim($request->departamento) : null;
+        if ($request->has('ciudad')) $cliente->ciudad = $request->ciudad ? trim($request->ciudad) : null;
+        if ($request->has('contacto_emergencia_nombre')) $cliente->contacto_emergencia_nombre = $request->contacto_emergencia_nombre ? trim($request->contacto_emergencia_nombre) : null;
+        if ($request->has('contacto_emergencia_telefono')) $cliente->contacto_emergencia_telefono = $request->contacto_emergencia_telefono ? trim($request->contacto_emergencia_telefono) : null;
+        if ($request->has('es_afiliado')) {
+            $nuevoEstadoAfiliado = filter_var($request->es_afiliado, FILTER_VALIDATE_BOOLEAN);
+            if ($nuevoEstadoAfiliado && !$cliente->es_afiliado) {
+                $cliente->fecha_afiliacion = now();
+            }
+            $cliente->es_afiliado = $nuevoEstadoAfiliado;
+        }
+
+        $cliente->save();
+
+        return response()->json([
+            'message' => 'Información del cliente actualizada exitosamente.',
+            'cliente' => $cliente,
+        ], 200);
+    }
 }
+
 

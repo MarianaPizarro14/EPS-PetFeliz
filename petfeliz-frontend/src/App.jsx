@@ -36,6 +36,8 @@ import AdminDashboard from './components/pages/AdminDashboard'
 import AdminCitas from './components/pages/AdminCitas'
 import AdminMascotas from './components/pages/AdminMascotas'
 import AdminVeterinarios from './components/pages/AdminVeterinarios'
+import AdminServicios from './components/pages/AdminServicios'
+import AdminClientes from './components/pages/AdminClientes'
 import DashboardVeterinario from './components/pages/DashboardVeterinario'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
@@ -44,7 +46,7 @@ const APP_ROUTES = [
   '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
-  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios',
+  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios', '/admin/servicios', '/admin/clientes',
   '/veterinario/dashboard'
 ]
 
@@ -127,6 +129,22 @@ function AppContent() {
           element={
             <ProtectedRouteAdmin>
               <AdminVeterinarios />
+            </ProtectedRouteAdmin>
+          }
+        />
+        <Route
+          path="/admin/servicios"
+          element={
+            <ProtectedRouteAdmin>
+              <AdminServicios />
+            </ProtectedRouteAdmin>
+          }
+        />
+        <Route
+          path="/admin/clientes"
+          element={
+            <ProtectedRouteAdmin>
+              <AdminClientes />
             </ProtectedRouteAdmin>
           }
         />

@@ -126,17 +126,34 @@ export default function AdminVeterinarios() {
   }
 
   const handleConfirmReset = async (e) => {
-    if (e) e.preventDefault()
-    if (!resetVet) return
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    if (!resetVet) {
+      console.warn('handleConfirmReset: No hay un veterinario seleccionado.')
+      return
+    }
 
     const token = getStoredToken()
-    if (!token) return
+    if (!token) {
+      console.error('handleConfirmReset: Token de autenticación no disponible en localStorage/sessionStorage.')
+      setResetError('No se encontró el token de sesión. Por favor inicie sesión de nuevo.')
+      return
+    }
 
     try {
       setSubmittingReset(true)
       setResetError('')
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/veterinarios/${resetVet.id_veterinario}/generar-password-temporal`, {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+      const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      const targetUrl = `${cleanUrl}/admin/veterinarios/${resetVet.id_veterinario}/generar-password-temporal`
+
+      console.log(`[AdminVeterinarios] Enviando PATCH a: ${targetUrl}`)
+
+      const res = await fetch(targetUrl, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -146,6 +163,7 @@ export default function AdminVeterinarios() {
       })
 
       const data = await res.json()
+      console.log('[AdminVeterinarios] Respuesta del backend:', data)
 
       if (res.ok && (data.success || data.contrasena_temporal || data.nueva_contrasena)) {
         setShowModalReset(false)
@@ -160,7 +178,7 @@ export default function AdminVeterinarios() {
       }
     } catch (err) {
       console.error('Error al generar contraseña temporal:', err)
-      setResetError('Error de conexión con el servidor.')
+      setResetError('Error de conexión con el servidor. Verifica que el backend esté activo.')
     } finally {
       setSubmittingReset(false)
     }
@@ -1125,7 +1143,12 @@ export default function AdminVeterinarios() {
                 <button type="button" className="adm-btn-secondary" onClick={() => setShowModalReset(false)}>
                   Cancelar
                 </button>
-                <button type="submit" className="adm-btn-primary" disabled={submittingReset}>
+                <button
+                  type="button"
+                  className="adm-btn-primary"
+                  onClick={(e) => handleConfirmReset(e)}
+                  disabled={submittingReset}
+                >
                   {submittingReset ? (
                     <>
                       <i className="fa-solid fa-spinner fa-spin"></i> Generando...

@@ -1574,6 +1574,191 @@ class AdminController extends Controller
             'nota' => 'La configuración institucional de la EPS está centralizada.',
         ], 200);
     }
+
+    /**
+     * Diagnóstico dinámico en tiempo real del estado de integraciones (Wompi, Dompdf, Mail SMTP, DB).
+     */
+    public function estadoIntegraciones()
+    {
+        $wompiStatus = $this->checkWompiStatus();
+        $pdfStatus = $this->checkPdfStatus();
+        $mailStatus = $this->checkMailStatus();
+        $dbStatus = $this->checkDbStatus();
+
+        $plataformaGlobal = 'produccion';
+        if ($wompiStatus['estado'] === 'sandbox') {
+            $plataformaGlobal = 'sandbox';
+        } elseif ($wompiStatus['estado'] === 'error' || $pdfStatus['estado'] === 'error' || $mailStatus['estado'] === 'error') {
+            $plataformaGlobal = 'atencion';
+        }
+
+        return response()->json([
+            'timestamp' => now()->toIso8601String(),
+            'plataforma_global' => $plataformaGlobal,
+            'integraciones' => [
+                'wompi' => $wompiStatus,
+                'dompdf' => $pdfStatus,
+                'mail' => $mailStatus,
+                'database' => $dbStatus,
+            ],
+        ], 200);
+    }
+
+    private function checkWompiStatus(): array
+    {
+        try {
+            $pubKey = config('services.wompi.public_key') ?: env('WOMPI_PUBLIC_KEY');
+            $integritySecret = config('services.wompi.integrity_secret') ?: env('WOMPI_INTEGRITY_SECRET');
+            $apiUrl = config('services.wompi.api_url') ?: env('WOMPI_API_URL', 'https://sandbox.wompi.co/v1');
+
+            if (empty($pubKey) || empty($integritySecret)) {
+                return [
+                    'estado' => 'error',
+                    'badge_color' => 'rojo',
+                    'titulo' => 'Wompi no disponible',
+                    'mensaje' => 'Faltan credenciales (WOMPI_PUBLIC_KEY o WOMPI_INTEGRITY_SECRET) en el entorno .env.',
+                    'modo' => 'sin_configurar',
+                    'icono' => 'fa-solid fa-triangle-exclamation',
+                ];
+            }
+
+            $isTestKey = str_contains($pubKey, 'pub_test_') || str_contains($apiUrl, 'sandbox');
+
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get(rtrim($apiUrl, '/') . "/merchants/{$pubKey}");
+
+            if (!$response->successful()) {
+                return [
+                    'estado' => 'error',
+                    'badge_color' => 'rojo',
+                    'titulo' => 'Error de conexión Wompi',
+                    'mensaje' => "HTTP {$response->status()}: La llave pública o el servidor Wompi no respondieron correctamente.",
+                    'modo' => $isTestKey ? 'sandbox' : 'produccion',
+                    'icono' => 'fa-solid fa-circle-xmark',
+                ];
+            }
+
+            if ($isTestKey) {
+                return [
+                    'estado' => 'sandbox',
+                    'badge_color' => 'naranja',
+                    'titulo' => 'Modo Sandbox Activo',
+                    'mensaje' => 'Pasarela conectada en entorno de pruebas (Sandbox). Los cobros son simulación y no generan cargos reales.',
+                    'modo' => 'sandbox',
+                    'icono' => 'fa-solid fa-vial',
+                ];
+            }
+
+            return [
+                'estado' => 'produccion',
+                'badge_color' => 'verde',
+                'titulo' => 'Modo Producción Activo',
+                'mensaje' => 'Pasarela conectada en entorno real de producción. Los cobros a tarjetas de crédito y PSE son reales.',
+                'modo' => 'produccion',
+                'icono' => 'fa-solid fa-circle-check',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'estado' => 'error',
+                'badge_color' => 'rojo',
+                'titulo' => 'Wompi Inaccesible',
+                'mensaje' => 'Error de red al intentar comunicar con la API de Wompi: ' . $e->getMessage(),
+                'modo' => 'error',
+                'icono' => 'fa-solid fa-plug-circle-xmark',
+            ];
+        }
+    }
+
+    private function checkPdfStatus(): array
+    {
+        try {
+            $hasDompdf = class_exists('Dompdf\Dompdf') || class_exists('Barryvdh\DomPDF\Facade\Pdf');
+
+            if ($hasDompdf) {
+                return [
+                    'estado' => 'ok',
+                    'badge_color' => 'verde',
+                    'titulo' => 'Habilitada (Dompdf)',
+                    'mensaje' => 'Librería Dompdf cargada correctamente en PHP para emisión de facturas y certificados.',
+                    'icono' => 'fa-solid fa-file-pdf',
+                ];
+            }
+
+            return [
+                'estado' => 'error',
+                'badge_color' => 'rojo',
+                'titulo' => 'Dompdf no disponible',
+                'mensaje' => 'Falta el paquete barryvdh/laravel-dompdf o dompdf/dompdf en el servidor PHP.',
+                'icono' => 'fa-solid fa-file-circle-xmark',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'estado' => 'unverifiable',
+                'badge_color' => 'gris',
+                'titulo' => 'Estado no verificable',
+                'mensaje' => 'No se pudo diagnosticar la librería PDF.',
+                'icono' => 'fa-solid fa-circle-question',
+            ];
+        }
+    }
+
+    private function checkMailStatus(): array
+    {
+        try {
+            $mailer = config('mail.default') ?: env('MAIL_MAILER', 'log');
+            $resendKey = env('RESEND_API_KEY');
+            $host = env('MAIL_HOST');
+
+            if ($mailer === 'log' || (empty($resendKey) && empty($host))) {
+                return [
+                    'estado' => 'error',
+                    'badge_color' => 'rojo',
+                    'titulo' => 'SMTP / Correo sin configurar',
+                    'mensaje' => 'El driver de correo está en modo log o faltan credenciales SMTP/Resend en .env.',
+                    'icono' => 'fa-solid fa-envelope-circle-check',
+                ];
+            }
+
+            $queue = config('queue.default', 'sync');
+
+            return [
+                'estado' => 'ok',
+                'badge_color' => 'verde',
+                'titulo' => "SMTP / Queue Habilitado ({$mailer})",
+                'mensaje' => "Servicio de notificaciones por correo activo (Driver: {$mailer}, Cola: {$queue}).",
+                'icono' => 'fa-solid fa-paper-plane',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'estado' => 'unverifiable',
+                'badge_color' => 'gris',
+                'titulo' => 'Estado no verificable',
+                'mensaje' => 'No se pudo diagnosticar el servicio de correo.',
+                'icono' => 'fa-solid fa-circle-question',
+            ];
+        }
+    }
+
+    private function checkDbStatus(): array
+    {
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            return [
+                'estado' => 'ok',
+                'badge_color' => 'verde',
+                'titulo' => 'Base de Datos Conectada',
+                'mensaje' => 'Conexión a la base de datos MySQL activa y respondiendo.',
+                'icono' => 'fa-solid fa-database',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'estado' => 'error',
+                'badge_color' => 'rojo',
+                'titulo' => 'Error de Base de Datos',
+                'mensaje' => 'No hay conexión con la base de datos: ' . $e->getMessage(),
+                'icono' => 'fa-solid fa-database',
+            ];
+        }
+    }
 }
 
 

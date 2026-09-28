@@ -77,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Rutas de Administración de Configuración
         Route::get('/admin/configuracion', [AdminController::class, 'configuracionIndex']);
+        Route::get('/admin/configuracion/estado-integraciones', [AdminController::class, 'estadoIntegraciones']);
 
         // Rutas de Administración de Historias de Cuidadores
         Route::get('/admin/historias-cuidadores', [HistoriaCuidadorController::class, 'adminIndex']);

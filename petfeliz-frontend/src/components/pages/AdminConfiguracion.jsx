@@ -19,7 +19,9 @@ export default function AdminConfiguracion() {
   })
 
   const [config, setConfig] = useState(null)
+  const [integraciones, setIntegraciones] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [checkingIntegraciones, setCheckingIntegraciones] = useState(false)
   const [errorGlobal, setErrorGlobal] = useState('')
 
   // Toast Flotante
@@ -65,9 +67,76 @@ export default function AdminConfiguracion() {
     }
   }
 
+  const fetchIntegraciones = async () => {
+    const token = getStoredToken()
+    if (!token) return
+
+    try {
+      setCheckingIntegraciones(true)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/configuracion/estado-integraciones`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setIntegraciones(data.integraciones || {})
+      }
+    } catch (err) {
+      console.error('Error al verificar integraciones:', err)
+    } finally {
+      setCheckingIntegraciones(false)
+    }
+  }
+
   useEffect(() => {
     fetchConfig()
+    fetchIntegraciones()
   }, [navigate])
+
+  const renderIntegrationBadge = (itemKey) => {
+    const item = integraciones ? integraciones[itemKey] : null
+
+    if (!item) {
+      return (
+        <div style={{ padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+              <i className="fa-solid fa-circle-question" style={{ marginRight: '6px' }}></i> Estado no verificable
+            </span>
+            <span className="cita-tag-badge" style={{ background: '#f1f5f9', color: '#64748b', borderColor: '#cbd5e1' }}>
+              Gris
+            </span>
+          </div>
+        </div>
+      )
+    }
+
+    const badgeStyles = {
+      verde: { bg: '#ecfdf5', color: '#059669', border: '#a7f3d0' },
+      naranja: { bg: '#fffbe8', color: '#d97706', border: '#fde68a' },
+      rojo: { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' },
+      gris: { bg: '#f8fafc', color: '#64748b', border: '#cbd5e1' },
+    }
+
+    const style = badgeStyles[item.badge_color] || badgeStyles.gris
+
+    return (
+      <div style={{ padding: '0.75rem 0.9rem', background: style.bg, borderRadius: '10px', border: `1px solid ${style.border}`, marginTop: '0.4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.3rem' }}>
+          <strong style={{ fontSize: '0.86rem', color: style.color, fontFamily: "'Sora', sans-serif" }}>
+            <i className={item.icono || 'fa-solid fa-circle-info'} style={{ marginRight: '6px' }}></i>
+            {item.titulo}
+          </strong>
+          <span className="cita-tag-badge" style={{ background: '#ffffff', color: style.color, borderColor: style.border, fontSize: '0.75rem', padding: '0.25rem 0.65rem', fontWeight: 700 }}>
+            {item.estado === 'produccion' ? 'PRODUCCIÓN' : item.estado === 'sandbox' ? 'SANDBOX' : item.estado === 'ok' ? 'OK / ACTIVO' : item.estado === 'error' ? 'ERROR / FALTANTE' : 'NO VERIFICABLE'}
+          </span>
+        </div>
+        <p style={{ fontSize: '0.81rem', color: '#334155', margin: 0, lineHeight: 1.4, fontFamily: "'Inter', sans-serif" }}>
+          {item.mensaje}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="dash">
@@ -102,15 +171,27 @@ export default function AdminConfiguracion() {
         <div className="admin-card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 18px rgba(0,0,0,0.03)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.35rem', flexShrink: 0 }}>
-                <i className="fa-solid fa-shield-halved"></i>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '14px',
+                background: integraciones?.wompi?.estado === 'produccion' ? '#ecfdf5' : integraciones?.wompi?.estado === 'sandbox' ? '#fffbe8' : '#fef2f2',
+                color: integraciones?.wompi?.estado === 'produccion' ? '#059669' : integraciones?.wompi?.estado === 'sandbox' ? '#d97706' : '#dc2626',
+                border: `1px solid ${integraciones?.wompi?.estado === 'produccion' ? '#a7f3d0' : integraciones?.wompi?.estado === 'sandbox' ? '#fde68a' : '#fecaca'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.35rem',
+                flexShrink: 0
+              }}>
+                <i className={integraciones?.wompi?.icono || 'fa-solid fa-shield-halved'}></i>
               </div>
               <div>
                 <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-                  Estado de la Plataforma EPS PetFeliz
+                  Estado General de Integraciones
                 </h4>
                 <p style={{ fontSize: '0.86rem', color: '#64748b', margin: 0, fontFamily: "'Inter', sans-serif" }}>
-                  Sistema operativo con pasarela Wompi en <strong style={{ color: '#0284c7' }}>Modo Sandbox / Pruebas</strong> y base de datos centralizada.
+                  {integraciones?.wompi?.mensaje || 'Evaluando diagnóstico en tiempo real del servidor backend...'}
                 </p>
               </div>
             </div>
@@ -118,9 +199,19 @@ export default function AdminConfiguracion() {
               <span className="cita-tag-badge cita-tag-badge--asistio" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}>
                 <i className="fa-solid fa-circle-check"></i> Servidor API Activo
               </span>
-              <span className="cita-tag-badge" style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}>
-                <i className="fa-solid fa-vial"></i> Wompi Sandbox
-              </span>
+              {integraciones?.wompi?.estado === 'produccion' ? (
+                <span className="cita-tag-badge" style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0', padding: '0.45rem 0.9rem', fontSize: '0.82rem', fontWeight: 700 }}>
+                  <i className="fa-solid fa-circle-check"></i> Producción Activa (Pagos Reales)
+                </span>
+              ) : integraciones?.wompi?.estado === 'sandbox' ? (
+                <span className="cita-tag-badge" style={{ background: '#fffbe8', color: '#d97706', borderColor: '#fde68a', padding: '0.45rem 0.9rem', fontSize: '0.82rem', fontWeight: 700 }}>
+                  <i className="fa-solid fa-vial"></i> Modo Sandbox (Cobros Pruebas)
+                </span>
+              ) : (
+                <span className="cita-tag-badge" style={{ background: '#fef2f2', color: '#dc2626', borderColor: '#fecaca', padding: '0.45rem 0.9rem', fontSize: '0.82rem', fontWeight: 700 }}>
+                  <i className="fa-solid fa-circle-xmark"></i> Wompi No Disponible
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -172,29 +263,47 @@ export default function AdminConfiguracion() {
                     <div className="admin-card__title-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
                       <i className="fa-solid fa-sliders"></i>
                     </div>
-                    <h3>Integraciones & Catálogo</h3>
+                    <h3>Integraciones & Diagnóstico</h3>
                   </div>
+                  <button
+                    type="button"
+                    className="act-btn act-btn--view"
+                    disabled={checkingIntegraciones}
+                    onClick={() => {
+                      fetchIntegraciones()
+                      triggerToast('Sincronizando diagnóstico de integraciones...', 'success')
+                    }}
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <i className={`fa-solid fa-arrows-rotate ${checkingIntegraciones ? 'fa-spin' : ''}`}></i>
+                    <span>{checkingIntegraciones ? 'Verificando...' : 'Revisar Estado'}</span>
+                  </button>
                 </div>
 
-                <div style={{ padding: '1.5rem' }}>
-                  <ul className="info-list">
-                    <li>
-                      <span>Pasarela de Pago Wompi:</span>
-                      <strong style={{ color: '#059669' }}>
-                        <i className="fa-solid fa-circle-check" style={{ marginRight: '4px' }}></i>
-                        Modo Sandbox Activo
-                      </strong>
-                    </li>
-                    <li><span>Moneda Oficial:</span> <strong>{config?.moneda}</strong></li>
-                    <li><span>Generación de Facturas PDF:</span> <strong>Habilitada (Dompdf)</strong></li>
-                    <li><span>Notificaciones Correo (SMTP):</span> <strong>Cola de Trabajos (Queue)</strong></li>
-                  </ul>
+                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {/* Item Wompi */}
+                  <div>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>Pasarela de Pago Wompi:</span>
+                    {renderIntegrationBadge('wompi')}
+                  </div>
 
-                  <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid #e2e8f0' }}>
-                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem' }}>
+                  {/* Item Dompdf */}
+                  <div>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>Generación de Facturas PDF (Dompdf):</span>
+                    {renderIntegrationBadge('dompdf')}
+                  </div>
+
+                  {/* Item Correo SMTP */}
+                  <div>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#0f172a' }}>Notificaciones Correo (SMTP / Queue):</span>
+                    {renderIntegrationBadge('mail')}
+                  </div>
+
+                  <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.4rem' }}>
                       Catálogo de Servicios & Coberturas EPS
                     </h4>
-                    <p style={{ fontSize: '0.84rem', color: '#64748b', marginBottom: '1rem' }}>
+                    <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.8rem' }}>
                       Para modificar el catálogo médico, precios de particular, copagos y activación de servicios, accede al módulo de Servicios.
                     </p>
                     <Link to="/admin/servicios" className="adm-btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>

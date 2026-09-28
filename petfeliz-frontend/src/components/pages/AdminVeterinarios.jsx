@@ -115,18 +115,12 @@ export default function AdminVeterinarios() {
   // Reset Password State
   const [resetVet, setResetVet] = useState(null)
   const [showModalReset, setShowModalReset] = useState(false)
-  const [modeReset, setModeReset] = useState('auto') // 'auto' | 'manual'
-  const [customPassword, setCustomPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [submittingReset, setSubmittingReset] = useState(false)
   const [resetError, setResetError] = useState('')
   const [resetSuccessData, setResetSuccessData] = useState(null)
 
   const handleOpenResetModal = (vet) => {
     setResetVet(vet)
-    setModeReset('auto')
-    setCustomPassword('')
-    setConfirmPassword('')
     setResetError('')
     setShowModalReset(true)
   }
@@ -135,29 +129,12 @@ export default function AdminVeterinarios() {
     if (e) e.preventDefault()
     if (!resetVet) return
 
-    if (modeReset === 'manual') {
-      if (!customPassword) {
-        setResetError('Por favor ingrese la nueva contraseña.')
-        return
-      }
-      if (customPassword.length < 6) {
-        setResetError('La contraseña debe tener al menos 6 caracteres.')
-        return
-      }
-      if (customPassword !== confirmPassword) {
-        setResetError('Las contraseñas confirmadas no coinciden.')
-        return
-      }
-    }
-
     const token = getStoredToken()
     if (!token) return
 
     try {
       setSubmittingReset(true)
       setResetError('')
-
-      const payload = modeReset === 'manual' ? { password: customPassword } : {}
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/veterinarios/${resetVet.id_veterinario}/generar-password-temporal`, {
         method: 'PATCH',
@@ -166,24 +143,23 @@ export default function AdminVeterinarios() {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify(payload),
       })
 
       const data = await res.json()
 
-      if (res.ok && data.success) {
+      if (res.ok && (data.success || data.contrasena_temporal || data.nueva_contrasena)) {
         setShowModalReset(false)
         setResetSuccessData({
           nombre: data.veterinario?.nombre || resetVet.nombre,
           correo: data.veterinario?.correo || resetVet.correo,
           contrasena: data.nueva_contrasena || data.contrasena_temporal,
         })
-        triggerToast(`Contraseña de ${resetVet.nombre} restablecida con éxito.`, 'success')
+        triggerToast(`Contraseña temporal de ${resetVet.nombre} generada con éxito.`, 'success')
       } else {
-        setResetError(data.message || 'No se pudo restablecer la contraseña.')
+        setResetError(data.message || 'No se pudo generar la contraseña temporal.')
       }
     } catch (err) {
-      console.error('Error al restablecer contraseña:', err)
+      console.error('Error al generar contraseña temporal:', err)
       setResetError('Error de conexión con el servidor.')
     } finally {
       setSubmittingReset(false)
@@ -1110,14 +1086,14 @@ export default function AdminVeterinarios() {
         </div>
       )}
 
-      {/* ── MODAL CENTRADO: RESTABLECER CONTRASEÑA ── */}
+      {/* ── MODAL CENTRADO: GENERAR CONTRASEÑA TEMPORAL ── */}
       {showModalReset && resetVet && (
         <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setShowModalReset(false)}>
           <div className="adm-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
             <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#d97706' }}>
                 <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
-                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Restablecer Contraseña</h3>
+                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Generar Contraseña Temporal</h3>
               </div>
               <button className="adm-modal-close" onClick={() => setShowModalReset(false)}>
                 <i className="fa-solid fa-xmark"></i>
@@ -1127,7 +1103,7 @@ export default function AdminVeterinarios() {
             <form onSubmit={handleConfirmReset}>
               <div className="adm-modal-body">
                 <p style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '1.2rem', lineHeight: '1.5' }}>
-                  Vas a cambiar la clave de acceso de <strong>{resetVet.nombre}</strong> ({resetVet.correo}).
+                  Vas a generar una nueva contraseña temporal aleatoria para el médico veterinario <strong>{resetVet.nombre}</strong> ({resetVet.correo}).
                 </p>
 
                 {resetError && (
@@ -1137,94 +1113,12 @@ export default function AdminVeterinarios() {
                   </div>
                 )}
 
-                {/* Seleccionar Modo */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }}>Método de Generación</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => setModeReset('auto')}
-                      style={{
-                        padding: '0.6rem',
-                        borderRadius: '8px',
-                        border: modeReset === 'auto' ? '2px solid #059669' : '1px solid #cbd5e1',
-                        background: modeReset === 'auto' ? '#ecfdf5' : '#ffffff',
-                        color: modeReset === 'auto' ? '#047857' : '#64748b',
-                        fontWeight: 600,
-                        fontSize: '0.82rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.4rem',
-                      }}
-                    >
-                      <i className="fa-solid fa-wand-magic-sparkles"></i>
-                      Automática
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setModeReset('manual')}
-                      style={{
-                        padding: '0.6rem',
-                        borderRadius: '8px',
-                        border: modeReset === 'manual' ? '2px solid #059669' : '1px solid #cbd5e1',
-                        background: modeReset === 'manual' ? '#ecfdf5' : '#ffffff',
-                        color: modeReset === 'manual' ? '#047857' : '#64748b',
-                        fontWeight: 600,
-                        fontSize: '0.82rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.4rem',
-                      }}
-                    >
-                      <i className="fa-solid fa-keyboard"></i>
-                      Manual
-                    </button>
-                  </div>
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>
+                    <i className="fa-solid fa-wand-magic-sparkles" style={{ color: '#059669', marginRight: '6px' }}></i>
+                    Se generará automáticamente una clave segura. Podrás copiarla de inmediato para entregársela al veterinario. El médico podrá personalizarla desde su portal.
+                  </p>
                 </div>
-
-                {modeReset === 'auto' ? (
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
-                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>
-                      <i className="fa-solid fa-circle-info" style={{ color: '#0284c7', marginRight: '6px' }}></i>
-                      Se generará automáticamente una clave segura de 8 caracteres. Podrás copiarla inmediatamente para entregársela al veterinario.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    <div className="adm-form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.82rem' }}>Nueva Contraseña *</label>
-                      <div className="adm-input-wrap">
-                        <i className="fa-solid fa-lock input-icon"></i>
-                        <input
-                          type="password"
-                          required
-                          placeholder="Mínimo 6 caracteres"
-                          value={customPassword}
-                          onChange={(e) => setCustomPassword(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="adm-form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.82rem' }}>Confirmar Nueva Contraseña *</label>
-                      <div className="adm-input-wrap">
-                        <i className="fa-solid fa-shield-halved input-icon"></i>
-                        <input
-                          type="password"
-                          required
-                          placeholder="Repite la contraseña"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="adm-modal-footer">
@@ -1234,11 +1128,11 @@ export default function AdminVeterinarios() {
                 <button type="submit" className="adm-btn-primary" disabled={submittingReset}>
                   {submittingReset ? (
                     <>
-                      <i className="fa-solid fa-spinner fa-spin"></i> Actualizando...
+                      <i className="fa-solid fa-spinner fa-spin"></i> Generando...
                     </>
                   ) : (
                     <>
-                      <i className="fa-solid fa-key" style={{ marginRight: '6px' }}></i> Restablecer Contraseña
+                      <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i> Generar Contraseña Temporal
                     </>
                   )}
                 </button>

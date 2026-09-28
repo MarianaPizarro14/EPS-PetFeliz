@@ -1121,7 +1121,7 @@ class AdminController extends Controller
     /**
      * Generar / Restablecer la contraseña temporal de un usuario veterinario desde la interfaz de administración.
      * Restricción de seguridad: Solo permite modificar usuarios con rol 'veterinario' (nunca cuentas admin).
-     * Marca en la base de datos password_temporal = true.
+     * Genera siempre una clave aleatoria temporal y marca en la base de datos password_temporal = true.
      */
     public function generarPasswordTemporal(Request $request, $id)
     {
@@ -1146,23 +1146,8 @@ class AdminController extends Controller
             ], 403);
         }
 
-        if ($request->filled('nueva_contrasena')) {
-            $request->validate([
-                'nueva_contrasena' => 'required|string|min:6|max:100',
-            ], [
-                'nueva_contrasena.required' => 'La nueva contraseña es obligatoria.',
-                'nueva_contrasena.min'      => 'La nueva contraseña debe tener al menos 6 caracteres.',
-            ]);
-
-            $nuevaContrasena = trim($request->nueva_contrasena);
-        } elseif ($request->filled('password')) {
-            $request->validate([
-                'password' => 'required|string|min:6|max:100',
-            ]);
-            $nuevaContrasena = trim($request->password);
-        } else {
-            $nuevaContrasena = 'Vet#' . rand(10000, 99999);
-        }
+        // Generar siempre una contraseña aleatoria temporal
+        $nuevaContrasena = 'Vet#' . rand(10000, 99999);
 
         $user->contrasena_hash = Hash::make($nuevaContrasena);
         $user->password_temporal = true;

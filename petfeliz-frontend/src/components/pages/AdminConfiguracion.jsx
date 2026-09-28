@@ -98,14 +98,30 @@ export default function AdminConfiguracion() {
           </div>
         )}
 
-        {/* ── BANNER DE ESTADO DEL SISTEMA ── */}
-        <div className="dash-alert dash-alert--info" style={{ marginBottom: '1.5rem', background: '#ecfdf5', borderColor: '#a7f3d0', color: '#065f46' }}>
-          <i className="fa-solid fa-shield-halved" style={{ fontSize: '1.2rem', color: '#059669' }}></i>
-          <div>
-            <strong style={{ display: 'block', fontSize: '0.95rem' }}>Plataforma EPS PetFeliz - Entorno de Producción Activo</strong>
-            <span style={{ fontSize: '0.85rem' }}>
-              Los servicios y parámetros generales se sincronizan en tiempo real con la base de datos central.
-            </span>
+        {/* ── TARJETA DE ESTADO DE LA PLATAFORMA ── */}
+        <div className="admin-card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 18px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.35rem', flexShrink: 0 }}>
+                <i className="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+                  Estado de la Plataforma EPS PetFeliz
+                </h4>
+                <p style={{ fontSize: '0.86rem', color: '#64748b', margin: 0, fontFamily: "'Inter', sans-serif" }}>
+                  Sistema operativo con pasarela Wompi en <strong style={{ color: '#0284c7' }}>Modo Sandbox / Pruebas</strong> y base de datos centralizada.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <span className="cita-tag-badge cita-tag-badge--asistio" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}>
+                <i className="fa-solid fa-circle-check"></i> Servidor API Activo
+              </span>
+              <span className="cita-tag-badge" style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}>
+                <i className="fa-solid fa-vial"></i> Wompi Sandbox
+              </span>
+            </div>
           </div>
         </div>
 
@@ -115,79 +131,208 @@ export default function AdminConfiguracion() {
             <p>Cargando información del sistema...</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-            {/* Tarjeta 1: Datos Institucionales EPS */}
-            <div className="admin-card">
-              <div className="admin-card__header">
-                <div className="admin-card__title">
-                  <div className="admin-card__title-icon" style={{ background: '#ecfdf5', color: '#047857' }}>
-                    <i className="fa-solid fa-hospital"></i>
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+              {/* Tarjeta 1: Datos Institucionales EPS */}
+              <div className="admin-card">
+                <div className="admin-card__header">
+                  <div className="admin-card__title">
+                    <div className="admin-card__title-icon" style={{ background: '#ecfdf5', color: '#047857' }}>
+                      <i className="fa-solid fa-hospital"></i>
+                    </div>
+                    <h3>Datos Generales de la EPS</h3>
                   </div>
-                  <h3>Datos Generales de la EPS</h3>
+                </div>
+
+                <div style={{ padding: '1.5rem' }}>
+                  <ul className="info-list">
+                    <li><span>Razón Social:</span> <strong>{config?.nombre}</strong></li>
+                    <li><span>NIT Corporativo:</span> <strong>{config?.nit}</strong></li>
+                    <li><span>Correo Institucional:</span> <strong>{config?.email_contacto}</strong></li>
+                    <li><span>Línea Telefónica Soporte:</span> <strong>{config?.telefono_soporte}</strong></li>
+                    <li><span>Dirección Sede Principal:</span> <strong>{config?.direccion}</strong></li>
+                    <li><span>Horario de Atención:</span> <strong>{config?.horario_atencion}</strong></li>
+                  </ul>
+
+                  <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                      <i className="fa-solid fa-info-circle" style={{ marginRight: '5px' }}></i> Nota Institucional
+                    </span>
+                    <p style={{ fontSize: '0.84rem', color: '#334155', margin: 0, lineHeight: 1.4 }}>
+                      Los datos de contacto y sedes de la EPS son administrados centralizadamente desde la configuración del servidor backend.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div style={{ padding: '1.5rem' }}>
-                <ul className="info-list">
-                  <li><span>Razón Social:</span> <strong>{config?.nombre}</strong></li>
-                  <li><span>NIT Corporativo:</span> <strong>{config?.nit}</strong></li>
-                  <li><span>Correo Institucional:</span> <strong>{config?.email_contacto}</strong></li>
-                  <li><span>Línea Telefónica Soporte:</span> <strong>{config?.telefono_soporte}</strong></li>
-                  <li><span>Dirección Sede Principal:</span> <strong>{config?.direccion}</strong></li>
-                  <li><span>Horario de Atención:</span> <strong>{config?.horario_atencion}</strong></li>
-                </ul>
+              {/* Tarjeta 2: Integraciones & Catálogo de Servicios */}
+              <div className="admin-card">
+                <div className="admin-card__header">
+                  <div className="admin-card__title">
+                    <div className="admin-card__title-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
+                      <i className="fa-solid fa-sliders"></i>
+                    </div>
+                    <h3>Integraciones & Catálogo</h3>
+                  </div>
+                </div>
 
-                <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>
-                    <i className="fa-solid fa-info-circle" style={{ marginRight: '5px' }}></i> Nota Institucional
-                  </span>
-                  <p style={{ fontSize: '0.84rem', color: '#334155', margin: 0, lineHeight: 1.4 }}>
-                    Los datos de contacto y sedes de la EPS son administrados centralizadamente desde la configuración del servidor backend.
-                  </p>
+                <div style={{ padding: '1.5rem' }}>
+                  <ul className="info-list">
+                    <li>
+                      <span>Pasarela de Pago Wompi:</span>
+                      <strong style={{ color: '#059669' }}>
+                        <i className="fa-solid fa-circle-check" style={{ marginRight: '4px' }}></i>
+                        Modo Sandbox Activo
+                      </strong>
+                    </li>
+                    <li><span>Moneda Oficial:</span> <strong>{config?.moneda}</strong></li>
+                    <li><span>Generación de Facturas PDF:</span> <strong>Habilitada (Dompdf)</strong></li>
+                    <li><span>Notificaciones Correo (SMTP):</span> <strong>Cola de Trabajos (Queue)</strong></li>
+                  </ul>
+
+                  <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid #e2e8f0' }}>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem' }}>
+                      Catálogo de Servicios & Coberturas EPS
+                    </h4>
+                    <p style={{ fontSize: '0.84rem', color: '#64748b', marginBottom: '1rem' }}>
+                      Para modificar el catálogo médico, precios de particular, copagos y activación de servicios, accede al módulo de Servicios.
+                    </p>
+                    <Link to="/admin/servicios" className="adm-btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+                      <i className="fa-solid fa-stethoscope" style={{ marginRight: '6px' }}></i>
+                      Gestionar Catálogo de Servicios
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Tarjeta 2: Integraciones & Catálogo de Servicios */}
+            {/* ── SECCIÓN: MANUALES DE USUARIO ── */}
             <div className="admin-card">
               <div className="admin-card__header">
                 <div className="admin-card__title">
-                  <div className="admin-card__title-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
-                    <i className="fa-solid fa-sliders"></i>
+                  <div className="admin-card__title-icon" style={{ background: '#f3e8ff', color: '#7e22ce' }}>
+                    <i className="fa-solid fa-book-bookmark"></i>
                   </div>
-                  <h3>Integraciones & Catálogo</h3>
+                  <h3>Manuales de Usuario & Documentación del Sistema</h3>
                 </div>
+                <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
+                  Formatos PDF Oficiales
+                </span>
               </div>
 
               <div style={{ padding: '1.5rem' }}>
-                <ul className="info-list">
-                  <li>
-                    <span>Pasarela de Pago Wompi:</span>
-                    <strong style={{ color: '#059669' }}>
-                      <i className="fa-solid fa-circle-check" style={{ marginRight: '4px' }}></i>
-                      Modo Sandbox Activo
-                    </strong>
-                  </li>
-                  <li><span>Moneda Oficial:</span> <strong>{config?.moneda}</strong></li>
-                  <li><span>Generación de Facturas PDF:</span> <strong>Habilitada (Dompdf)</strong></li>
-                  <li><span>Notificaciones Correo (SMTP):</span> <strong>Cola de Trabajos (Queue)</strong></li>
-                </ul>
+                <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '1.25rem', fontFamily: "'Inter', sans-serif" }}>
+                  Descarga las guías de uso y manuales de procedimientos según el rol correspondiente en la plataforma EPS PetFeliz:
+                </p>
 
-                <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid #e2e8f0' }}>
-                  <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem' }}>
-                    Catálogo de Servicios & Coberturas EPS
-                  </h4>
-                  <p style={{ fontSize: '0.84rem', color: '#64748b', marginBottom: '1rem' }}>
-                    Para modificar el catálogo médico, precios de particular, copagos y activación de servicios, accede al módulo de Servicios.
-                  </p>
-                  <Link to="/admin/servicios" className="adm-btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
-                    <i className="fa-solid fa-stethoscope" style={{ marginRight: '6px' }}></i>
-                    Gestionar Catálogo de Servicios
-                  </Link>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.2rem' }}>
+                  {/* Manual 1: Instalación */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-file-code"></i>
+                      </div>
+                      <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                        Manual de Instalación
+                      </h4>
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
+                        Guía técnica de arquitectura, dependencias backend/frontend y despliegue en servidor.
+                      </p>
+                    </div>
+                    <a
+                      href="/manuales/manual-instalacion.pdf"
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="act-btn act-btn--view"
+                      style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', display: 'flex', gap: '6px' }}
+                    >
+                      <i className="fa-solid fa-download"></i>
+                      <span>Descargar PDF</span>
+                    </a>
+                  </div>
+
+                  {/* Manual 2: Administrador */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#e0f2fe', color: '#0284c7', border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-user-shield"></i>
+                      </div>
+                      <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                        Manual del Administrador
+                      </h4>
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
+                        Guía operativa para administración de usuarios, facturación Wompi, citas y servicios.
+                      </p>
+                    </div>
+                    <a
+                      href="/manuales/manual-administrador.pdf"
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="act-btn act-btn--view"
+                      style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', display: 'flex', gap: '6px' }}
+                    >
+                      <i className="fa-solid fa-download"></i>
+                      <span>Descargar PDF</span>
+                    </a>
+                  </div>
+
+                  {/* Manual 3: Recepcionista */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-headset"></i>
+                      </div>
+                      <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                        Manual del Recepcionista
+                      </h4>
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
+                        Procedimientos de agendamiento de citas, recepción de pacientes y validación EPS.
+                      </p>
+                    </div>
+                    <a
+                      href="/manuales/manual-recepcionista.pdf"
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="act-btn act-btn--view"
+                      style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', display: 'flex', gap: '6px' }}
+                    >
+                      <i className="fa-solid fa-download"></i>
+                      <span>Descargar PDF</span>
+                    </a>
+                  </div>
+
+                  {/* Manual 4: Veterinario */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-user-doctor"></i>
+                      </div>
+                      <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                        Manual del Veterinario
+                      </h4>
+                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
+                        Guía del portal médico, consulta de expedientes clínicos y atención de citas.
+                      </p>
+                    </div>
+                    <a
+                      href="/manuales/manual-veterinario.pdf"
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="act-btn act-btn--view"
+                      style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', display: 'flex', gap: '6px' }}
+                    >
+                      <i className="fa-solid fa-download"></i>
+                      <span>Descargar PDF</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </main>
     </div>

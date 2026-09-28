@@ -195,9 +195,9 @@ export default function AdminPagos() {
 
         {/* ── 4 TARJETAS MÉTRICAS ── */}
         <div className="admin-dash-grid">
-          <div className="admin-stat-card">
-            <div className="admin-stat-card__info">
-              <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem' }}>
+          <div className="admin-stat-card" style={{ gap: '1.25rem' }}>
+            <div className="admin-stat-card__info" style={{ paddingRight: '0.5rem' }}>
+              <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.35rem', display: 'block' }}>
                 Total Recaudado
               </span>
               <h3>{loading ? '...' : stats.total_recaudado_formateado}</h3>
@@ -206,14 +206,14 @@ export default function AdminPagos() {
                 <span>Ingresos Confirmados</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon admin-stat-card__icon--green">
+            <div className="admin-stat-card__icon admin-stat-card__icon--green" style={{ flexShrink: 0 }}>
               <i className="fa-solid fa-money-bill-wave"></i>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-card__info">
-              <span className="admin-stat-card__title" style={{ color: '#0284c7', fontWeight: 700, fontSize: '0.86rem' }}>
+          <div className="admin-stat-card" style={{ gap: '1.25rem' }}>
+            <div className="admin-stat-card__info" style={{ paddingRight: '0.5rem' }}>
+              <span className="admin-stat-card__title" style={{ color: '#0284c7', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.35rem', display: 'block' }}>
                 Recaudo Mes Actual
               </span>
               <h3>{loading ? '...' : stats.pagos_mes_monto_formateado}</h3>
@@ -222,14 +222,14 @@ export default function AdminPagos() {
                 <span>{stats.pagos_mes_cantidad} Transacciones</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon admin-stat-card__icon--blue">
+            <div className="admin-stat-card__icon admin-stat-card__icon--blue" style={{ flexShrink: 0 }}>
               <i className="fa-solid fa-chart-line"></i>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-card__info">
-              <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem' }}>
+          <div className="admin-stat-card" style={{ gap: '1.25rem' }}>
+            <div className="admin-stat-card__info" style={{ paddingRight: '0.5rem' }}>
+              <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.35rem', display: 'block' }}>
                 Transacciones Exitosas
               </span>
               <h3>{loading ? '...' : stats.pagos_exitosos}</h3>
@@ -238,14 +238,14 @@ export default function AdminPagos() {
                 <span>Pasarela Wompi Sandbox</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon admin-stat-card__icon--green">
+            <div className="admin-stat-card__icon admin-stat-card__icon--green" style={{ flexShrink: 0 }}>
               <i className="fa-solid fa-circle-check"></i>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-card__info">
-              <span className="admin-stat-card__title" style={{ color: '#d97706', fontWeight: 700, fontSize: '0.86rem' }}>
+          <div className="admin-stat-card" style={{ gap: '1.25rem' }}>
+            <div className="admin-stat-card__info" style={{ paddingRight: '0.5rem' }}>
+              <span className="admin-stat-card__title" style={{ color: '#d97706', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.35rem', display: 'block' }}>
                 Rechazadas / Pendientes
               </span>
               <h3>{loading ? '...' : stats.pagos_rechazados}</h3>
@@ -254,7 +254,7 @@ export default function AdminPagos() {
                 <span>Revisión de Cobro</span>
               </div>
             </div>
-            <div className="admin-stat-card__icon admin-stat-card__icon--amber">
+            <div className="admin-stat-card__icon admin-stat-card__icon--amber" style={{ flexShrink: 0 }}>
               <i className="fa-solid fa-credit-card"></i>
             </div>
           </div>

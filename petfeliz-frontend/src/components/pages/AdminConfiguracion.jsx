@@ -278,21 +278,21 @@ export default function AdminConfiguracion() {
                     </a>
                   </div>
 
-                  {/* Manual 3: Recepcionista */}
+                  {/* Manual 3: Recepcionista y Veterinario */}
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
-                        <i className="fa-solid fa-headset"></i>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-notes-medical"></i>
                       </div>
                       <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
-                        Manual del Recepcionista
+                        Manual del Recepcionista y Veterinario
                       </h4>
                       <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
-                        Procedimientos de agendamiento de citas, recepción de pacientes y validación EPS.
+                        Guía para agendamiento de citas, recepción de pacientes, validación EPS, portal médico y expedientes clínicos.
                       </p>
                     </div>
                     <a
-                      href="/manuales/manual-recepcionista.pdf"
+                      href="/manuales/manual-recepcionista-veterinario.pdf"
                       download
                       target="_blank"
                       rel="noopener noreferrer"
@@ -304,21 +304,21 @@ export default function AdminConfiguracion() {
                     </a>
                   </div>
 
-                  {/* Manual 4: Veterinario */}
+                  {/* Manual 4: Usuario / Cliente */}
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
-                        <i className="fa-solid fa-user-doctor"></i>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem', marginBottom: '0.8rem' }}>
+                        <i className="fa-solid fa-users"></i>
                       </div>
                       <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: '0.98rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
-                        Manual del Veterinario
+                        Manual de Usuario
                       </h4>
                       <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.45 }}>
-                        Guía del portal médico, consulta de expedientes clínicos y atención de citas.
+                        Guía para clientes y afiliados: registro, reserva de citas, pago de membresía, carné digital y facturas.
                       </p>
                     </div>
                     <a
-                      href="/manuales/manual-veterinario.pdf"
+                      href="/manuales/manual-usuario.pdf"
                       download
                       target="_blank"
                       rel="noopener noreferrer"

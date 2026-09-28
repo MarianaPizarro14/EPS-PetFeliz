@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarAdmin from '../ui/SidebarAdmin'
 import DashboardHeader from '../ui/DashboardHeader'
+import UserAvatar from '../ui/UserAvatar'
 import './DashboardClient.css'
 import './AdminDashboard.css'
 import './AdminCitas.css'
@@ -371,15 +372,7 @@ export default function AdminClientes() {
                     <tr key={c.id_cliente}>
                       <td>
                         <div className="pet-info-cell">
-                          <img
-                            src={c.foto}
-                            alt={c.nombre}
-                            className="admin-table__avatar"
-                            onError={(e) => {
-                              e.target.onerror = null
-                              e.target.src = 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg'
-                            }}
-                          />
+                          <UserAvatar user={c} size="44px" fontSize="1.15rem" />
                           <div>
                             <strong className="pet-name">{c.nombre}</strong>
                             <span className="pet-meta-sub">
@@ -469,20 +462,13 @@ export default function AdminClientes() {
               <>
                 <div className="adm-vet-hero" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%)' }}>
                   <div className="adm-vet-hero__avatar-wrap">
-                    <img
-                      src={selectedFicha.cliente.foto}
-                      alt={selectedFicha.cliente.nombre}
+                    <UserAvatar
+                      user={selectedFicha.cliente}
+                      size="76px"
+                      fontSize="2rem"
                       style={{
-                        width: '76px',
-                        height: '76px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
                         border: '3px solid rgba(255,255,255,0.95)',
                         boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
-                      }}
-                      onError={(e) => {
-                        e.target.onerror = null
-                        e.target.src = 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg'
                       }}
                     />
                   </div>

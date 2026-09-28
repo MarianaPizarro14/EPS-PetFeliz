@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarAdmin from '../ui/SidebarAdmin'
 import DashboardHeader from '../ui/DashboardHeader'
+import UserAvatar from '../ui/UserAvatar'
 import './DashboardClient.css'
 import './AdminDashboard.css'
 import './AdminCitas.css'
@@ -529,17 +530,15 @@ export default function AdminVeterinarios() {
                     <tr key={vet.id_veterinario}>
                       <td>
                         <div className="adm-vet-avatar-cell">
-                          {isValidAvatarUrl(vet.foto_perfil) ? (
-                            <img
-                              src={vet.foto_perfil}
-                              alt={vet.nombre}
-                              className="adm-vet-avatar"
-                            />
-                          ) : (
-                            <div className="adm-vet-avatar adm-vet-avatar--fallback" title={vet.nombre}>
-                              <i className="fa-solid fa-user-doctor"></i>
-                            </div>
-                          )}
+                          <UserAvatar
+                            user={vet}
+                            photoUrl={vet.foto_perfil}
+                            name={vet.nombre}
+                            id={vet.id_veterinario}
+                            icon="fa-solid fa-user-doctor"
+                            size="44px"
+                            fontSize="1.15rem"
+                          />
                           <div className="adm-vet-name-box">
                             <span className="adm-vet-name">{vet.nombre}</span>
                             <span className="adm-vet-id">ID Veterinario #{vet.id_veterinario}</span>
@@ -610,17 +609,19 @@ export default function AdminVeterinarios() {
           <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
             <div className="adm-vet-hero">
               <div className="adm-vet-hero__avatar-wrap">
-                {isValidAvatarUrl(selectedFicha.foto_perfil) ? (
-                  <img
-                    src={selectedFicha.foto_perfil}
-                    alt={selectedFicha.nombre}
-                    className="adm-vet-hero__img"
-                  />
-                ) : (
-                  <div className="adm-vet-hero__img--fallback" title={selectedFicha.nombre}>
-                    <i className="fa-solid fa-user-doctor"></i>
-                  </div>
-                )}
+                <UserAvatar
+                  user={selectedFicha}
+                  photoUrl={selectedFicha.foto_perfil}
+                  name={selectedFicha.nombre}
+                  id={selectedFicha.id_veterinario}
+                  icon="fa-solid fa-user-doctor"
+                  size="76px"
+                  fontSize="2rem"
+                  style={{
+                    border: '3px solid rgba(255,255,255,0.95)',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
+                  }}
+                />
                 <span className="adm-vet-hero__online-badge" title="Personal Médico Activo"></span>
               </div>
               <div className="adm-vet-hero__info">

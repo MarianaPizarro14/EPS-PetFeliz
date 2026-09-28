@@ -1615,8 +1615,8 @@ class AdminController extends Controller
                 return [
                     'estado' => 'error',
                     'badge_color' => 'rojo',
-                    'titulo' => 'Wompi no disponible',
-                    'mensaje' => 'Faltan credenciales (WOMPI_PUBLIC_KEY o WOMPI_INTEGRITY_SECRET) en el entorno .env.',
+                    'titulo' => 'Wompi No Disponible',
+                    'mensaje' => 'Faltan credenciales (WOMPI_PUBLIC_KEY o WOMPI_INTEGRITY_SECRET) en el archivo .env.',
                     'modo' => 'sin_configurar',
                     'icono' => 'fa-solid fa-triangle-exclamation',
                 ];
@@ -1624,14 +1624,17 @@ class AdminController extends Controller
 
             $isTestKey = str_contains($pubKey, 'pub_test_') || str_contains($apiUrl, 'sandbox');
 
-            $response = \Illuminate\Support\Facades\Http::timeout(3)->get(rtrim($apiUrl, '/') . "/merchants/{$pubKey}");
+            // Consulta a Wompi desactivando SSL verify local de PHP si es necesario
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->timeout(5)
+                ->get(rtrim($apiUrl, '/') . "/merchants/{$pubKey}");
 
             if (!$response->successful()) {
                 return [
                     'estado' => 'error',
                     'badge_color' => 'rojo',
-                    'titulo' => 'Error de conexión Wompi',
-                    'mensaje' => "HTTP {$response->status()}: La llave pública o el servidor Wompi no respondieron correctamente.",
+                    'titulo' => 'Wompi No Disponible',
+                    'mensaje' => "HTTP {$response->status()}: La llave pública no fue aceptada por la API de Wompi o la pasarela no responde.",
                     'modo' => $isTestKey ? 'sandbox' : 'produccion',
                     'icono' => 'fa-solid fa-circle-xmark',
                 ];
@@ -1641,8 +1644,8 @@ class AdminController extends Controller
                 return [
                     'estado' => 'sandbox',
                     'badge_color' => 'naranja',
-                    'titulo' => 'Modo Sandbox Activo',
-                    'mensaje' => 'Pasarela conectada en entorno de pruebas (Sandbox). Los cobros son simulación y no generan cargos reales.',
+                    'titulo' => 'Wompi Funcionando - Modo Sandbox',
+                    'mensaje' => 'Pasarela conectada y respondiendo en entorno de pruebas (Sandbox). Los cobros son de prueba y no generan cargos reales.',
                     'modo' => 'sandbox',
                     'icono' => 'fa-solid fa-vial',
                 ];
@@ -1651,8 +1654,8 @@ class AdminController extends Controller
             return [
                 'estado' => 'produccion',
                 'badge_color' => 'verde',
-                'titulo' => 'Modo Producción Activo',
-                'mensaje' => 'Pasarela conectada en entorno real de producción. Los cobros a tarjetas de crédito y PSE son reales.',
+                'titulo' => 'Wompi Funcionando - Modo Producción',
+                'mensaje' => 'Pasarela conectada y respondiendo en entorno real de producción. Los cobros a tarjetas de crédito y PSE son reales.',
                 'modo' => 'produccion',
                 'icono' => 'fa-solid fa-circle-check',
             ];
@@ -1660,8 +1663,8 @@ class AdminController extends Controller
             return [
                 'estado' => 'error',
                 'badge_color' => 'rojo',
-                'titulo' => 'Wompi Inaccesible',
-                'mensaje' => 'Error de red al intentar comunicar con la API de Wompi: ' . $e->getMessage(),
+                'titulo' => 'Wompi No Disponible',
+                'mensaje' => 'Error al comunicar con la API de Wompi: ' . $e->getMessage(),
                 'modo' => 'error',
                 'icono' => 'fa-solid fa-plug-circle-xmark',
             ];

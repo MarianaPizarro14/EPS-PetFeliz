@@ -2,6 +2,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getStoredToken, clearStoredAuth } from '../../utils/authStorage'
+import AdminCriticalAlert from './AdminCriticalAlert'
 
 const adminMenuItems = [
   { to: '/admin/dashboard', aliases: [], label: 'Panel', icon: 'fa-solid fa-border-all' },
@@ -47,7 +48,9 @@ export default function SidebarAdmin() {
   const isHelpActive = location.pathname === '/admin/soporte'
 
   return (
-    <aside className="dash-side">
+    <>
+      <AdminCriticalAlert />
+      <aside className="dash-side">
       <div>
         <div className="dash-side__logo">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -123,5 +126,6 @@ export default function SidebarAdmin() {
         </button>
       </div>
     </aside>
+  </>
   )
 }

@@ -49,4 +49,10 @@ class Cita extends Model
     {
         return $this->belongsTo(EstadoCita::class, 'id_estado', 'id_estado');
     }
+
+    public function estadoCita()
+    {
+        return $this->belongsTo(EstadoCita::class, 'id_estado', 'id_estado');
+    }
 }
+

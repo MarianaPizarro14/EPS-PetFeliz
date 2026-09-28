@@ -82,12 +82,26 @@ class NotificationService
                             Log::info("RESEND SUCCESS: Correo enviado a {$recipientEmail}. ID: " . ($response->json('id') ?? 'OK'));
                         } else {
                             Log::error("RESEND ERROR [HTTP {$response->status()}] al enviar a {$recipientEmail}: " . $response->body());
+                            // Fallback a Mailer SMTP estándar si falla Resend
+                            if ($mailable instanceof \Illuminate\Contracts\Queue\ShouldQueue) {
+                                \Illuminate\Support\Facades\Mail::to($recipientEmail)->queue($mailable);
+                            } else {
+                                \Illuminate\Support\Facades\Mail::to($recipientEmail)->send($mailable);
+                            }
+                            $emailEnviado = true;
                         }
                     } else {
-                        Log::error("RESEND CONFIG ERROR: La clave config('services.resend.key') está vacía o no comienza por 're_'. No se envió el correo a {$recipientEmail}.");
+                        // Fallback a Mailer SMTP estándar de Laravel cuando RESEND_API_KEY no está configurada
+                        if ($mailable instanceof \Illuminate\Contracts\Queue\ShouldQueue) {
+                            \Illuminate\Support\Facades\Mail::to($recipientEmail)->queue($mailable);
+                        } else {
+                            \Illuminate\Support\Facades\Mail::to($recipientEmail)->send($mailable);
+                        }
+                        $emailEnviado = true;
+                        Log::info("MAIL SMTP SUCCESS: Correo despachado a {$recipientEmail} usando Mailer de Laravel.");
                     }
                 } catch (\Throwable $e) {
-                    Log::error("RESEND EXCEPTION al enviar correo a {$recipientEmail}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    Log::error("MAIL EXCEPTION al enviar correo a {$recipientEmail}: " . $e->getMessage());
                 }
             }
         }

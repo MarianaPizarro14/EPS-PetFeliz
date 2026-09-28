@@ -32,6 +32,7 @@ class VeterinarioPortalController extends Controller
 
         $citas = $citasQuery->map(function ($c) {
             $horaFmt = date('h:i A', strtotime($c->hora));
+            $nombreEstado = $c->estado->nombre ?? ($c->id_estado == 4 ? 'Completada' : ($c->id_estado == 2 ? 'Confirmada' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente')));
             return [
                 'id_cita' => $c->id_cita,
                 'fecha' => $c->fecha,
@@ -40,7 +41,8 @@ class VeterinarioPortalController extends Controller
                 'hora_raw' => $c->hora,
                 'motivo' => $c->motivo ?? ($c->servicio->nombre ?? 'Consulta General'),
                 'id_estado' => $c->id_estado,
-                'estado' => $c->estado->nombre_estado ?? ($c->id_estado == 2 ? 'Atendida' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente')),
+                'estado' => $nombreEstado,
+                'estado_nombre' => $nombreEstado,
                 'observacion' => $c->observacion ?? '',
                 'paciente' => [
                     'id_mascota' => $c->mascota->id_mascota ?? null,
@@ -48,6 +50,7 @@ class VeterinarioPortalController extends Controller
                     'especie' => $c->mascota->especie ?? 'Canino',
                     'raza' => $c->mascota->raza ?? 'Criollo',
                     'foto' => $c->mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
+                    'foto_mascota' => $c->mascota->foto_mascota ?? null,
                 ],
                 'dueno' => [
                     'id_cliente' => $c->cliente->id_cliente ?? null,
@@ -56,20 +59,35 @@ class VeterinarioPortalController extends Controller
                     'email' => $c->cliente->usuario->email ?? '',
                     'cedula' => $c->cliente->cedula ?? '',
                 ],
+                'cliente' => [
+                    'id_cliente' => $c->cliente->id_cliente ?? null,
+                    'nombre' => $c->cliente->nombre ?? 'Cliente EPS',
+                    'telefono' => $c->cliente->telefono ?? '300 000 0000',
+                ],
                 'servicio' => [
                     'id_servicio' => $c->servicio->id_servicio ?? null,
-                    'nombre' => $c->servicio->nombre ?? 'Consulta General',
+                    'nombre' => $c->servicio->nombre ?? ($c->motivo ?? 'Consulta General'),
+                    'nombre_servicio' => $c->servicio->nombre ?? ($c->motivo ?? 'Consulta General'),
                 ],
             ];
         });
 
-        // Agrupar citas por fecha para facilitar la vista semanal en el frontend
-        $citasPorFecha = $citas->groupBy('fecha');
+        // Agrupar citas por fecha estructuradas para el frontend
+        $diasEsp = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        $agendaSemanal = $citas->groupBy('fecha')->map(function ($items, $fechaKey) use ($diasEsp) {
+            $dt = Carbon::parse($fechaKey);
+            $diaNom = $diasEsp[$dt->dayOfWeek] . ' ' . $dt->format('d/m/Y');
+            return [
+                'fecha' => $fechaKey,
+                'dia_nombre' => $diaNom,
+                'citas' => $items->values(),
+            ];
+        })->values();
 
         // Métricas reales
         $totalCitas = $citas->count();
-        $pendientes = $citas->where('id_estado', 1)->count();
-        $atendidas = $citas->where('id_estado', 2)->count();
+        $pendientes = $citas->whereIn('id_estado', [1, 2])->count();
+        $atendidas = $citas->where('id_estado', 4)->count();
         $pacientesUnicos = $citas->pluck('paciente.id_mascota')->filter()->unique()->count();
 
         return response()->json([
@@ -88,7 +106,9 @@ class VeterinarioPortalController extends Controller
                 'pacientes_unicos' => $pacientesUnicos,
             ],
             'citas' => $citas->values(),
-            'citas_por_fecha' => $citasPorFecha,
+            'todas_citas' => $citas->values(),
+            'agenda_semanal' => $agendaSemanal,
+            'citas_por_fecha' => $citas->groupBy('fecha'),
         ], 200);
     }
 
@@ -165,8 +185,8 @@ class VeterinarioPortalController extends Controller
             'id_estado' => 'nullable|integer|in:1,2,3,4',
         ]);
 
-        // Cambiar a estado 2 ("Atendida" / Confirmada) por defecto al registrar atención
-        $cita->id_estado = $request->id_estado ?? 2;
+        // Cambiar a estado 4 ("Completada" / Atendida) por defecto al registrar atención clínica
+        $cita->id_estado = $request->id_estado ?? 4;
 
         if ($request->has('observacion')) {
             $cita->observacion = trim(strip_tags($request->observacion));
@@ -184,7 +204,7 @@ class VeterinarioPortalController extends Controller
                 'hora' => date('h:i A', strtotime($cita->hora)),
                 'motivo' => $cita->motivo,
                 'id_estado' => $cita->id_estado,
-                'estado' => $cita->estado->nombre_estado ?? 'Atendida',
+                'estado' => $cita->estado->nombre ?? 'Completada',
                 'observacion' => $cita->observacion,
                 'paciente' => $cita->mascota->nombre ?? 'Paciente',
                 'dueno' => $cita->cliente->nombre ?? 'Cliente',

@@ -279,7 +279,7 @@ class AdminController extends Controller
                     'especialidad' => $c->veterinario->especialidad ?? 'Medicina General',
                     'foto' => $c->veterinario->foto_perfil ?? null,
                 ],
-                'estado' => $c->estado->nombre_estado ?? ($c->id_estado == 2 ? 'Confirmada' : 'Pendiente'),
+                'estado' => $c->estado->nombre ?? ($c->id_estado == 4 ? 'Completada' : ($c->id_estado == 2 ? 'Confirmada' : 'Pendiente')),
                 'id_estado' => $c->id_estado,
                 'observacion' => $c->observacion ?? 'Atención agendada en línea.',
             ];
@@ -407,7 +407,7 @@ class AdminController extends Controller
                     'especialidad' => $c->veterinario->especialidad ?? 'Medicina General',
                     'foto' => $c->veterinario->foto_perfil ?? null,
                 ],
-                'estado' => $c->estado->nombre_estado ?? ($c->id_estado == 2 ? 'Confirmada' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente')),
+                'estado' => $c->estado->nombre ?? ($c->id_estado == 4 ? 'Completada' : ($c->id_estado == 2 ? 'Confirmada' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente'))),
                 'id_estado' => $c->id_estado,
                 'observacion' => $c->observacion ?? 'Atención agendada en línea.',
             ];
@@ -681,10 +681,11 @@ class AdminController extends Controller
                 'hora' => Carbon::parse($cita->hora)->format('h:i A'),
                 'servicio' => $cita->servicio ? $cita->servicio->nombre : ($cita->motivo ?? 'Consulta General'),
                 'veterinario' => $cita->veterinario ? $cita->veterinario->nombre : 'Veterinario Asignado',
-                'estado' => $cita->estadoCita ? $cita->estadoCita->nombre : 'Pendiente',
+                'estado' => $cita->estado ? $cita->estado->nombre : ($cita->id_estado == 4 ? 'Completada' : ($cita->id_estado == 2 ? 'Confirmada' : 'Pendiente')),
                 'id_estado' => $cita->id_estado,
                 'motivo' => $cita->motivo,
-                'observaciones' => $cita->observaciones,
+                'observacion' => $cita->observacion,
+                'observaciones' => $cita->observacion,
             ];
         });
 

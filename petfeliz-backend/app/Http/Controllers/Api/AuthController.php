@@ -45,7 +45,8 @@ class AuthController extends Controller
             '¡Bienvenido a EPS PetFeliz!',
             "Tu cuenta ha sido creada exitosamente. Estamos listos para cuidar de tus mascotas con el mejor servicio médico.",
             'fa-solid fa-shield-heart',
-            'bienvenida'
+            'bienvenida',
+            new \App\Mail\BienvenidaMail($cliente)
         );
 
         \App\Services\NotificationService::notificarAdmin(

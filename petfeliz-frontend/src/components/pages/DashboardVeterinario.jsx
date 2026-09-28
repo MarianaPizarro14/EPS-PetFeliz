@@ -172,16 +172,17 @@ export default function DashboardVeterinario() {
     .map((dia) => {
       const citasDelDia = dia.citas.filter((c) => {
         // Filtro estado
-        if (filterStatus === 'pendiente' && c.id_estado !== 1) return false
-        if (filterStatus === 'atendida' && c.id_estado !== 2) return false
+        if (filterStatus === 'pendiente' && c.id_estado !== 1 && c.id_estado !== 2) return false
+        if (filterStatus === 'atendida' && c.id_estado !== 4) return false
 
         // Filtro búsqueda
         if (!searchLower) return true
+        const sNombre = c.servicio?.nombre_servicio || c.servicio?.nombre || c.motivo || ''
         return (
-          c.mascota.nombre.toLowerCase().includes(searchLower) ||
-          c.mascota.especie.toLowerCase().includes(searchLower) ||
-          c.cliente.nombre.toLowerCase().includes(searchLower) ||
-          c.servicio.nombre_servicio.toLowerCase().includes(searchLower)
+          (c.mascota?.nombre || '').toLowerCase().includes(searchLower) ||
+          (c.mascota?.especie || '').toLowerCase().includes(searchLower) ||
+          (c.cliente?.nombre || c.dueno?.nombre || '').toLowerCase().includes(searchLower) ||
+          sNombre.toLowerCase().includes(searchLower)
         )
       })
 
@@ -355,9 +356,11 @@ export default function DashboardVeterinario() {
 
                   <div className="vet-citas-list">
                     {diaGroup.citas.map((cita) => {
-                      const isPendiente = cita.id_estado === 1
-                      const isAtendida = cita.id_estado === 2
+                      const isPendiente = cita.id_estado === 1 || cita.id_estado === 2
+                      const isAtendida = cita.id_estado === 4
                       const isCancelada = cita.id_estado === 3
+                      const servicioNombre = cita.servicio?.nombre_servicio || cita.servicio?.nombre || cita.motivo || 'Consulta General'
+                      const estadoTexto = cita.estado_nombre || cita.estado || (isAtendida ? 'Atendida' : (isPendiente ? 'Pendiente' : 'Cancelada'))
 
                       return (
                         <div key={cita.id_cita} className="vet-cita-row">
@@ -367,7 +370,7 @@ export default function DashboardVeterinario() {
                               <i className="fa-regular fa-clock"></i> {cita.hora}
                             </span>
                             <span className="vet-cita-service-badge">
-                              {cita.servicio.nombre_servicio}
+                              {servicioNombre}
                             </span>
                           </div>
 
@@ -375,18 +378,18 @@ export default function DashboardVeterinario() {
                           <div className="vet-cita-pet-info">
                             <img
                               src={
-                                cita.mascota.foto_mascota ||
-                                (cita.mascota.especie === 'Gato'
+                                cita.paciente?.foto || cita.paciente?.foto_mascota || cita.mascota?.foto_mascota ||
+                                (cita.mascota?.especie === 'Gato'
                                   ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
                                   : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
                               }
-                              alt={cita.mascota.nombre}
+                              alt={cita.mascota?.nombre || 'Paciente'}
                               className="vet-pet-avatar"
                             />
                             <div>
-                              <strong className="vet-pet-name">{cita.mascota.nombre}</strong>
+                              <strong className="vet-pet-name">{cita.mascota?.nombre || 'Paciente'}</strong>
                               <span className="vet-pet-detail">
-                                {cita.mascota.especie} {cita.mascota.raza ? `• ${cita.mascota.raza}` : ''}
+                                {cita.mascota?.especie || 'Mascota'} {cita.mascota?.raza ? `• ${cita.mascota.raza}` : ''}
                               </span>
                             </div>
                           </div>
@@ -394,9 +397,9 @@ export default function DashboardVeterinario() {
                           {/* Cliente / Dueño */}
                           <div className="vet-cita-owner-info">
                             <span className="vet-owner-label">Dueño / Solicitante:</span>
-                            <strong className="vet-owner-name">{cita.cliente.nombre}</strong>
+                            <strong className="vet-owner-name">{cita.cliente?.nombre || cita.dueno?.nombre || 'Cliente EPS'}</strong>
                             <span className="vet-owner-phone">
-                              <i className="fa-solid fa-phone"></i> {cita.cliente.telefono}
+                              <i className="fa-solid fa-phone"></i> {cita.cliente?.telefono || cita.dueno?.telefono || 'N/R'}
                             </span>
                           </div>
 
@@ -420,7 +423,7 @@ export default function DashboardVeterinario() {
                                     : 'fa-circle-xmark'
                                 }`}
                               ></i>
-                              {cita.estado_nombre}
+                              {estadoTexto}
                             </span>
                           </div>
 

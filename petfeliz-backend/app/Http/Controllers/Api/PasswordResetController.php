@@ -30,7 +30,8 @@ class PasswordResetController extends Controller
             'token_reset_expira' => now()->addMinutes(60),
         ]);
 
-        $resetLink = env('FRONTEND_URL') . '/reset-password?token=' . $token . '&email=' . $user->email;
+        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+        $resetLink = rtrim($frontendUrl, '/') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
 
         Mail::to($user->email)->send(new ResetPasswordMail($resetLink));
 

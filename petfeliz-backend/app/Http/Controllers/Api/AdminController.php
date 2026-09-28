@@ -1624,10 +1624,12 @@ class AdminController extends Controller
 
             $isTestKey = str_contains($pubKey, 'pub_test_') || str_contains($apiUrl, 'sandbox');
 
-            // Consulta a Wompi desactivando SSL verify local de PHP si es necesario
-            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
-                ->timeout(5)
-                ->get(rtrim($apiUrl, '/') . "/merchants/{$pubKey}");
+            // En entorno local omitimos verificación SSL por cacert de Windows local, en producción (Railway) es siempre verificado
+            $httpClient = app()->environment('local')
+                ? \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(5)
+                : \Illuminate\Support\Facades\Http::timeout(5);
+
+            $response = $httpClient->get(rtrim($apiUrl, '/') . "/merchants/{$pubKey}");
 
             if (!$response->successful()) {
                 return [

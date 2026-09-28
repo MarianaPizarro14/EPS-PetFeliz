@@ -1119,6 +1119,58 @@ class AdminController extends Controller
     }
 
     /**
+     * Restablecer la contraseña de un usuario veterinario desde la interfaz del panel de administración.
+     * Restricción de seguridad: Solo permite modificar usuarios con rol 'veterinario' (nunca cuentas admin).
+     */
+    public function veterinariosResetPassword(Request $request, $id)
+    {
+        $vet = Veterinario::with('usuario')->where('id_veterinario', $id)->firstOrFail();
+
+        $user = $vet->usuario;
+        if (!$user) {
+            return response()->json([
+                'message' => 'No se encontró una cuenta de usuario activa asociada a este veterinario.'
+            ], 404);
+        }
+
+        // Restricción de seguridad: El administrador no puede restablecer contraseñas de otros administradores
+        if ($user->rol !== 'veterinario') {
+            return response()->json([
+                'message' => 'Seguridad: Solo se permite restablecer contraseñas de cuentas con rol de veterinario.'
+            ], 403);
+        }
+
+        if ($request->filled('nueva_contrasena')) {
+            $request->validate([
+                'nueva_contrasena' => 'required|string|min:6|max:100',
+            ], [
+                'nueva_contrasena.required' => 'La nueva contraseña es obligatoria.',
+                'nueva_contrasena.min'      => 'La nueva contraseña debe tener al menos 6 caracteres.',
+            ]);
+
+            $nuevaContrasena = trim($request->nueva_contrasena);
+        } else {
+            $nuevaContrasena = 'Vet#' . rand(10000, 99999);
+        }
+
+        $user->contrasena_hash = Hash::make($nuevaContrasena);
+        $user->save();
+
+        // Revocar tokens previos por seguridad para forzar inicio de sesión con nueva clave
+        $user->tokens()->delete();
+
+        return response()->json([
+            'message'             => 'Contraseña del veterinario restablecida con éxito.',
+            'contrasena_temporal' => $nuevaContrasena,
+            'veterinario'         => [
+                'id_veterinario' => $vet->id_veterinario,
+                'nombre'         => $vet->nombre,
+                'correo'         => $user->email,
+            ],
+        ], 200);
+    }
+
+    /**
      * Listado completo de Servicios para Administración.
      */
     public function serviciosIndex(Request $request)

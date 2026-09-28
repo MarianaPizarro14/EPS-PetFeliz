@@ -57,6 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosShow']);
         Route::post('/admin/veterinarios', [AdminController::class, 'veterinariosStore']);
         Route::put('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosUpdate']);
+        Route::patch('/admin/veterinarios/{id}/reset-password', [AdminController::class, 'veterinariosResetPassword']);
+        Route::post('/admin/veterinarios/{id}/reset-password', [AdminController::class, 'veterinariosResetPassword']);
         Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
 
         // Rutas de Administración de Servicios

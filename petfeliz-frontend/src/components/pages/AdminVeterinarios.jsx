@@ -112,6 +112,92 @@ export default function AdminVeterinarios() {
   const [createdCredentials, setCreatedCredentials] = useState(null)
   const [copiedToast, setCopiedToast] = useState(false)
 
+  // Reset Password State
+  const [resetVet, setResetVet] = useState(null)
+  const [showModalReset, setShowModalReset] = useState(false)
+  const [modeReset, setModeReset] = useState('auto') // 'auto' | 'manual'
+  const [customPassword, setCustomPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [submittingReset, setSubmittingReset] = useState(false)
+  const [resetError, setResetError] = useState('')
+  const [resetSuccessData, setResetSuccessData] = useState(null)
+
+  const handleOpenResetModal = (vet) => {
+    setResetVet(vet)
+    setModeReset('auto')
+    setCustomPassword('')
+    setConfirmPassword('')
+    setResetError('')
+    setShowModalReset(true)
+  }
+
+  const handleConfirmReset = async (e) => {
+    if (e) e.preventDefault()
+    if (!resetVet) return
+
+    if (modeReset === 'manual') {
+      if (!customPassword) {
+        setResetError('Por favor ingrese la nueva contraseña.')
+        return
+      }
+      if (customPassword.length < 6) {
+        setResetError('La contraseña debe tener al menos 6 caracteres.')
+        return
+      }
+      if (customPassword !== confirmPassword) {
+        setResetError('Las contraseñas confirmadas no coinciden.')
+        return
+      }
+    }
+
+    const token = getStoredToken()
+    if (!token) return
+
+    try {
+      setSubmittingReset(true)
+      setResetError('')
+
+      const payload = modeReset === 'manual' ? { password: customPassword } : {}
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/veterinarios/${resetVet.id_veterinario}/reset-password`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        setShowModalReset(false)
+        setResetSuccessData({
+          nombre: resetVet.nombre,
+          correo: resetVet.correo,
+          contrasena: data.nueva_contrasena,
+        })
+        triggerToast(`Contraseña de ${resetVet.nombre} restablecida con éxito.`, 'success')
+      } else {
+        setResetError(data.message || 'No se pudo restablecer la contraseña.')
+      }
+    } catch (err) {
+      console.error('Error al restablecer contraseña:', err)
+      setResetError('Error de conexión con el servidor.')
+    } finally {
+      setSubmittingReset(false)
+    }
+  }
+
+  const handleCopyResetCredentials = () => {
+    if (!resetSuccessData) return
+    const textToCopy = `NUEVA CONTRASEÑA VETERINARIO - EPS PETFELIZ\n\nNombre: ${resetSuccessData.nombre}\nUsuario / Correo: ${resetSuccessData.correo}\nNueva Contraseña: ${resetSuccessData.contrasena}\n\nIniciar Sesión: ${window.location.origin}/login`
+    navigator.clipboard.writeText(textToCopy)
+    setCopiedToast(true)
+    setTimeout(() => setCopiedToast(false), 3000)
+  }
+
   const handleCopyCredentials = () => {
     if (!createdCredentials) return
     const textToCopy = `CREDENCIALES DE ACCESO VETERINARIO - EPS PETFELIZ\n\nNombre: ${createdCredentials.nombre}\nUsuario / Correo: ${createdCredentials.correo}\nContraseña Temporal: ${createdCredentials.contrasena}\n\nIniciar Sesión: ${window.location.origin}/login`
@@ -585,6 +671,16 @@ export default function AdminVeterinarios() {
                           </button>
                           <button
                             type="button"
+                            className="act-btn act-btn--view"
+                            onClick={() => handleOpenResetModal(vet)}
+                            title="Restablecer contraseña del veterinario"
+                            style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a' }}
+                          >
+                            <i className="fa-solid fa-key"></i>
+                            <span>Clave</span>
+                          </button>
+                          <button
+                            type="button"
                             className="act-btn act-btn--delete"
                             onClick={() => setDeletingVet(vet)}
                             title="Eliminar veterinario"
@@ -717,7 +813,19 @@ export default function AdminVeterinarios() {
               </div>
             </div>
 
-            <div className="adm-drawer-footer">
+            <div className="adm-drawer-footer" style={{ gap: '0.6rem' }}>
+              <button
+                className="adm-btn-secondary"
+                onClick={() => {
+                  const targetVet = selectedFicha
+                  setSelectedFicha(null)
+                  handleOpenResetModal(targetVet)
+                }}
+                style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <i className="fa-solid fa-key" style={{ color: '#d97706' }}></i>
+                Restablecer Contraseña
+              </button>
               <button
                 className="adm-btn-primary"
                 onClick={() => {
@@ -725,7 +833,7 @@ export default function AdminVeterinarios() {
                   setSelectedFicha(null)
                   handleOpenEditModal(targetVet)
                 }}
-                style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+                style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center' }}
               >
                 <i className="fa-solid fa-pen-to-square" style={{ marginRight: '6px' }}></i>
                 Editar Datos
@@ -996,6 +1104,214 @@ export default function AdminVeterinarios() {
               >
                 <i className={copiedToast ? "fa-solid fa-check" : "fa-solid fa-copy"}></i>
                 <span>{copiedToast ? '¡Credenciales Copiadas!' : 'Copiar Credenciales'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL CENTRADO: RESTABLECER CONTRASEÑA ── */}
+      {showModalReset && resetVet && (
+        <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setShowModalReset(false)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#d97706' }}>
+                <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
+                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Restablecer Contraseña</h3>
+              </div>
+              <button className="adm-modal-close" onClick={() => setShowModalReset(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmReset}>
+              <div className="adm-modal-body">
+                <p style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+                  Vas a cambiar la clave de acceso de <strong>{resetVet.nombre}</strong> ({resetVet.correo}).
+                </p>
+
+                {resetError && (
+                  <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.2rem' }}>
+                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <span>{resetError}</span>
+                  </div>
+                )}
+
+                {/* Seleccionar Modo */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }}>Método de Generación</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setModeReset('auto')}
+                      style={{
+                        padding: '0.6rem',
+                        borderRadius: '8px',
+                        border: modeReset === 'auto' ? '2px solid #059669' : '1px solid #cbd5e1',
+                        background: modeReset === 'auto' ? '#ecfdf5' : '#ffffff',
+                        color: modeReset === 'auto' ? '#047857' : '#64748b',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <i className="fa-solid fa-wand-magic-sparkles"></i>
+                      Automática
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setModeReset('manual')}
+                      style={{
+                        padding: '0.6rem',
+                        borderRadius: '8px',
+                        border: modeReset === 'manual' ? '2px solid #059669' : '1px solid #cbd5e1',
+                        background: modeReset === 'manual' ? '#ecfdf5' : '#ffffff',
+                        color: modeReset === 'manual' ? '#047857' : '#64748b',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <i className="fa-solid fa-keyboard"></i>
+                      Manual
+                    </button>
+                  </div>
+                </div>
+
+                {modeReset === 'auto' ? (
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>
+                      <i className="fa-solid fa-circle-info" style={{ color: '#0284c7', marginRight: '6px' }}></i>
+                      Se generará automáticamente una clave segura de 8 caracteres. Podrás copiarla inmediatamente para entregársela al veterinario.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    <div className="adm-form-group" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '0.82rem' }}>Nueva Contraseña *</label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-lock input-icon"></i>
+                        <input
+                          type="password"
+                          required
+                          placeholder="Mínimo 6 caracteres"
+                          value={customPassword}
+                          onChange={(e) => setCustomPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '0.82rem' }}>Confirmar Nueva Contraseña *</label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-shield-halved input-icon"></i>
+                        <input
+                          type="password"
+                          required
+                          placeholder="Repite la contraseña"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="adm-modal-footer">
+                <button type="button" className="adm-btn-secondary" onClick={() => setShowModalReset(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="adm-btn-primary" disabled={submittingReset}>
+                  {submittingReset ? (
+                    <>
+                      <i className="fa-solid fa-spinner fa-spin"></i> Actualizando...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-key" style={{ marginRight: '6px' }}></i> Restablecer Contraseña
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL CENTRADO: NUEVA CONTRASEÑA RESTABLECIDA CON ÉXITO ── */}
+      {resetSuccessData && (
+        <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setResetSuccessData(null)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#059669' }}>
+                <i className="fa-solid fa-circle-check" style={{ fontSize: '1.2rem' }}></i>
+                <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Contraseña Restablecida</h3>
+              </div>
+              <button className="adm-modal-close" onClick={() => setResetSuccessData(null)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div className="adm-modal-body">
+              <div className="dash-alert dash-alert--success" style={{ marginBottom: '1.25rem' }}>
+                <i className="fa-solid fa-circle-check"></i>
+                <span>¡La clave de <strong>{resetSuccessData.nombre}</strong> ha sido actualizada exitosamente!</span>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '12px', border: '1px solid #cbd5e1', marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '0.8rem' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                    Usuario / Correo
+                  </span>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
+                    {resetSuccessData.correo}
+                  </span>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                    Nueva Contraseña
+                  </span>
+                  <span style={{ fontFamily: 'monospace', fontSize: '1.2rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '0.36rem 0.75rem', borderRadius: '6px', border: '1px solid #a7f3d0', display: 'inline-block' }}>
+                    {resetSuccessData.contrasena}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginTop: '2px', fontSize: '0.95rem' }}></i>
+                <span style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
+                  <strong>Importante:</strong> Entrega esta nueva contraseña al veterinario. Las sesiones anteriores abiertas han sido cerradas por seguridad.
+                </span>
+              </div>
+            </div>
+
+            <div className="adm-modal-footer">
+              <button
+                type="button"
+                className="adm-btn-secondary"
+                onClick={() => setResetSuccessData(null)}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="adm-btn-primary"
+                onClick={handleCopyResetCredentials}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <i className={copiedToast ? "fa-solid fa-check" : "fa-solid fa-copy"}></i>
+                <span>{copiedToast ? '¡Copiado!' : 'Copiar Credenciales'}</span>
               </button>
             </div>
           </div>

@@ -174,9 +174,9 @@ export default function AdminVeterinarios() {
       if (res.ok && data.success) {
         setShowModalReset(false)
         setResetSuccessData({
-          nombre: resetVet.nombre,
-          correo: resetVet.correo,
-          contrasena: data.nueva_contrasena,
+          nombre: data.veterinario?.nombre || resetVet.nombre,
+          correo: data.veterinario?.correo || resetVet.correo,
+          contrasena: data.nueva_contrasena || data.contrasena_temporal,
         })
         triggerToast(`Contraseña de ${resetVet.nombre} restablecida con éxito.`, 'success')
       } else {

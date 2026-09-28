@@ -68,13 +68,15 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $emailClean = strtolower(trim($request->email));
+
+        if (!Auth::attempt(['email' => $emailClean, 'password' => $request->password])) {
             return response()->json([
                 'message' => 'Las credenciales no coinciden.',
             ], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::where('email', $emailClean)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
         $cliente = $user->cliente;
         $vet = $user->veterinario;

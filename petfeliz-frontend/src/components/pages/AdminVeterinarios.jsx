@@ -159,7 +159,7 @@ export default function AdminVeterinarios() {
 
       const payload = modeReset === 'manual' ? { password: customPassword } : {}
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/veterinarios/${resetVet.id_veterinario}/reset-password`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/veterinarios/${resetVet.id_veterinario}/generar-password-temporal`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -824,7 +824,7 @@ export default function AdminVeterinarios() {
                 style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
               >
                 <i className="fa-solid fa-key" style={{ color: '#d97706' }}></i>
-                Restablecer Contraseña
+                Generar Contraseña Temporal
               </button>
               <button
                 className="adm-btn-primary"

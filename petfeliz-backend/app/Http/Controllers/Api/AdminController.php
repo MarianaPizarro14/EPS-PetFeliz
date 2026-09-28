@@ -1119,9 +1119,15 @@ class AdminController extends Controller
     }
 
     /**
-     * Restablecer la contraseña de un usuario veterinario desde la interfaz del panel de administración.
+     * Generar / Restablecer la contraseña temporal de un usuario veterinario desde la interfaz de administración.
      * Restricción de seguridad: Solo permite modificar usuarios con rol 'veterinario' (nunca cuentas admin).
+     * Marca en la base de datos password_temporal = true.
      */
+    public function generarPasswordTemporal(Request $request, $id)
+    {
+        return $this->veterinariosResetPassword($request, $id);
+    }
+
     public function veterinariosResetPassword(Request $request, $id)
     {
         $vet = Veterinario::with('usuario')->where('id_veterinario', $id)->firstOrFail();
@@ -1149,19 +1155,28 @@ class AdminController extends Controller
             ]);
 
             $nuevaContrasena = trim($request->nueva_contrasena);
+        } elseif ($request->filled('password')) {
+            $request->validate([
+                'password' => 'required|string|min:6|max:100',
+            ]);
+            $nuevaContrasena = trim($request->password);
         } else {
             $nuevaContrasena = 'Vet#' . rand(10000, 99999);
         }
 
         $user->contrasena_hash = Hash::make($nuevaContrasena);
+        $user->password_temporal = true;
         $user->save();
 
         // Revocar tokens previos por seguridad para forzar inicio de sesión con nueva clave
         $user->tokens()->delete();
 
         return response()->json([
-            'message'             => 'Contraseña del veterinario restablecida con éxito.',
+            'success'             => true,
+            'message'             => 'Contraseña temporal del veterinario generada con éxito.',
+            'nueva_contrasena'    => $nuevaContrasena,
             'contrasena_temporal' => $nuevaContrasena,
+            'password_temporal'   => true,
             'veterinario'         => [
                 'id_veterinario' => $vet->id_veterinario,
                 'nombre'         => $vet->nombre,

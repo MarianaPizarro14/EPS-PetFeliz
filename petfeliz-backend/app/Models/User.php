@@ -19,6 +19,7 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'contrasena_hash',
+        'password_temporal',
         'rol',
         'activo',
         'token_reset',
@@ -39,6 +40,7 @@ class User extends Authenticatable
     {
         return [
             'activo' => 'boolean',
+            'password_temporal' => 'boolean',
             'token_reset_expira' => 'datetime',
         ];
     }

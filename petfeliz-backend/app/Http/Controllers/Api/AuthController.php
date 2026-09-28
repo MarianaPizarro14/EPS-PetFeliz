@@ -108,6 +108,7 @@ class AuthController extends Controller
                 'nombreCompleto' => $nombreCompleto,
                 'numero_tarjeta' => $vet ? $vet->numero_tarjeta : null,
                 'foto' => $foto,
+                'password_temporal' => (bool) ($user->password_temporal ?? false),
             ],
         ], 200);
     }
@@ -300,6 +301,7 @@ class AuthController extends Controller
             'notificaciones_email' => $cliente ? (bool) ($cliente->notificaciones_email ?? true) : true,
             'recordatorios_citas' => $cliente ? (bool) ($cliente->recordatorios_citas ?? true) : true,
             'foto' => $cliente ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg') : 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+            'password_temporal' => (bool) ($user->password_temporal ?? false),
         ]);
     }
 
@@ -411,6 +413,7 @@ class AuthController extends Controller
         }
 
         $user->contrasena_hash = Hash::make($request->nueva_contrasena);
+        $user->password_temporal = false;
         $user->save();
 
         return response()->json([

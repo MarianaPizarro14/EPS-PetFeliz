@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosUpdate']);
         Route::patch('/admin/veterinarios/{id}/reset-password', [AdminController::class, 'veterinariosResetPassword']);
         Route::post('/admin/veterinarios/{id}/reset-password', [AdminController::class, 'veterinariosResetPassword']);
+        Route::patch('/admin/veterinarios/{id}/generar-password-temporal', [AdminController::class, 'generarPasswordTemporal']);
+        Route::post('/admin/veterinarios/{id}/generar-password-temporal', [AdminController::class, 'generarPasswordTemporal']);
         Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
 
         // Rutas de Administración de Servicios
@@ -91,6 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [VeterinarioPortalController::class, 'dashboard']);
         Route::get('/pacientes', [VeterinarioPortalController::class, 'pacientes']);
         Route::post('/citas/{id}/atender', [VeterinarioPortalController::class, 'atender']);
+        Route::patch('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
+        Route::post('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
     });
 
     Route::apiResource('mascotas', MascotaController::class);

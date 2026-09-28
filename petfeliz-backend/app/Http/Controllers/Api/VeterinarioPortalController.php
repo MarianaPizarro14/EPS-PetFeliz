@@ -98,6 +98,7 @@ class VeterinarioPortalController extends Controller
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
                 'foto_perfil' => $vet->foto_perfil ?? null,
                 'correo' => $user->email,
+                'password_temporal' => (bool) ($user->password_temporal ?? false),
             ],
             'stats' => [
                 'total_citas' => $totalCitas,
@@ -209,6 +210,52 @@ class VeterinarioPortalController extends Controller
                 'paciente' => $cita->mascota->nombre ?? 'Paciente',
                 'dueno' => $cita->cliente->nombre ?? 'Cliente',
             ],
+        ], 200);
+    }
+
+    /**
+     * Cambiar la contraseña del veterinario desde su propio portal.
+     * Valida la contraseña actual o temporal y marca password_temporal = false al guardar.
+     */
+    public function cambiarPassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no autenticado.'], 401);
+        }
+
+        $request->validate([
+            'contrasena_actual' => 'required|string',
+            'nueva_contrasena' => 'required|string|min:6',
+            'confirmar_nueva_contrasena' => 'required|string|same:nueva_contrasena',
+        ], [
+            'contrasena_actual.required' => 'Debes ingresar tu contraseña actual o temporal.',
+            'nueva_contrasena.required' => 'Debes ingresar la nueva contraseña.',
+            'nueva_contrasena.min' => 'La nueva contraseña debe tener al menos 6 caracteres.',
+            'confirmar_nueva_contrasena.same' => 'La confirmación de la contraseña no coincide.',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->contrasena_actual, $user->contrasena_hash)) {
+            return response()->json([
+                'message' => 'La contraseña actual o temporal ingresada es incorrecta.',
+            ], 422);
+        }
+
+        if (\Illuminate\Support\Facades\Hash::check($request->nueva_contrasena, $user->contrasena_hash)) {
+            return response()->json([
+                'message' => 'La nueva contraseña no puede ser igual a la clave actual.',
+            ], 422);
+        }
+
+        $user->contrasena_hash = \Illuminate\Support\Facades\Hash::make($request->nueva_contrasena);
+        $user->password_temporal = false;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña actualizada exitosamente. Tu cuenta cuenta ahora con una clave personalizada.',
+            'password_temporal' => false,
         ], 200);
     }
 }

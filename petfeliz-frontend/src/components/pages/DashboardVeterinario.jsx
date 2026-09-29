@@ -34,6 +34,11 @@ export default function DashboardVeterinario() {
   const [changePassError, setChangePassError] = useState('')
   const [changePassSuccess, setChangePassSuccess] = useState('')
 
+  // Visibilidad de contraseñas (Ojo toggle)
+  const [showActualPass, setShowActualPass] = useState(false)
+  const [showNuevaPass, setShowNuevaPass] = useState(false)
+  const [showConfirmarPass, setShowConfirmarPass] = useState(false)
+
   // Toast flotante
   const [toast, setToast] = useState(null)
   const triggerToast = (message, type = 'success') => {
@@ -902,50 +907,122 @@ export default function DashboardVeterinario() {
                   <label htmlFor="contrasena_actual" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
                     Contraseña Actual o Temporal *
                   </label>
-                  <input
-                    id="contrasena_actual"
-                    type="password"
-                    required
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
-                    placeholder="Ingresa tu clave actual o la temporal recibida"
-                    value={changePassForm.contrasena_actual}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
-                  />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="contrasena_actual"
+                      type={showActualPass ? 'text' : 'password'}
+                      required
+                      className="vet-modal-textarea"
+                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Ingresa tu clave actual o la temporal recibida"
+                      value={changePassForm.contrasena_actual}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowActualPass(!showActualPass)}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        fontSize: '0.95rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'color 0.15s ease',
+                      }}
+                      title={showActualPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showActualPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="vet-modal-field" style={{ marginBottom: 0 }}>
                   <label htmlFor="nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
                     Nueva Contraseña *
                   </label>
-                  <input
-                    id="nueva_contrasena"
-                    type="password"
-                    required
-                    minLength={6}
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
-                    placeholder="Mínimo 6 caracteres"
-                    value={changePassForm.nueva_contrasena}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
-                  />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="nueva_contrasena"
+                      type={showNuevaPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      className="vet-modal-textarea"
+                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Mínimo 6 caracteres"
+                      value={changePassForm.nueva_contrasena}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNuevaPass(!showNuevaPass)}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        fontSize: '0.95rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'color 0.15s ease',
+                      }}
+                      title={showNuevaPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showNuevaPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="vet-modal-field" style={{ marginBottom: 0 }}>
                   <label htmlFor="confirmar_nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
                     Confirmar Nueva Contraseña *
                   </label>
-                  <input
-                    id="confirmar_nueva_contrasena"
-                    type="password"
-                    required
-                    minLength={6}
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
-                    placeholder="Repite la nueva contraseña"
-                    value={changePassForm.confirmar_nueva_contrasena}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
-                  />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="confirmar_nueva_contrasena"
+                      type={showConfirmarPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      className="vet-modal-textarea"
+                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Repite la nueva contraseña"
+                      value={changePassForm.confirmar_nueva_contrasena}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmarPass(!showConfirmarPass)}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        fontSize: '0.95rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'color 0.15s ease',
+                      }}
+                      title={showConfirmarPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showConfirmarPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="vet-modal-actions" style={{ marginTop: '0.75rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9' }}>

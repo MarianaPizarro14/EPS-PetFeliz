@@ -1139,11 +1139,16 @@ class AdminController extends Controller
             ], 404);
         }
 
-        // Restricción de seguridad: El administrador no puede restablecer contraseñas de otros administradores
-        if ($user->rol !== 'veterinario') {
+        // Restricción de seguridad: El administrador no puede restablecer contraseñas de cuentas con rol de administrador
+        if (strtolower(trim($user->rol ?? '')) === 'admin') {
             return response()->json([
-                'message' => 'Seguridad: Solo se permite restablecer contraseñas de cuentas con rol de veterinario.'
+                'message' => 'Seguridad: Solo se permite restablecer contraseñas de cuentas con rol de veterinario, no de administradores.'
             ], 403);
+        }
+
+        // Asegurar que la cuenta posea el rol de veterinario activo
+        if ($user->rol !== 'veterinario') {
+            $user->rol = 'veterinario';
         }
 
         // Generar siempre una contraseña aleatoria temporal

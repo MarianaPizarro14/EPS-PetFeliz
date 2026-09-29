@@ -17,7 +17,7 @@ class EnsureIsAdmin
     {
         $user = $request->user();
 
-        if (!$user || $user->rol !== 'admin') {
+        if (!$user || strtolower(trim($user->rol ?? '')) !== 'admin') {
             return response()->json([
                 'message' => 'Acceso denegado. Se requieren permisos de administrador.'
             ], Response::HTTP_FORBIDDEN);

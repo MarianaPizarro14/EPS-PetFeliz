@@ -845,22 +845,26 @@ export default function DashboardHeader({
               <div className="dh-menu-divider"></div>
 
               <nav className="dh-menu-links">
-                <button type="button" className="dh-menu-item" onClick={handleOpenProfileModal}>
-                  <i className="fa-solid fa-user"></i>
-                  <span>Mi perfil</span>
-                </button>
+                {usuario?.rol !== 'veterinario' && (
+                  <>
+                    <button type="button" className="dh-menu-item" onClick={handleOpenProfileModal}>
+                      <i className="fa-solid fa-user"></i>
+                      <span>Mi perfil</span>
+                    </button>
 
-                <button type="button" className="dh-menu-item" onClick={handleOpenPhotoModal}>
-                  <i className="fa-solid fa-camera"></i>
-                  <span>Cambiar foto</span>
-                </button>
+                    <button type="button" className="dh-menu-item" onClick={handleOpenPhotoModal}>
+                      <i className="fa-solid fa-camera"></i>
+                      <span>Cambiar foto</span>
+                    </button>
 
-                <button type="button" className="dh-menu-item" onClick={() => handleOpenSettingsModal('password')}>
-                  <i className="fa-solid fa-shield-halved"></i>
-                  <span>Contraseña y seguridad</span>
-                </button>
+                    <button type="button" className="dh-menu-item" onClick={() => handleOpenSettingsModal('password')}>
+                      <i className="fa-solid fa-shield-halved"></i>
+                      <span>Contraseña y seguridad</span>
+                    </button>
 
-                <div className="dh-menu-divider"></div>
+                    <div className="dh-menu-divider"></div>
+                  </>
+                )}
 
                 <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
                   <i className="fa-solid fa-arrow-right-from-bracket"></i>

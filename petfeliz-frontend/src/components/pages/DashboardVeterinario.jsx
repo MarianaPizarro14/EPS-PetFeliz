@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { getStoredToken, getStoredUser, updateStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
@@ -19,33 +19,8 @@ export default function DashboardVeterinario() {
   })
 
   const [vetProfile, setVetProfile] = useState(null)
-  const [activeTab, setActiveTab] = useState('agenda') // 'agenda' | 'pacientes'
-  const [openProfileTrigger, setOpenProfileTrigger] = useState(0)
-
-  // Flag y modal de contraseña temporal
   const isTempPass = Boolean(storedUser?.password_temporal)
   const [passwordTemporal, setPasswordTemporal] = useState(isTempPass)
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(isTempPass)
-  const [changePassForm, setChangePassForm] = useState({
-    contrasena_actual: '',
-    nueva_contrasena: '',
-    confirmar_nueva_contrasena: '',
-  })
-  const [submittingChangePass, setSubmittingChangePass] = useState(false)
-  const [changePassError, setChangePassError] = useState('')
-  const [changePassSuccess, setChangePassSuccess] = useState('')
-
-  // Visibilidad de contraseñas (Ojo toggle)
-  const [showActualPass, setShowActualPass] = useState(false)
-  const [showNuevaPass, setShowNuevaPass] = useState(false)
-  const [showConfirmarPass, setShowConfirmarPass] = useState(false)
-
-  // Toast flotante
-  const [toast, setToast] = useState(null)
-  const triggerToast = (message, type = 'success') => {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 4000)
-  }
 
   // Data states
   const [stats, setStats] = useState({
@@ -54,16 +29,12 @@ export default function DashboardVeterinario() {
     pendientes: 0,
     pacientes_unicos: 0,
   })
-  const [agendaSemanal, setAgendaSemanal] = useState([])
   const [todasCitas, setTodasCitas] = useState([])
   const [pacientes, setPacientes] = useState([])
-
   const [loading, setLoading] = useState(true)
   const [errorGlobal, setErrorGlobal] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('todos') // 'todos' | 'pendiente' | 'atendida'
 
-  // Modal para atender cita / ver observaciones
+  // Modal para atender cita desde el panel
   const [selectedCita, setSelectedCita] = useState(null)
   const [observacion, setObservacion] = useState('')
   const [submittingAtender, setSubmittingAtender] = useState(false)
@@ -71,70 +42,13 @@ export default function DashboardVeterinario() {
   const [modalError, setModalError] = useState('')
   const [viewOnlyObs, setViewOnlyObs] = useState(false)
 
-  // Handler cambio de contraseña
-  const handleSubmitChangePassword = async (e) => {
-    if (e) e.preventDefault()
-    setChangePassError('')
-    setChangePassSuccess('')
-
-    if (!changePassForm.contrasena_actual) {
-      setChangePassError('Ingresa tu contraseña actual o temporal.')
-      return
-    }
-    if (changePassForm.nueva_contrasena.length < 6) {
-      setChangePassError('La nueva contraseña debe tener al menos 6 caracteres.')
-      return
-    }
-    if (changePassForm.nueva_contrasena !== changePassForm.confirmar_nueva_contrasena) {
-      setChangePassError('Las contraseñas confirmadas no coinciden.')
-      return
-    }
-
-    const token = getStoredToken()
-    if (!token) return
-
-    try {
-      setSubmittingChangePass(true)
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/cambiar-password`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(changePassForm),
-      })
-
-      const data = await res.json()
-
-      if (res.ok && data.success) {
-        setChangePassSuccess('¡Contraseña actualizada exitosamente!')
-        setPasswordTemporal(false)
-
-        const currentUser = getStoredUser()
-        if (currentUser) {
-          updateStoredUser({ ...currentUser, password_temporal: false })
-        }
-
-        setTimeout(() => {
-          setShowChangePasswordModal(false)
-          setChangePassForm({ contrasena_actual: '', nueva_contrasena: '', confirmar_nueva_contrasena: '' })
-          setChangePassSuccess('')
-          triggerToast('¡Contraseña actualizada con éxito! Tu portal está activo y seguro.', 'success')
-        }, 1200)
-      } else {
-        setChangePassError(data.message || 'No se pudo actualizar la contraseña.')
-      }
-    } catch (err) {
-      console.error('Error al cambiar contraseña:', err)
-      setChangePassError('Error de conexión al guardar la nueva contraseña.')
-    } finally {
-      setSubmittingChangePass(false)
-    }
+  // Toast flotante
+  const [toast, setToast] = useState(null)
+  const triggerToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4000)
   }
 
-  // Cargar dashboard
   const fetchDashboardData = async () => {
     const token = getStoredToken()
     if (!token) {
@@ -164,8 +78,7 @@ export default function DashboardVeterinario() {
         const dashData = await resDash.json()
         setVetProfile(dashData.veterinario)
         setStats(dashData.stats || {})
-        setAgendaSemanal(dashData.agenda_semanal || [])
-        setTodasCitas(dashData.todas_citas || [])
+        setTodasCitas(dashData.todas_citas || dashData.citas || [])
 
         if (dashData.veterinario) {
           setUsuario((prev) => ({
@@ -183,11 +96,10 @@ export default function DashboardVeterinario() {
 
           if (dashData.veterinario.password_temporal) {
             setPasswordTemporal(true)
-            setShowChangePasswordModal(true)
           }
         }
       } else {
-        setErrorGlobal('No se pudo obtener la agenda médica.')
+        setErrorGlobal('No se pudo obtener la información del panel.')
       }
 
       if (resPacientes.ok) {
@@ -206,7 +118,6 @@ export default function DashboardVeterinario() {
     fetchDashboardData()
   }, [navigate])
 
-  // Abrir modal atender
   const handleOpenAtenderModal = (cita, isReadOnly = false) => {
     setSelectedCita(cita)
     setObservacion(cita.observacion || '')
@@ -223,7 +134,6 @@ export default function DashboardVeterinario() {
     setModalError('')
   }
 
-  // Submit guardar atención de cita
   const handleSubmitAtender = async (e) => {
     e.preventDefault()
     if (!selectedCita) return
@@ -256,6 +166,7 @@ export default function DashboardVeterinario() {
       setTimeout(() => {
         handleCloseModal()
         fetchDashboardData()
+        triggerToast('¡Consulta registrada con éxito!')
       }, 1200)
     } catch (err) {
       console.error('Error al atender cita:', err)
@@ -265,50 +176,13 @@ export default function DashboardVeterinario() {
     }
   }
 
-  // Filtrado de la agenda
-  const searchLower = searchTerm.toLowerCase().trim()
-
-  const agendaFiltrada = agendaSemanal
-    .map((dia) => {
-      const citasDelDia = dia.citas.filter((c) => {
-        // Filtro estado
-        if (filterStatus === 'pendiente' && c.id_estado !== 1 && c.id_estado !== 2) return false
-        if (filterStatus === 'atendida' && c.id_estado !== 4) return false
-
-        // Filtro búsqueda
-        if (!searchLower) return true
-        const sNombre = c.servicio?.nombre_servicio || c.servicio?.nombre || c.motivo || ''
-        return (
-          (c.mascota?.nombre || '').toLowerCase().includes(searchLower) ||
-          (c.mascota?.especie || '').toLowerCase().includes(searchLower) ||
-          (c.cliente?.nombre || c.dueno?.nombre || '').toLowerCase().includes(searchLower) ||
-          sNombre.toLowerCase().includes(searchLower)
-        )
-      })
-
-      return {
-        ...dia,
-        citas: citasDelDia,
-      }
-    })
-    .filter((dia) => dia.citas.length > 0)
-
-  // Filtrado de pacientes
-  const pacientesFiltrados = pacientes.filter((p) => {
-    if (!searchLower) return true
-    return (
-      p.nombre.toLowerCase().includes(searchLower) ||
-      p.especie.toLowerCase().includes(searchLower) ||
-      (p.raza && p.raza.toLowerCase().includes(searchLower)) ||
-      (p.dueno?.nombre && p.dueno.nombre.toLowerCase().includes(searchLower))
-    )
-  })
+  // Próximas citas pendientes
+  const proximasCitas = todasCitas.slice(0, 6)
 
   return (
     <div className="dash">
       <SidebarVet />
 
-      {/* ── TOAST FLOTANTE DE CONFIRMACIÓN ── */}
       {toast && (
         <div className={`adm-toast ${toast.type === 'error' ? 'adm-toast--error' : ''}`}>
           <i className={`adm-toast__icon fa-solid ${toast.type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}`}></i>
@@ -329,53 +203,6 @@ export default function DashboardVeterinario() {
           }
           usuario={usuario}
           onUserUpdated={setUsuario}
-          openProfileTrigger={openProfileTrigger}
-          showSearch={true}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          extraActions={
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <button
-                type="button"
-                className="act-btn"
-                onClick={() => setOpenProfileTrigger((prev) => prev + 1)}
-                style={{
-                  background: '#ecfdf5',
-                  color: '#059669',
-                  border: '1px solid #a7f3d0',
-                  padding: '0.5rem 0.85rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  height: '40px',
-                  borderRadius: '10px',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
-                title="Editar mi perfil profesional"
-              >
-                <i className="fa-solid fa-user-doctor"></i>
-                <span>Mi Perfil</span>
-              </button>
-
-              <button
-                type="button"
-                className="act-btn act-btn--edit"
-                onClick={() => {
-                  setChangePassError('')
-                  setChangePassSuccess('')
-                  setChangePassForm({ contrasena_actual: '', nueva_contrasena: '', confirmar_nueva_contrasena: '' })
-                  setShowChangePasswordModal(true)
-                }}
-                style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a', padding: '0.5rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', height: '40px', borderRadius: '10px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
-                title="Cambiar contraseña de la cuenta"
-              >
-                <i className="fa-solid fa-key"></i>
-                <span>Cambiar Contraseña</span>
-              </button>
-            </div>
-          }
         />
 
         {passwordTemporal && (
@@ -384,21 +211,15 @@ export default function DashboardVeterinario() {
               <i className="fa-solid fa-shield-cat" style={{ fontSize: '1.25rem', color: '#d97706' }}></i>
               <div>
                 <strong style={{ fontSize: '0.9rem', color: '#92400e', display: 'block' }}>Contraseña Temporal Activa</strong>
-                <span style={{ fontSize: '0.82rem', color: '#a16207' }}>Estás navegando con una clave temporal. Debes actualizar tu contraseña para proteger tu cuenta.</span>
+                <span style={{ fontSize: '0.82rem', color: '#a16207' }}>Estás navegando con una clave temporal. Actualízala desde Configuración.</span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setChangePassError('')
-                setChangePassSuccess('')
-                setChangePassForm({ contrasena_actual: '', nueva_contrasena: '', confirmar_nueva_contrasena: '' })
-                setShowChangePasswordModal(true)
-              }}
-              style={{ background: '#d97706', color: '#ffffff', border: 'none', padding: '0.45rem 0.85rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            <Link
+              to="/veterinario/configuracion"
+              style={{ background: '#d97706', color: '#ffffff', textDecoration: 'none', padding: '0.45rem 0.85rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              <i className="fa-solid fa-key"></i> Cambiar Ahora
-            </button>
+              <i className="fa-solid fa-key"></i> Ir a Configuración
+            </Link>
           </div>
         )}
 
@@ -410,7 +231,7 @@ export default function DashboardVeterinario() {
         )}
 
         {/* ── 4 TARJETAS DE ESTADÍSTICAS VETERINARIO ── */}
-        <div className="vet-stats-grid">
+        <div className="vet-stats-grid" style={{ marginBottom: '2rem' }}>
           <div className="vet-stat-card">
             <div className="vet-stat-card__icon vet-stat-card__icon--teal">
               <i className="fa-regular fa-calendar-check"></i>
@@ -452,264 +273,210 @@ export default function DashboardVeterinario() {
           </div>
         </div>
 
-        {/* ── BARRA DE PESTAÑAS (AGENDA Y PACIENTES) ── */}
-        <div className="vet-tabs-header">
-          <div className="vet-tabs-nav">
-            <button
-              type="button"
-              className={`vet-tab-btn ${activeTab === 'agenda' ? 'vet-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('agenda')}
-            >
-              <i className="fa-regular fa-calendar-days"></i>
-              <span>Mi Agenda Médica</span>
-              {stats.pendientes > 0 && (
-                <span className="vet-tab-badge">{stats.pendientes}</span>
-              )}
-            </button>
+        {/* ── SECCIÓN 1: PRÓXIMOS PACIENTES / CONSULTAS DEL DÍA ── */}
+        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div>
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <i className="fa-solid fa-user-doctor" style={{ color: '#059669' }}></i>
+                Próximos Pacientes y Consultas
+              </h3>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                Citas más recientes programadas en tu agenda médica
+              </p>
+            </div>
 
-            <button
-              type="button"
-              className={`vet-tab-btn ${activeTab === 'pacientes' ? 'vet-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('pacientes')}
+            <Link
+              to="/veterinario/citas"
+              style={{
+                background: '#ecfdf5',
+                color: '#059669',
+                border: '1px solid #a7f3d0',
+                borderRadius: '8px',
+                padding: '0.45rem 0.85rem',
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
             >
-              <i className="fa-solid fa-paw"></i>
-              <span>Mis Pacientes</span>
-              <span className="vet-tab-badge vet-tab-badge--subtle">{pacientes.length}</span>
-            </button>
+              <span>Ver Agenda Completa</span>
+              <i className="fa-solid fa-arrow-right"></i>
+            </Link>
           </div>
 
-          {activeTab === 'agenda' && (
-            <div className="vet-status-filters">
-              <span className="vet-filter-label">Estado:</span>
-              <button
-                type="button"
-                className={`vet-filter-chip ${filterStatus === 'todos' ? 'vet-filter-chip--active' : ''}`}
-                onClick={() => setFilterStatus('todos')}
-              >
-                Todos
-              </button>
-              <button
-                type="button"
-                className={`vet-filter-chip ${filterStatus === 'pendiente' ? 'vet-filter-chip--active' : ''}`}
-                onClick={() => setFilterStatus('pendiente')}
-              >
-                Pendientes
-              </button>
-              <button
-                type="button"
-                className={`vet-filter-chip ${filterStatus === 'atendida' ? 'vet-filter-chip--active' : ''}`}
-                onClick={() => setFilterStatus('atendida')}
-              >
-                Atendidas
-              </button>
+          {loading ? (
+            <div className="vet-loading-box">
+              <i className="fa-solid fa-spinner fa-spin"></i>
+              <p>Cargando próximos pacientes...</p>
+            </div>
+          ) : proximasCitas.length === 0 ? (
+            <div className="vet-empty-box">
+              <i className="fa-regular fa-calendar-check"></i>
+              <h3>No hay consultas registradas</h3>
+              <p>No tienes citas agendadas actualmente en el sistema.</p>
+            </div>
+          ) : (
+            <div className="vet-citas-list">
+              {proximasCitas.map((cita) => {
+                const isPendiente = cita.id_estado === 1 || cita.id_estado === 2
+                const isAtendida = cita.id_estado === 4
+                const servicioNombre = cita.servicio?.nombre_servicio || cita.servicio?.nombre || cita.motivo || 'Consulta General'
+                const estadoTexto = cita.estado_nombre || cita.estado || (isAtendida ? 'Atendida' : (isPendiente ? 'Pendiente' : 'Cancelada'))
+
+                return (
+                  <div key={cita.id_cita} className="vet-cita-row">
+                    <div className="vet-cita-time-block">
+                      <span className="vet-cita-time">
+                        <i className="fa-regular fa-clock"></i> {cita.hora}
+                      </span>
+                      <span className="vet-cita-service-badge">
+                        {servicioNombre}
+                      </span>
+                    </div>
+
+                    <div className="vet-cita-pet-info">
+                      <img
+                        src={
+                          cita.paciente?.foto || cita.paciente?.foto_mascota || cita.mascota?.foto_mascota ||
+                          (cita.mascota?.especie === 'Gato'
+                            ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
+                            : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
+                        }
+                        alt={cita.mascota?.nombre || 'Paciente'}
+                        className="vet-pet-avatar"
+                      />
+                      <div>
+                        <strong className="vet-pet-name">{cita.mascota?.nombre || 'Paciente'}</strong>
+                        <span className="vet-pet-detail">
+                          {cita.mascota?.especie || 'Mascota'} {cita.mascota?.raza ? `• ${cita.mascota.raza}` : ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="vet-cita-owner-info">
+                      <span className="vet-owner-label">Dueño / Solicitante:</span>
+                      <strong className="vet-owner-name">{cita.cliente?.nombre || cita.dueno?.nombre || 'Cliente EPS'}</strong>
+                      <span className="vet-owner-phone">
+                        <i className="fa-solid fa-phone"></i> {cita.cliente?.telefono || cita.dueno?.telefono || 'N/R'}
+                      </span>
+                    </div>
+
+                    <div className="vet-cita-status-block">
+                      <span className={`vet-badge ${isAtendida ? 'vet-badge--atendida' : isPendiente ? 'vet-badge--pendiente' : 'vet-badge--cancelada'}`}>
+                        <i className={`fa-solid ${isAtendida ? 'fa-circle-check' : isPendiente ? 'fa-clock' : 'fa-circle-xmark'}`}></i>
+                        {estadoTexto}
+                      </span>
+                    </div>
+
+                    <div className="vet-cita-actions">
+                      {isPendiente && (
+                        <button type="button" className="vet-btn-atender" onClick={() => handleOpenAtenderModal(cita, false)}>
+                          <i className="fa-solid fa-stethoscope"></i>
+                          <span>Atender Cita</span>
+                        </button>
+                      )}
+                      {isAtendida && (
+                        <button type="button" className="vet-btn-obs" onClick={() => handleOpenAtenderModal(cita, true)}>
+                          <i className="fa-regular fa-file-lines"></i>
+                          <span>Ver Historial</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
 
-        {/* ── CONTENIDO PESTAÑA 1: MI AGENDA ── */}
-        {activeTab === 'agenda' && (
-          <div className="vet-agenda-container">
-            {loading ? (
-              <div className="vet-loading-box">
-                <i className="fa-solid fa-spinner fa-spin"></i>
-                <p>Cargando agenda médica...</p>
-              </div>
-            ) : agendaFiltrada.length === 0 ? (
-              <div className="vet-empty-box">
-                <i className="fa-regular fa-calendar-xmark"></i>
-                <h3>No hay citas programadas</h3>
-                <p>No se encontraron citas con los filtros o criterios de búsqueda seleccionados.</p>
-              </div>
-            ) : (
-              agendaFiltrada.map((diaGroup, index) => (
-                <div key={index} className="vet-day-card">
-                  <div className="vet-day-header">
-                    <div className="vet-day-title">
-                      <i className="fa-regular fa-calendar"></i>
-                      <h3>{diaGroup.dia_nombre}</h3>
+        {/* ── SECCIÓN 2: ACCESO RÁPIDO A PACIENTES RECIENTES ── */}
+        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div>
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <i className="fa-solid fa-paw" style={{ color: '#059669' }}></i>
+                Mascotas en Consulta Reciente
+              </h3>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                Mascotas atendidas en tus últimos registros médicos
+              </p>
+            </div>
+
+            <Link
+              to="/veterinario/pacientes"
+              style={{
+                background: '#f8fafc',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '0.45rem 0.85rem',
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem'
+              }}
+            >
+              <span>Ver Todos los Pacientes</span>
+              <i className="fa-solid fa-arrow-right"></i>
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="vet-loading-box">
+              <i className="fa-solid fa-spinner fa-spin"></i>
+              <p>Cargando lista de mascotas...</p>
+            </div>
+          ) : pacientes.length === 0 ? (
+            <div className="vet-empty-box">
+              <i className="fa-solid fa-paw"></i>
+              <h3>Sin pacientes registrados</h3>
+              <p>No se encontraron mascotas en tu lista de atención.</p>
+            </div>
+          ) : (
+            <div className="vet-pacientes-grid">
+              {pacientes.slice(0, 3).map((paciente) => (
+                <div key={paciente.id_mascota} className="vet-paciente-card">
+                  <div className="vet-paciente-card__top">
+                    <img
+                      src={
+                        paciente.foto || paciente.foto_mascota ||
+                        (paciente.especie === 'Gato'
+                          ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
+                          : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
+                      }
+                      alt={paciente.nombre}
+                      className="vet-paciente-img"
+                    />
+                    <div className="vet-paciente-title-wrap">
+                      <h4>{paciente.nombre}</h4>
+                      <span className="vet-paciente-species">
+                        {paciente.especie} {paciente.raza ? `• ${paciente.raza}` : ''}
+                      </span>
                     </div>
-                    <span className="vet-day-count">
-                      {diaGroup.citas.length} {diaGroup.citas.length === 1 ? 'cita' : 'citas'}
-                    </span>
                   </div>
 
-                  <div className="vet-citas-list">
-                    {diaGroup.citas.map((cita) => {
-                      const isPendiente = cita.id_estado === 1 || cita.id_estado === 2
-                      const isAtendida = cita.id_estado === 4
-                      const isCancelada = cita.id_estado === 3
-                      const servicioNombre = cita.servicio?.nombre_servicio || cita.servicio?.nombre || cita.motivo || 'Consulta General'
-                      const estadoTexto = cita.estado_nombre || cita.estado || (isAtendida ? 'Atendida' : (isPendiente ? 'Pendiente' : 'Cancelada'))
-
-                      return (
-                        <div key={cita.id_cita} className="vet-cita-row">
-                          {/* Hora y Servicio */}
-                          <div className="vet-cita-time-block">
-                            <span className="vet-cita-time">
-                              <i className="fa-regular fa-clock"></i> {cita.hora}
-                            </span>
-                            <span className="vet-cita-service-badge">
-                              {servicioNombre}
-                            </span>
-                          </div>
-
-                          {/* Mascota */}
-                          <div className="vet-cita-pet-info">
-                            <img
-                              src={
-                                cita.paciente?.foto || cita.paciente?.foto_mascota || cita.mascota?.foto_mascota ||
-                                (cita.mascota?.especie === 'Gato'
-                                  ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
-                                  : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
-                              }
-                              alt={cita.mascota?.nombre || 'Paciente'}
-                              className="vet-pet-avatar"
-                            />
-                            <div>
-                              <strong className="vet-pet-name">{cita.mascota?.nombre || 'Paciente'}</strong>
-                              <span className="vet-pet-detail">
-                                {cita.mascota?.especie || 'Mascota'} {cita.mascota?.raza ? `• ${cita.mascota.raza}` : ''}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Cliente / Dueño */}
-                          <div className="vet-cita-owner-info">
-                            <span className="vet-owner-label">Dueño / Solicitante:</span>
-                            <strong className="vet-owner-name">{cita.cliente?.nombre || cita.dueno?.nombre || 'Cliente EPS'}</strong>
-                            <span className="vet-owner-phone">
-                              <i className="fa-solid fa-phone"></i> {cita.cliente?.telefono || cita.dueno?.telefono || 'N/R'}
-                            </span>
-                          </div>
-
-                          {/* Estado */}
-                          <div className="vet-cita-status-block">
-                            <span
-                              className={`vet-badge ${
-                                isAtendida
-                                  ? 'vet-badge--atendida'
-                                  : isPendiente
-                                  ? 'vet-badge--pendiente'
-                                  : 'vet-badge--cancelada'
-                              }`}
-                            >
-                              <i
-                                className={`fa-solid ${
-                                  isAtendida
-                                    ? 'fa-circle-check'
-                                    : isPendiente
-                                    ? 'fa-clock'
-                                    : 'fa-circle-xmark'
-                                }`}
-                              ></i>
-                              {estadoTexto}
-                            </span>
-                          </div>
-
-                          {/* Acciones */}
-                          <div className="vet-cita-actions">
-                            {isPendiente && (
-                              <button
-                                type="button"
-                                className="vet-btn-atender"
-                                onClick={() => handleOpenAtenderModal(cita, false)}
-                              >
-                                <i className="fa-solid fa-stethoscope"></i>
-                                <span>Atender Cita</span>
-                              </button>
-                            )}
-
-                            {isAtendida && (
-                              <button
-                                type="button"
-                                className="vet-btn-obs"
-                                onClick={() => handleOpenAtenderModal(cita, true)}
-                              >
-                                <i className="fa-regular fa-file-lines"></i>
-                                <span>Ver Historial / Obs.</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="vet-paciente-card__body">
+                    <div className="vet-paciente-field">
+                      <span className="field-title">Tutor / Dueño:</span>
+                      <span className="field-highlight">{paciente.dueno?.nombre || 'Cliente EPS'}</span>
+                    </div>
+                    <div className="vet-paciente-field">
+                      <span className="field-title">Teléfono:</span>
+                      <span>{paciente.dueno?.telefono || 'N/R'}</span>
+                    </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* ── CONTENIDO PESTAÑA 2: MIS PACIENTES ── */}
-        {activeTab === 'pacientes' && (
-          <div className="vet-pacientes-container">
-            {loading ? (
-              <div className="vet-loading-box">
-                <i className="fa-solid fa-spinner fa-spin"></i>
-                <p>Cargando pacientes...</p>
-              </div>
-            ) : pacientesFiltrados.length === 0 ? (
-              <div className="vet-empty-box">
-                <i className="fa-solid fa-paw"></i>
-                <h3>No hay pacientes registrados</h3>
-                <p>No se encontraron mascotas en tu historial médico con ese nombre o criterio.</p>
-              </div>
-            ) : (
-              <div className="vet-pacientes-grid">
-                {pacientesFiltrados.map((paciente) => (
-                  <div key={paciente.id_mascota} className="vet-paciente-card">
-                    <div className="vet-paciente-card__top">
-                      <img
-                        src={
-                          paciente.foto_mascota ||
-                          (paciente.especie === 'Gato'
-                            ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
-                            : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
-                        }
-                        alt={paciente.nombre}
-                        className="vet-paciente-img"
-                      />
-                      <div className="vet-paciente-title-wrap">
-                        <h4>{paciente.nombre}</h4>
-                        <span className="vet-paciente-species">
-                          {paciente.especie} {paciente.raza ? `• ${paciente.raza}` : ''}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="vet-paciente-card__body">
-                      <div className="vet-paciente-field">
-                        <span className="field-title">Sexo:</span>
-                        <span>{paciente.sexo || 'No registrado'}</span>
-                      </div>
-
-                      <div className="vet-paciente-field">
-                        <span className="field-title">Peso:</span>
-                        <span>{paciente.peso_kg ? `${paciente.peso_kg} kg` : 'N/R'}</span>
-                      </div>
-
-                      <div className="vet-paciente-field">
-                        <span className="field-title">Dueño / Tutor:</span>
-                        <span className="field-highlight">{paciente.dueno?.nombre || 'Desconocido'}</span>
-                      </div>
-
-                      <div className="vet-paciente-field">
-                        <span className="field-title">Teléfono Dueño:</span>
-                        <span>{paciente.dueno?.telefono || 'N/R'}</span>
-                      </div>
-
-                      <div className="vet-paciente-stats-row">
-                        <span className="vet-paciente-tag">
-                          <i className="fa-solid fa-notes-medical"></i> {paciente.total_citas} Atenciones
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* ── MODAL ATENDER CITA / VER OBSERVACIONES ── */}
         {selectedCita && (
@@ -734,7 +501,6 @@ export default function DashboardVeterinario() {
               {modalError && <div className="vet-modal-alert vet-modal-alert--error">{modalError}</div>}
               {modalSuccess && <div className="vet-modal-alert vet-modal-alert--success">{modalSuccess}</div>}
 
-              {/* Resumen del paciente y dueño */}
               <div className="vet-modal-summary-box">
                 <div className="vet-modal-pet-header">
                   <img
@@ -811,283 +577,6 @@ export default function DashboardVeterinario() {
                       )}
                     </button>
                   )}
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {/* ── MODAL: CAMBIO DE CONTRASEÑA VETERINARIO ── */}
-        {showChangePasswordModal && (
-          <div className="vet-modal-backdrop" style={{ zIndex: 1100 }}>
-            <div className="vet-modal-box" style={{ maxWidth: '500px', padding: '1.75rem' }}>
-              
-              {/* Header con Ícono FontAwesome en Contenedor Redondeado */}
-              <div className="vet-modal-header" style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.15rem', marginBottom: '1.15rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  {passwordTemporal ? (
-                    <div style={{
-                      width: '46px',
-                      height: '46px',
-                      borderRadius: '14px',
-                      background: '#fef3c7',
-                      color: '#d97706',
-                      border: '1px solid #fde68a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.25rem',
-                      flexShrink: 0,
-                      boxShadow: '0 2px 8px rgba(217, 119, 6, 0.12)'
-                    }}>
-                      <i className="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                  ) : (
-                    <div style={{
-                      width: '46px',
-                      height: '46px',
-                      borderRadius: '14px',
-                      background: '#ecfdf5',
-                      color: '#059669',
-                      border: '1px solid #a7f3d0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.25rem',
-                      flexShrink: 0,
-                      boxShadow: '0 2px 8px rgba(5, 150, 105, 0.12)'
-                    }}>
-                      <i className="fa-solid fa-key"></i>
-                    </div>
-                  )}
-
-                  <div>
-                    <h3 style={{
-                      fontFamily: 'Sora, sans-serif',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      color: '#0f172a',
-                      margin: '0 0 0.35rem 0',
-                      lineHeight: '1.25'
-                    }}>
-                      {passwordTemporal ? 'Cambio de Contraseña Obligatorio' : 'Cambiar Contraseña'}
-                    </h3>
-                    <p className="vet-modal-subtitle" style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.86rem',
-                      color: '#64748b',
-                      margin: 0,
-                      lineHeight: '1.4'
-                    }}>
-                      {passwordTemporal
-                        ? 'Por seguridad debes configurar una nueva contraseña antes de continuar'
-                        : 'Actualiza la clave de acceso a tu portal médico en EPS PetFeliz'}
-                    </p>
-                  </div>
-                </div>
-
-                {!passwordTemporal && (
-                  <button type="button" className="vet-modal-close" onClick={() => setShowChangePasswordModal(false)} title="Cerrar ventana">
-                    <i className="fa-solid fa-xmark"></i>
-                  </button>
-                )}
-              </div>
-
-              {/* Banner de Contraseña Temporal Detectada */}
-              {passwordTemporal && (
-                <div style={{
-                  background: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  borderRadius: '12px',
-                  padding: '0.95rem 1.1rem',
-                  marginBottom: '1.25rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem'
-                }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    background: '#fef3c7',
-                    color: '#d97706',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.95rem',
-                    flexShrink: 0
-                  }}>
-                    <i className="fa-solid fa-shield-cat"></i>
-                  </div>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.83rem', color: '#92400e', lineHeight: '1.45' }}>
-                    <strong>Contraseña Temporal Detectada:</strong> El administrador generó tu clave actual. Para proteger la información médica de tus pacientes, ingresa la clave actual y establece una nueva contraseña personalizada.
-                  </span>
-                </div>
-              )}
-
-              {changePassError && (
-                <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.1rem' }}>
-                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {changePassError}
-                </div>
-              )}
-
-              {changePassSuccess && (
-                <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.1rem' }}>
-                  <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i> {changePassSuccess}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmitChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                  <label htmlFor="contrasena_actual" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                    Contraseña Actual o Temporal *
-                  </label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <input
-                      id="contrasena_actual"
-                      type={showActualPass ? 'text' : 'password'}
-                      required
-                      className="vet-modal-textarea"
-                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                      placeholder="Ingresa tu clave actual o la temporal recibida"
-                      value={changePassForm.contrasena_actual}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowActualPass(!showActualPass)}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '6px',
-                        fontSize: '0.95rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'color 0.15s ease',
-                      }}
-                      title={showActualPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      tabIndex={-1}
-                    >
-                      <i className={`fa-solid ${showActualPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                  <label htmlFor="nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                    Nueva Contraseña *
-                  </label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <input
-                      id="nueva_contrasena"
-                      type={showNuevaPass ? 'text' : 'password'}
-                      required
-                      minLength={6}
-                      className="vet-modal-textarea"
-                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                      placeholder="Mínimo 6 caracteres"
-                      value={changePassForm.nueva_contrasena}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNuevaPass(!showNuevaPass)}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '6px',
-                        fontSize: '0.95rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'color 0.15s ease',
-                      }}
-                      title={showNuevaPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      tabIndex={-1}
-                    >
-                      <i className={`fa-solid ${showNuevaPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                  <label htmlFor="confirmar_nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                    Confirmar Nueva Contraseña *
-                  </label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <input
-                      id="confirmar_nueva_contrasena"
-                      type={showConfirmarPass ? 'text' : 'password'}
-                      required
-                      minLength={6}
-                      className="vet-modal-textarea"
-                      style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                      placeholder="Repite la nueva contraseña"
-                      value={changePassForm.confirmar_nueva_contrasena}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmarPass(!showConfirmarPass)}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '6px',
-                        fontSize: '0.95rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'color 0.15s ease',
-                      }}
-                      title={showConfirmarPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      tabIndex={-1}
-                    >
-                      <i className={`fa-solid ${showConfirmarPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="vet-modal-actions" style={{ marginTop: '0.75rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9' }}>
-                  {!passwordTemporal && (
-                    <button
-                      type="button"
-                      className="vet-modal-btn vet-modal-btn--secondary"
-                      onClick={() => setShowChangePasswordModal(false)}
-                    >
-                      Cancelar
-                    </button>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="vet-modal-btn vet-modal-btn--primary"
-                    disabled={submittingChangePass}
-                    style={{ width: passwordTemporal ? '100%' : 'auto', justifyContent: 'center' }}
-                  >
-                    {submittingChangePass ? (
-                      <>
-                        <i className="fa-solid fa-spinner fa-spin"></i>
-                        <span>Actualizando Contraseña...</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fa-solid fa-shield-halved"></i>
-                        <span>Actualizar Contraseña</span>
-                      </>
-                    )}
-                  </button>
                 </div>
               </form>
             </div>

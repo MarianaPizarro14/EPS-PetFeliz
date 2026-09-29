@@ -3,7 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getStoredToken, clearStoredAuth } from '../../utils/authStorage'
 
 const vetMenuItems = [
-  { to: '/veterinario/dashboard', aliases: [], label: 'Mi Portal', icon: 'fa-solid fa-user-doctor' },
+  { to: '/veterinario/dashboard', aliases: ['/veterinario'], label: 'Panel', icon: 'fa-solid fa-chart-line' },
+  { to: '/veterinario/pacientes', aliases: [], label: 'Mis Pacientes', icon: 'fa-solid fa-paw' },
+  { to: '/veterinario/citas', aliases: [], label: 'Citas', icon: 'fa-regular fa-calendar-days' },
+  { to: '/veterinario/historial', aliases: [], label: 'Historial Clínico', icon: 'fa-solid fa-file-waveform' },
+  { to: '/veterinario/configuracion', aliases: [], label: 'Configuración', icon: 'fa-solid fa-gear' },
 ]
 
 export default function SidebarVet() {

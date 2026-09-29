@@ -41,6 +41,10 @@ import AdminClientes from './components/pages/AdminClientes'
 import AdminPagos from './components/pages/AdminPagos'
 import AdminConfiguracion from './components/pages/AdminConfiguracion'
 import DashboardVeterinario from './components/pages/DashboardVeterinario'
+import VetPacientes from './components/pages/VetPacientes'
+import VetCitas from './components/pages/VetCitas'
+import VetHistorialClinico from './components/pages/VetHistorialClinico'
+import VetConfiguracion from './components/pages/VetConfiguracion'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
@@ -49,7 +53,7 @@ const APP_ROUTES = [
   '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
   '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
   '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios', '/admin/servicios', '/admin/clientes', '/admin/pagos', '/admin/configuracion',
-  '/veterinario/dashboard'
+  '/veterinario', '/veterinario/dashboard', '/veterinario/pacientes', '/veterinario/citas', '/veterinario/historial', '/veterinario/configuracion'
 ]
 
 function AppContent() {
@@ -291,6 +295,38 @@ function AppContent() {
           element={
             <ProtectedRouteVet>
               <DashboardVeterinario />
+            </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/veterinario/pacientes"
+          element={
+            <ProtectedRouteVet>
+              <VetPacientes />
+            </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/veterinario/citas"
+          element={
+            <ProtectedRouteVet>
+              <VetCitas />
+            </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/veterinario/historial"
+          element={
+            <ProtectedRouteVet>
+              <VetHistorialClinico />
+            </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/veterinario/configuracion"
+          element={
+            <ProtectedRouteVet>
+              <VetConfiguracion />
             </ProtectedRouteVet>
           }
         />

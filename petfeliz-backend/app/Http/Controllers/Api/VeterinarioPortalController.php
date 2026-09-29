@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\Mascota;
+use App\Services\CloudinaryService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -94,6 +95,7 @@ class VeterinarioPortalController extends Controller
             'veterinario' => [
                 'id_veterinario' => $vet->id_veterinario,
                 'nombre' => $vet->nombre,
+                'especialidad' => $vet->especialidad ?? '',
                 'telefono' => $vet->telefono ?? '',
                 'numero_tarjeta' => $vet->numero_tarjeta ?? '',
                 'foto_perfil' => $vet->foto_perfil ?? null,
@@ -256,6 +258,98 @@ class VeterinarioPortalController extends Controller
             'success' => true,
             'message' => 'Contraseña actualizada exitosamente. Tu cuenta cuenta ahora con una clave personalizada.',
             'password_temporal' => false,
+        ], 200);
+    }
+
+    /**
+     * Obtener la información del perfil del médico veterinario autenticado.
+     */
+    public function perfilInfo(Request $request)
+    {
+        $user = $request->user();
+        $vet = $user->veterinario;
+
+        if (!$vet) {
+            return response()->json([
+                'message' => 'No se encontró un perfil de médico veterinario asociado a esta cuenta.'
+            ], 404);
+        }
+
+        return response()->json([
+            'veterinario' => [
+                'id_veterinario' => $vet->id_veterinario,
+                'nombre' => $vet->nombre,
+                'especialidad' => $vet->especialidad ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'telefono' => $vet->telefono ?? '',
+                'foto_perfil' => $vet->foto_perfil ?? null,
+                'correo' => $user->email,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Actualizar la información del perfil del médico veterinario autenticado.
+     */
+    public function updatePerfil(Request $request)
+    {
+        $user = $request->user();
+        $vet = $user->veterinario;
+
+        if (!$vet) {
+            return response()->json([
+                'message' => 'No se encontró un perfil de médico veterinario asociado a esta cuenta.'
+            ], 404);
+        }
+
+        $request->validate([
+            'nombre' => 'required|string|max:150',
+            'especialidad' => 'nullable|string|max:150',
+            'numero_tarjeta' => 'nullable|string|max:50',
+            'telefono' => 'nullable|string|max:20',
+            'foto' => 'nullable',
+            'foto_perfil' => 'nullable',
+        ], [
+            'nombre.required' => 'El nombre completo es obligatorio.',
+        ]);
+
+        $vet->nombre = trim($request->nombre);
+        if ($request->has('especialidad')) {
+            $vet->especialidad = trim($request->especialidad ?? '');
+        }
+        if ($request->has('numero_tarjeta')) {
+            $vet->numero_tarjeta = trim($request->numero_tarjeta ?? '');
+        }
+        if ($request->has('telefono')) {
+            $vet->telefono = trim($request->telefono ?? '');
+        }
+
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+            if ($fotoUrl) {
+                $vet->foto_perfil = $fotoUrl;
+            }
+        } elseif ($request->hasFile('foto_perfil')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+            if ($fotoUrl) {
+                $vet->foto_perfil = $fotoUrl;
+            }
+        }
+
+        $vet->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Perfil del médico veterinario actualizado exitosamente.',
+            'veterinario' => [
+                'id_veterinario' => $vet->id_veterinario,
+                'nombre' => $vet->nombre,
+                'especialidad' => $vet->especialidad ?? '',
+                'numero_tarjeta' => $vet->numero_tarjeta ?? '',
+                'telefono' => $vet->telefono ?? '',
+                'foto_perfil' => $vet->foto_perfil ?? null,
+                'correo' => $user->email,
+            ]
         ], 200);
     }
 }

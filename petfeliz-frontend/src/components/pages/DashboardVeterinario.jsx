@@ -20,6 +20,7 @@ export default function DashboardVeterinario() {
 
   const [vetProfile, setVetProfile] = useState(null)
   const [activeTab, setActiveTab] = useState('agenda') // 'agenda' | 'pacientes'
+  const [openProfileTrigger, setOpenProfileTrigger] = useState(0)
 
   // Flag y modal de contraseña temporal
   const isTempPass = Boolean(storedUser?.password_temporal)
@@ -171,7 +172,13 @@ export default function DashboardVeterinario() {
             ...prev,
             nombre: dashData.veterinario.nombre,
             nombreCompleto: dashData.veterinario.nombre,
+            especialidad: dashData.veterinario.especialidad || '',
+            numero_tarjeta: dashData.veterinario.numero_tarjeta || '',
+            telefono: dashData.veterinario.telefono || '',
+            correo: dashData.veterinario.correo || dashData.veterinario.email || prev.email,
+            email: dashData.veterinario.correo || dashData.veterinario.email || prev.email,
             foto: dashData.veterinario.foto_perfil || prev.foto,
+            rol: 'veterinario',
           }))
 
           if (dashData.veterinario.password_temporal) {
@@ -322,25 +329,52 @@ export default function DashboardVeterinario() {
           }
           usuario={usuario}
           onUserUpdated={setUsuario}
+          openProfileTrigger={openProfileTrigger}
           showSearch={true}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           extraActions={
-            <button
-              type="button"
-              className="act-btn act-btn--edit"
-              onClick={() => {
-                setChangePassError('')
-                setChangePassSuccess('')
-                setChangePassForm({ contrasena_actual: '', nueva_contrasena: '', confirmar_nueva_contrasena: '' })
-                setShowChangePasswordModal(true)
-              }}
-              style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a', padding: '0.5rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', height: '40px' }}
-              title="Cambiar contraseña de la cuenta"
-            >
-              <i className="fa-solid fa-key"></i>
-              <span>Cambiar Contraseña</span>
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="act-btn"
+                onClick={() => setOpenProfileTrigger((prev) => prev + 1)}
+                style={{
+                  background: '#ecfdf5',
+                  color: '#059669',
+                  border: '1px solid #a7f3d0',
+                  padding: '0.5rem 0.85rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  height: '40px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                title="Editar mi perfil profesional"
+              >
+                <i className="fa-solid fa-user-doctor"></i>
+                <span>Mi Perfil</span>
+              </button>
+
+              <button
+                type="button"
+                className="act-btn act-btn--edit"
+                onClick={() => {
+                  setChangePassError('')
+                  setChangePassSuccess('')
+                  setChangePassForm({ contrasena_actual: '', nueva_contrasena: '', confirmar_nueva_contrasena: '' })
+                  setShowChangePasswordModal(true)
+                }}
+                style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a', padding: '0.5rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', height: '40px', borderRadius: '10px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+                title="Cambiar contraseña de la cuenta"
+              >
+                <i className="fa-solid fa-key"></i>
+                <span>Cambiar Contraseña</span>
+              </button>
+            </div>
           }
         />
 

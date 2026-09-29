@@ -209,6 +209,14 @@ export default function DashboardHeader({
     contacto_emergencia_telefono: '',
   })
 
+  const [vetProfileForm, setVetProfileForm] = useState({
+    nombre: '',
+    especialidad: '',
+    numero_tarjeta: '',
+    telefono: '',
+    correo: '',
+  })
+
   const [notifPreferences, setNotifPreferences] = useState({
     recordatorios_citas: true,
   })
@@ -235,6 +243,16 @@ export default function DashboardHeader({
   // Sincronización de datos al cambiar el prop usuario
   useEffect(() => {
     if (usuario) {
+      if (usuario.rol === 'veterinario') {
+        setVetProfileForm({
+          nombre: usuario.nombreCompleto || usuario.nombre || '',
+          especialidad: usuario.especialidad || '',
+          numero_tarjeta: usuario.numero_tarjeta || '',
+          telefono: usuario.telefono || '',
+          correo: usuario.correo || usuario.email || '',
+        })
+      }
+
       setProfileForm({
         nombre: usuario.nombreCompleto || usuario.nombre || '',
         cedula: usuario.cedula || '',
@@ -251,7 +269,7 @@ export default function DashboardHeader({
         recordatorios_citas: usuario.recordatorios_citas !== undefined ? Boolean(usuario.recordatorios_citas) : true,
       })
 
-      setPhotoPreview(usuario.foto || null)
+      setPhotoPreview(usuario.foto || usuario.foto_perfil || null)
     }
   }, [usuario])
 
@@ -299,11 +317,37 @@ export default function DashboardHeader({
     }
   }
 
-  // Abrir Modal de Información Personal
-  const handleOpenProfileModal = () => {
+  // Abrir Modal de Información Personal / Perfil
+  const handleOpenProfileModal = async () => {
     setModalError('')
     setModalSuccess('')
     setShowProfileMenu(false)
+
+    if (usuario?.rol === 'veterinario') {
+      const token = getStoredToken()
+      if (token) {
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/perfil`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data.veterinario) {
+              setVetProfileForm({
+                nombre: data.veterinario.nombre || '',
+                especialidad: data.veterinario.especialidad || '',
+                numero_tarjeta: data.veterinario.numero_tarjeta || '',
+                telefono: data.veterinario.telefono || '',
+                correo: data.veterinario.correo || usuario?.email || '',
+              })
+            }
+          }
+        } catch (err) {
+          console.error('Error al cargar perfil de veterinario:', err)
+        }
+      }
+    }
+
     setShowProfileModal(true)
   }
 
@@ -372,8 +416,13 @@ export default function DashboardHeader({
       return
     }
 
+    const isVet = usuario?.rol === 'veterinario'
+    const photoEndpoint = isVet
+      ? `${import.meta.env.VITE_API_URL}/veterinario/perfil/update`
+      : `${import.meta.env.VITE_API_URL}/perfil/update`
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/perfil/update`, {
+      const res = await fetch(photoEndpoint, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -391,8 +440,17 @@ export default function DashboardHeader({
       }
 
       setModalSuccess('¡Foto de perfil actualizada correctamente!')
-      if (onUserUpdated && data.cliente) {
-        onUserUpdated(data.cliente)
+      const updatedEntity = data.veterinario || data.cliente
+      if (onUserUpdated && updatedEntity) {
+        if (isVet) {
+          onUserUpdated({
+            ...usuario,
+            nombre: updatedEntity.nombre,
+            foto: updatedEntity.foto_perfil || usuario?.foto,
+          })
+        } else {
+          onUserUpdated(updatedEntity)
+        }
       }
 
       setTimeout(() => {
@@ -401,6 +459,81 @@ export default function DashboardHeader({
     } catch (err) {
       console.error(err)
       setModalError('No se pudo conectar con el servidor para actualizar la foto.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Guardar Datos del Perfil de Médico Veterinario
+  const handleSaveVetProfile = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setModalError('')
+    setModalSuccess('')
+
+    if (!vetProfileForm.nombre || !vetProfileForm.nombre.trim()) {
+      setModalError('El nombre completo es obligatorio.')
+      setSaving(false)
+      return
+    }
+
+    if (vetProfileForm.telefono && !/^[0-9+\s-]{7,15}$/.test(vetProfileForm.telefono.trim())) {
+      setModalError('El teléfono ingresado debe contener entre 7 y 15 dígitos numéricos.')
+      setSaving(false)
+      return
+    }
+
+    const token = getStoredToken()
+    const bodyFormData = new FormData()
+
+    bodyFormData.append('nombre', vetProfileForm.nombre.trim())
+    bodyFormData.append('especialidad', vetProfileForm.especialidad ? vetProfileForm.especialidad.trim() : '')
+    bodyFormData.append('numero_tarjeta', vetProfileForm.numero_tarjeta ? vetProfileForm.numero_tarjeta.trim() : '')
+    bodyFormData.append('telefono', vetProfileForm.telefono ? vetProfileForm.telefono.trim() : '')
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/perfil/update`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        body: bodyFormData,
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setModalError(data.message || 'Error al actualizar el perfil del veterinario.')
+        setSaving(false)
+        return
+      }
+
+      setModalSuccess('¡Perfil del médico veterinario actualizado con éxito!')
+      if (data.veterinario) {
+        const updatedUserObj = {
+          ...usuario,
+          nombre: data.veterinario.nombre,
+          nombreCompleto: data.veterinario.nombre,
+          especialidad: data.veterinario.especialidad || '',
+          numero_tarjeta: data.veterinario.numero_tarjeta || '',
+          telefono: data.veterinario.telefono || '',
+          correo: data.veterinario.correo || usuario?.correo || usuario?.email || '',
+          email: data.veterinario.correo || usuario?.correo || usuario?.email || '',
+          foto: data.veterinario.foto_perfil || usuario?.foto,
+        }
+        if (onUserUpdated) {
+          onUserUpdated(updatedUserObj)
+        }
+        updateStoredUser(updatedUserObj)
+      }
+
+      setTimeout(() => {
+        setShowProfileModal(false)
+      }, 1200)
+    } catch (err) {
+      console.error(err)
+      setModalError('No se pudo conectar con el servidor.')
     } finally {
       setSaving(false)
     }
@@ -739,14 +872,18 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      {/* ── 3. MODAL INFORMACIÓN PERSONAL (Sin pestañas) ── */}
+      {/* ── 3. MODAL INFORMACIÓN PERSONAL / PERFIL ── */}
       {showProfileModal && (
         <div className="dh-modal-backdrop">
           <div className="dh-modal-box dh-modal-box--wide">
             <div className="dh-modal-header">
               <div>
-                <h3>Información Personal</h3>
-                <p className="dh-modal-subtitle">Actualiza tus datos de contacto y residencia</p>
+                <h3>{usuario?.rol === 'veterinario' ? 'Mi Perfil Médico Veterinario' : 'Información Personal'}</h3>
+                <p className="dh-modal-subtitle">
+                  {usuario?.rol === 'veterinario'
+                    ? 'Actualiza tu información profesional y datos de contacto en EPS PetFeliz'
+                    : 'Actualiza tus datos de contacto y residencia'}
+                </p>
               </div>
               <button
                 type="button"
@@ -760,150 +897,228 @@ export default function DashboardHeader({
             {modalError && <div className="dh-modal-alert dh-modal-alert--error">{modalError}</div>}
             {modalSuccess && <div className="dh-modal-alert dh-modal-alert--success">{modalSuccess}</div>}
 
-            <form onSubmit={handleSaveProfile} className="dh-profile-form">
-              <div className="dh-info-grid">
-                <div className="dh-form-field">
-                  <label htmlFor="nombre">Nombre Completo *</label>
-                  <input
-                    id="nombre"
-                    type="text"
-                    required
-                    placeholder="Tu nombre completo"
-                    value={profileForm.nombre}
-                    onChange={(e) => setProfileForm({ ...profileForm, nombre: e.target.value })}
-                  />
+            {usuario?.rol === 'veterinario' ? (
+              <form onSubmit={handleSaveVetProfile} className="dh-profile-form">
+                <div className="dh-info-grid">
+                  <div className="dh-form-field">
+                    <label htmlFor="vet_nombre">Nombre Completo *</label>
+                    <input
+                      id="vet_nombre"
+                      type="text"
+                      required
+                      placeholder="Dr. Nombre Apellido"
+                      value={vetProfileForm.nombre}
+                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, nombre: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="vet_especialidad">Especialidad Médica</label>
+                    <input
+                      id="vet_especialidad"
+                      type="text"
+                      placeholder="ej. Cirugía Veterinaria, Medicina Interna, Consulta General"
+                      value={vetProfileForm.especialidad}
+                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, especialidad: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="vet_numero_tarjeta">Número de Tarjeta Profesional</label>
+                    <input
+                      id="vet_numero_tarjeta"
+                      type="text"
+                      placeholder="ej. TP-123456"
+                      value={vetProfileForm.numero_tarjeta}
+                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, numero_tarjeta: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="vet_telefono">Teléfono de Contacto</label>
+                    <input
+                      id="vet_telefono"
+                      type="text"
+                      placeholder="ej. 3001234567"
+                      value={vetProfileForm.telefono}
+                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, telefono: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field dh-form-field--full">
+                    <label htmlFor="vet_correo">Correo Electrónico (Cuenta Institucional)</label>
+                    <input
+                      id="vet_correo"
+                      type="email"
+                      readOnly
+                      disabled
+                      className="dh-input-disabled"
+                      style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
+                      value={vetProfileForm.correo}
+                    />
+                    <span className="dh-field-hint">El correo institucional de acceso no puede ser modificado desde este panel.</span>
+                  </div>
                 </div>
 
-                <div className="dh-form-field">
-                  <label htmlFor="cedula">Cédula / Documento de Identidad</label>
-                  <input
-                    id="cedula"
-                    type="text"
-                    placeholder="ej. 1020304050"
-                    value={profileForm.cedula}
-                    onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
-                  />
-                  <span className="dh-field-hint">Solo números, entre 5 y 12 dígitos</span>
-                </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="fecha_nacimiento">Fecha de Nacimiento</label>
-                  <CustomDatePicker
-                    value={profileForm.fecha_nacimiento}
-                    onChange={(val) => setProfileForm({ ...profileForm, fecha_nacimiento: val })}
-                    placeholder="Selecciona fecha de nacimiento"
-                  />
-                </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="telefono">Teléfono de Contacto</label>
-                  <input
-                    id="telefono"
-                    type="text"
-                    placeholder="ej. 3001234567"
-                    value={profileForm.telefono}
-                    onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
-                  />
-                </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="direccion">Dirección de Residencia</label>
-                  <input
-                    id="direccion"
-                    type="text"
-                    placeholder="ej. Calle 10 # 20 - 30"
-                    value={profileForm.direccion}
-                    onChange={(e) => setProfileForm({ ...profileForm, direccion: e.target.value })}
-                  />
-                </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="departamento">Departamento</label>
-                  <select
-                    id="departamento"
-                    value={profileForm.departamento}
-                    onChange={(e) => {
-                      const depto = e.target.value
-                      const ciudadesDisponibles = DEPARTAMENTOS_Y_CIUDADES_COLOMBIA[depto] || []
-                      const ciudadInicial = ciudadesDisponibles.length > 0 ? ciudadesDisponibles[0] : ''
-                      setProfileForm({
-                        ...profileForm,
-                        departamento: depto,
-                        ciudad: ciudadInicial,
-                      })
-                    }}
+                <div className="dh-modal-footer" style={{ marginTop: '1.5rem' }}>
+                  <button
+                    type="button"
+                    className="dh-btn-secondary"
+                    onClick={() => setShowProfileModal(false)}
                   >
-                    <option value="">Selecciona departamento...</option>
-                    {Object.keys(DEPARTAMENTOS_Y_CIUDADES_COLOMBIA).sort().map((depto) => (
-                      <option key={depto} value={depto}>
-                        {depto}
-                      </option>
-                    ))}
-                  </select>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="dh-btn-primary" disabled={saving}>
+                    {saving ? 'Guardando...' : 'Guardar Perfil Veterinario'}
+                  </button>
                 </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSaveProfile} className="dh-profile-form">
+                <div className="dh-info-grid">
+                  <div className="dh-form-field">
+                    <label htmlFor="nombre">Nombre Completo *</label>
+                    <input
+                      id="nombre"
+                      type="text"
+                      required
+                      placeholder="Tu nombre completo"
+                      value={profileForm.nombre}
+                      onChange={(e) => setProfileForm({ ...profileForm, nombre: e.target.value })}
+                    />
+                  </div>
 
-                <div className="dh-form-field">
-                  <label htmlFor="ciudad">Ciudad / Municipio</label>
-                  {!profileForm.departamento ? (
-                    <select id="ciudad" disabled className="dh-select-disabled">
-                      <option value="">Selecciona primero un departamento</option>
-                    </select>
-                  ) : (
+                  <div className="dh-form-field">
+                    <label htmlFor="cedula">Cédula / Documento de Identidad</label>
+                    <input
+                      id="cedula"
+                      type="text"
+                      placeholder="ej. 1020304050"
+                      value={profileForm.cedula}
+                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
+                    />
+                    <span className="dh-field-hint">Solo números, entre 5 y 12 dígitos</span>
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="fecha_nacimiento">Fecha de Nacimiento</label>
+                    <CustomDatePicker
+                      value={profileForm.fecha_nacimiento}
+                      onChange={(val) => setProfileForm({ ...profileForm, fecha_nacimiento: val })}
+                      placeholder="Selecciona fecha de nacimiento"
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="telefono">Teléfono de Contacto</label>
+                    <input
+                      id="telefono"
+                      type="text"
+                      placeholder="ej. 3001234567"
+                      value={profileForm.telefono}
+                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="direccion">Dirección de Residencia</label>
+                    <input
+                      id="direccion"
+                      type="text"
+                      placeholder="ej. Calle 10 # 20 - 30"
+                      value={profileForm.direccion}
+                      onChange={(e) => setProfileForm({ ...profileForm, direccion: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="departamento">Departamento</label>
                     <select
-                      id="ciudad"
-                      value={profileForm.ciudad}
-                      onChange={(e) => setProfileForm({ ...profileForm, ciudad: e.target.value })}
+                      id="departamento"
+                      value={profileForm.departamento}
+                      onChange={(e) => {
+                        const depto = e.target.value
+                        const ciudadesDisponibles = DEPARTAMENTOS_Y_CIUDADES_COLOMBIA[depto] || []
+                        const ciudadInicial = ciudadesDisponibles.length > 0 ? ciudadesDisponibles[0] : ''
+                        setProfileForm({
+                          ...profileForm,
+                          departamento: depto,
+                          ciudad: ciudadInicial,
+                        })
+                      }}
                     >
-                      <option value="">Selecciona una ciudad...</option>
-                      {(DEPARTAMENTOS_Y_CIUDADES_COLOMBIA[profileForm.departamento] || []).map((ciudad) => (
-                        <option key={ciudad} value={ciudad}>
-                          {ciudad}
+                      <option value="">Selecciona departamento...</option>
+                      {Object.keys(DEPARTAMENTOS_Y_CIUDADES_COLOMBIA).sort().map((depto) => (
+                        <option key={depto} value={depto}>
+                          {depto}
                         </option>
                       ))}
                     </select>
-                  )}
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="ciudad">Ciudad / Municipio</label>
+                    {!profileForm.departamento ? (
+                      <select id="ciudad" disabled className="dh-select-disabled">
+                        <option value="">Selecciona primero un departamento</option>
+                      </select>
+                    ) : (
+                      <select
+                        id="ciudad"
+                        value={profileForm.ciudad}
+                        onChange={(e) => setProfileForm({ ...profileForm, ciudad: e.target.value })}
+                      >
+                        <option value="">Selecciona una ciudad...</option>
+                        {(DEPARTAMENTOS_Y_CIUDADES_COLOMBIA[profileForm.departamento] || []).map((ciudad) => (
+                          <option key={ciudad} value={ciudad}>
+                            {ciudad}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  <div className="dh-form-field dh-form-field--full">
+                    <div className="dh-section-title">Contacto de Emergencia</div>
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="contacto_emergencia_nombre">Nombre del Contacto</label>
+                    <input
+                      id="contacto_emergencia_nombre"
+                      type="text"
+                      placeholder="Nombre del familiar o persona de contacto"
+                      value={profileForm.contacto_emergencia_nombre}
+                      onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_nombre: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="dh-form-field">
+                    <label htmlFor="contacto_emergencia_telefono">Teléfono de Emergencia</label>
+                    <input
+                      id="contacto_emergencia_telefono"
+                      type="text"
+                      placeholder="ej. 3109876543"
+                      value={profileForm.contacto_emergencia_telefono}
+                      onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_telefono: e.target.value })}
+                    />
+                  </div>
                 </div>
 
-                <div className="dh-form-field dh-form-field--full">
-                  <div className="dh-section-title">Contacto de Emergencia</div>
+                <div className="dh-modal-footer">
+                  <button
+                    type="button"
+                    className="dh-btn-secondary"
+                    onClick={() => setShowProfileModal(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" className="dh-btn-primary" disabled={saving}>
+                    {saving ? 'Guardando...' : 'Guardar Cambios'}
+                  </button>
                 </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="contacto_emergencia_nombre">Nombre del Contacto</label>
-                  <input
-                    id="contacto_emergencia_nombre"
-                    type="text"
-                    placeholder="Nombre del familiar o persona de contacto"
-                    value={profileForm.contacto_emergencia_nombre}
-                    onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_nombre: e.target.value })}
-                  />
-                </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="contacto_emergencia_telefono">Teléfono de Emergencia</label>
-                  <input
-                    id="contacto_emergencia_telefono"
-                    type="text"
-                    placeholder="ej. 3109876543"
-                    value={profileForm.contacto_emergencia_telefono}
-                    onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_telefono: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="dh-modal-footer">
-                <button
-                  type="button"
-                  className="dh-btn-secondary"
-                  onClick={() => setShowProfileModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="dh-btn-primary" disabled={saving}>
-                  {saving ? 'Guardando...' : 'Guardar Cambios'}
-                </button>
-              </div>
-            </form>
+              </form>
+            )}
           </div>
         </div>
       )}

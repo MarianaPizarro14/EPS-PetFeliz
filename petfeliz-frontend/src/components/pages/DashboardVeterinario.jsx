@@ -780,94 +780,175 @@ export default function DashboardVeterinario() {
         {/* ── MODAL: CAMBIO DE CONTRASEÑA VETERINARIO ── */}
         {showChangePasswordModal && (
           <div className="vet-modal-backdrop" style={{ zIndex: 1100 }}>
-            <div className="vet-modal-box" style={{ maxWidth: '480px' }}>
-              <div className="vet-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <div>
-                  <h3 style={{ color: passwordTemporal ? '#d97706' : '#0f172a', fontFamily: 'Sora, sans-serif', fontSize: '1.15rem' }}>
-                    {passwordTemporal ? '⚠️ Cambio de Contraseña Obligatorio' : 'Cambiar Contraseña'}
-                  </h3>
-                  <p className="vet-modal-subtitle">
-                    {passwordTemporal
-                      ? 'Por seguridad debes configurar una nueva contraseña antes de continuar'
-                      : 'Actualiza la clave de acceso a tu portal médico en EPS PetFeliz'}
-                  </p>
+            <div className="vet-modal-box" style={{ maxWidth: '500px', padding: '1.75rem' }}>
+              
+              {/* Header con Ícono FontAwesome en Contenedor Redondeado */}
+              <div className="vet-modal-header" style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.15rem', marginBottom: '1.15rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  {passwordTemporal ? (
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '14px',
+                      background: '#fef3c7',
+                      color: '#d97706',
+                      border: '1px solid #fde68a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.25rem',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 8px rgba(217, 119, 6, 0.12)'
+                    }}>
+                      <i className="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '14px',
+                      background: '#ecfdf5',
+                      color: '#059669',
+                      border: '1px solid #a7f3d0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.25rem',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 8px rgba(5, 150, 105, 0.12)'
+                    }}>
+                      <i className="fa-solid fa-key"></i>
+                    </div>
+                  )}
+
+                  <div>
+                    <h3 style={{
+                      fontFamily: 'Sora, sans-serif',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      color: '#0f172a',
+                      margin: '0 0 0.35rem 0',
+                      lineHeight: '1.25'
+                    }}>
+                      {passwordTemporal ? 'Cambio de Contraseña Obligatorio' : 'Cambiar Contraseña'}
+                    </h3>
+                    <p className="vet-modal-subtitle" style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '0.86rem',
+                      color: '#64748b',
+                      margin: 0,
+                      lineHeight: '1.4'
+                    }}>
+                      {passwordTemporal
+                        ? 'Por seguridad debes configurar una nueva contraseña antes de continuar'
+                        : 'Actualiza la clave de acceso a tu portal médico en EPS PetFeliz'}
+                    </p>
+                  </div>
                 </div>
+
                 {!passwordTemporal && (
-                  <button type="button" className="vet-modal-close" onClick={() => setShowChangePasswordModal(false)}>
+                  <button type="button" className="vet-modal-close" onClick={() => setShowChangePasswordModal(false)} title="Cerrar ventana">
                     <i className="fa-solid fa-xmark"></i>
                   </button>
                 )}
               </div>
 
+              {/* Banner de Contraseña Temporal Detectada */}
               {passwordTemporal && (
-                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.85rem 1rem', margin: '1rem 1.25rem 0 1.25rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                  <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginTop: '2px', fontSize: '1rem' }}></i>
-                  <span style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: '1.45' }}>
-                    <strong>Contraseña Temporal Detectada:</strong> El administrador generó tu clave actual. Para proteger la información médica de tus pacientes, ingresa la clave actual y crea una nueva contraseña.
+                <div style={{
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '12px',
+                  padding: '0.95rem 1.1rem',
+                  marginBottom: '1.25rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: '#fef3c7',
+                    color: '#d97706',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.95rem',
+                    flexShrink: 0
+                  }}>
+                    <i className="fa-solid fa-shield-cat"></i>
+                  </div>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.83rem', color: '#92400e', lineHeight: '1.45' }}>
+                    <strong>Contraseña Temporal Detectada:</strong> El administrador generó tu clave actual. Para proteger la información médica de tus pacientes, ingresa la clave actual y establece una nueva contraseña personalizada.
                   </span>
                 </div>
               )}
 
               {changePassError && (
-                <div className="vet-modal-alert vet-modal-alert--error" style={{ margin: '1rem 1.25rem 0 1.25rem' }}>
-                  <i className="fa-solid fa-circle-exclamation"></i> {changePassError}
+                <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.1rem' }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {changePassError}
                 </div>
               )}
 
               {changePassSuccess && (
-                <div className="vet-modal-alert vet-modal-alert--success" style={{ margin: '1rem 1.25rem 0 1.25rem' }}>
-                  <i className="fa-solid fa-circle-check"></i> {changePassSuccess}
+                <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.1rem' }}>
+                  <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i> {changePassSuccess}
                 </div>
               )}
 
-              <form onSubmit={handleSubmitChangePassword} style={{ padding: '1.25rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-                  <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                    <label htmlFor="contrasena_actual">Contraseña Actual o Temporal *</label>
-                    <input
-                      id="contrasena_actual"
-                      type="password"
-                      required
-                      className="vet-modal-textarea"
-                      style={{ height: '42px', minHeight: 'auto', padding: '0.6rem 0.85rem' }}
-                      placeholder="Ingresa tu clave actual o la temporal recibida"
-                      value={changePassForm.contrasena_actual}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                    <label htmlFor="nueva_contrasena">Nueva Contraseña *</label>
-                    <input
-                      id="nueva_contrasena"
-                      type="password"
-                      required
-                      minLength={6}
-                      className="vet-modal-textarea"
-                      style={{ height: '42px', minHeight: 'auto', padding: '0.6rem 0.85rem' }}
-                      placeholder="Mínimo 6 caracteres"
-                      value={changePassForm.nueva_contrasena}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                    <label htmlFor="confirmar_nueva_contrasena">Confirmar Nueva Contraseña *</label>
-                    <input
-                      id="confirmar_nueva_contrasena"
-                      type="password"
-                      required
-                      minLength={6}
-                      className="vet-modal-textarea"
-                      style={{ height: '42px', minHeight: 'auto', padding: '0.6rem 0.85rem' }}
-                      placeholder="Repite la nueva contraseña"
-                      value={changePassForm.confirmar_nueva_contrasena}
-                      onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
-                    />
-                  </div>
+              <form onSubmit={handleSubmitChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="contrasena_actual" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Contraseña Actual o Temporal *
+                  </label>
+                  <input
+                    id="contrasena_actual"
+                    type="password"
+                    required
+                    className="vet-modal-textarea"
+                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
+                    placeholder="Ingresa tu clave actual o la temporal recibida"
+                    value={changePassForm.contrasena_actual}
+                    onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
+                  />
                 </div>
 
-                <div className="vet-modal-actions" style={{ marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Nueva Contraseña *
+                  </label>
+                  <input
+                    id="nueva_contrasena"
+                    type="password"
+                    required
+                    minLength={6}
+                    className="vet-modal-textarea"
+                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
+                    placeholder="Mínimo 6 caracteres"
+                    value={changePassForm.nueva_contrasena}
+                    onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
+                  />
+                </div>
+
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="confirmar_nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Confirmar Nueva Contraseña *
+                  </label>
+                  <input
+                    id="confirmar_nueva_contrasena"
+                    type="password"
+                    required
+                    minLength={6}
+                    className="vet-modal-textarea"
+                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 0.9rem', borderRadius: '10px' }}
+                    placeholder="Repite la nueva contraseña"
+                    value={changePassForm.confirmar_nueva_contrasena}
+                    onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
+                  />
+                </div>
+
+                <div className="vet-modal-actions" style={{ marginTop: '0.75rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9' }}>
                   {!passwordTemporal && (
                     <button
                       type="button"
@@ -882,16 +963,16 @@ export default function DashboardVeterinario() {
                     type="submit"
                     className="vet-modal-btn vet-modal-btn--primary"
                     disabled={submittingChangePass}
-                    style={{ width: passwordTemporal ? '100%' : 'auto' }}
+                    style={{ width: passwordTemporal ? '100%' : 'auto', justifyContent: 'center' }}
                   >
                     {submittingChangePass ? (
                       <>
                         <i className="fa-solid fa-spinner fa-spin"></i>
-                        <span>Guardando...</span>
+                        <span>Actualizando Contraseña...</span>
                       </>
                     ) : (
                       <>
-                        <i className="fa-solid fa-check"></i>
+                        <i className="fa-solid fa-shield-halved"></i>
                         <span>Actualizar Contraseña</span>
                       </>
                     )}

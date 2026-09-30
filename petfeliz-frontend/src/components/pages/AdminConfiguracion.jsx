@@ -261,6 +261,15 @@ export default function AdminConfiguracion() {
       }
     }
 
+    if (profileForm.telefono && profileForm.telefono.trim()) {
+      const cleanedTelefono = profileForm.telefono.trim()
+      if (!/^[0-9]{10}$/.test(cleanedTelefono)) {
+        setProfileError('El número de teléfono celular debe contener exactamente 10 dígitos numéricos.')
+        setSubmittingProfile(false)
+        return
+      }
+    }
+
     const token = getStoredToken()
     const formData = new FormData()
     formData.append('nombre', profileForm.nombre.trim())
@@ -697,9 +706,6 @@ export default function AdminConfiguracion() {
                       maxLength={10}
                       onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
-                    <small style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
-                      Debe contener entre 7 y 10 dígitos numéricos.
-                    </small>
                   </div>
 
                   {/* Teléfono de Contacto */}
@@ -710,7 +716,8 @@ export default function AdminConfiguracion() {
                       type="text"
                       placeholder="ej. 3009876543"
                       value={profileForm.telefono}
-                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
                   </div>
 

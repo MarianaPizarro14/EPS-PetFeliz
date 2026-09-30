@@ -162,6 +162,20 @@ export default function AdminClientes() {
       return
     }
 
+    if (formCliente.telefono && formCliente.telefono.trim()) {
+      if (!/^[0-9]{10}$/.test(formCliente.telefono.trim())) {
+        setFormError('El teléfono de contacto debe contener exactamente 10 dígitos numéricos.')
+        return
+      }
+    }
+
+    if (formCliente.contacto_emergencia_telefono && formCliente.contacto_emergencia_telefono.trim()) {
+      if (!/^[0-9]{10}$/.test(formCliente.contacto_emergencia_telefono.trim())) {
+        setFormError('El teléfono de emergencia debe contener exactamente 10 dígitos numéricos.')
+        return
+      }
+    }
+
     const token = getStoredToken()
     setSubmittingForm(true)
 
@@ -703,9 +717,10 @@ export default function AdminClientes() {
                         <i className="fa-solid fa-phone input-icon"></i>
                         <input
                           type="text"
-                          placeholder="Ej. 300 456 7890"
+                          placeholder="Ej. 3004567890"
                           value={formCliente.telefono}
-                          onChange={(e) => setFormCliente({ ...formCliente, telefono: e.target.value })}
+                          maxLength={10}
+                          onChange={(e) => setFormCliente({ ...formCliente, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                         />
                       </div>
                     </div>
@@ -776,9 +791,10 @@ export default function AdminClientes() {
                         <i className="fa-solid fa-phone-volume input-icon"></i>
                         <input
                           type="text"
-                          placeholder="Ej. 311 987 6543"
+                          placeholder="Ej. 3119876543"
                           value={formCliente.contacto_emergencia_telefono}
-                          onChange={(e) => setFormCliente({ ...formCliente, contacto_emergencia_telefono: e.target.value })}
+                          maxLength={10}
+                          onChange={(e) => setFormCliente({ ...formCliente, contacto_emergencia_telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                         />
                       </div>
                     </div>

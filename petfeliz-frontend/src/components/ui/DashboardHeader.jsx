@@ -484,8 +484,8 @@ export default function DashboardHeader({
       return
     }
 
-    if (vetProfileForm.telefono && !/^[0-9+\s-]{7,15}$/.test(vetProfileForm.telefono.trim())) {
-      setModalError('El teléfono ingresado debe contener entre 7 y 15 dígitos numéricos.')
+    if (vetProfileForm.telefono && !/^[0-9]{10}$/.test(vetProfileForm.telefono.trim())) {
+      setModalError('El teléfono ingresado debe contener exactamente 10 dígitos numéricos.')
       setSaving(false)
       return
     }
@@ -561,15 +561,15 @@ export default function DashboardHeader({
     }
 
     // Validación de Teléfono
-    if (profileForm.telefono && !/^[0-9+\s-]{7,15}$/.test(profileForm.telefono.trim())) {
-      setModalError('El teléfono ingresado debe contener entre 7 y 15 dígitos numéricos.')
+    if (profileForm.telefono && !/^[0-9]{10}$/.test(profileForm.telefono.trim())) {
+      setModalError('El teléfono de contacto debe contener exactamente 10 dígitos numéricos.')
       setSaving(false)
       return
     }
 
     // Validación de Teléfono de Emergencia
-    if (profileForm.contacto_emergencia_telefono && !/^[0-9+\s-]{7,15}$/.test(profileForm.contacto_emergencia_telefono.trim())) {
-      setModalError('El teléfono de contacto de emergencia debe contener entre 7 y 15 dígitos.')
+    if (profileForm.contacto_emergencia_telefono && !/^[0-9]{10}$/.test(profileForm.contacto_emergencia_telefono.trim())) {
+      setModalError('El teléfono de contacto de emergencia debe contener exactamente 10 dígitos numéricos.')
       setSaving(false)
       return
     }
@@ -972,7 +972,8 @@ export default function DashboardHeader({
                       type="text"
                       placeholder="ej. 3001234567"
                       value={vetProfileForm.telefono}
-                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, telefono: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setVetProfileForm({ ...vetProfileForm, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
                   </div>
 
@@ -1034,9 +1035,9 @@ export default function DashboardHeader({
                       maxLength={10}
                       onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
-                    <span className="dh-field-hint">
-                      {usuario?.cedula ? 'Cédula registrada en el sistema' : 'Solo números, entre 7 y 10 dígitos'}
-                    </span>
+                    {usuario?.cedula && (
+                      <span className="dh-field-hint">Cédula registrada en el sistema</span>
+                    )}
                   </div>
 
                   <div className="dh-form-field">
@@ -1055,7 +1056,8 @@ export default function DashboardHeader({
                       type="text"
                       placeholder="ej. 3001234567"
                       value={profileForm.telefono}
-                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
                   </div>
 
@@ -1139,7 +1141,8 @@ export default function DashboardHeader({
                       type="text"
                       placeholder="ej. 3109876543"
                       value={profileForm.contacto_emergencia_telefono}
-                      onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_telefono: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, contacto_emergencia_telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
                   </div>
                 </div>

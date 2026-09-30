@@ -448,6 +448,13 @@ export default function AdminVeterinarios() {
       return
     }
 
+    if (formVet.telefono && formVet.telefono.trim()) {
+      if (!/^[0-9]{10}$/.test(formVet.telefono.trim())) {
+        setFormError('El teléfono de contacto debe contener exactamente 10 dígitos numéricos.')
+        return
+      }
+    }
+
     const token = getStoredToken()
     if (!token) return
 
@@ -1168,9 +1175,10 @@ export default function AdminVeterinarios() {
                       <i className="fa-solid fa-phone input-icon"></i>
                       <input
                         type="text"
-                        placeholder="Ej. 300 456 7890"
+                        placeholder="Ej. 3004567890"
                         value={formVet.telefono}
-                        onChange={(e) => setFormVet({ ...formVet, telefono: e.target.value })}
+                        maxLength={10}
+                        onChange={(e) => setFormVet({ ...formVet, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                       />
                     </div>
                   </div>

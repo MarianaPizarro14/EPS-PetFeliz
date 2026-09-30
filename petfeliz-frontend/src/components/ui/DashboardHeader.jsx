@@ -704,9 +704,26 @@ export default function DashboardHeader({
     }
   }
 
-  const userFullName = usuario?.nombreCompleto || usuario?.nombre || 'Usuario'
+  const storedUserObj = getStoredUser()
+
+  const realPersonName =
+    (usuario?.nombre && usuario.nombre !== 'Director Administrativo' ? usuario.nombre : null) ||
+    (usuario?.nombreCompleto && usuario.nombreCompleto !== 'Director Administrativo' ? usuario.nombreCompleto : null) ||
+    storedUserObj?.nombre ||
+    storedUserObj?.nombreCompleto ||
+    'Mariana Pizarro'
+
   const userRoleFormatted = getFormattedRole(usuario?.rol)
-  const hasAvatarPhoto = isValidAvatarUrl(usuario?.foto)
+
+  const userEmail =
+    usuario?.email ||
+    usuario?.correo ||
+    storedUserObj?.email ||
+    storedUserObj?.correo ||
+    'admin@petfeliz.com'
+
+  const avatarPhotoUrl = usuario?.foto || usuario?.foto_perfil || storedUserObj?.foto || storedUserObj?.foto_perfil
+  const hasAvatarPhoto = isValidAvatarUrl(avatarPhotoUrl)
 
   return (
     <header className="dash-header">
@@ -808,57 +825,58 @@ export default function DashboardHeader({
               setShowNotifs(false)
             }}
           >
-            <span className="dash-header__user" title={userFullName}>
-              {userFullName}
+            <span className="dash-header__user" title={realPersonName}>
+              {userRoleFormatted === 'Director Administrativo' ? 'Director Administrativo' : realPersonName}
             </span>
 
             {hasAvatarPhoto ? (
               <img
                 className="dash-header__avatar"
-                src={getHighResAvatar(usuario.foto)}
-                alt={userFullName}
+                src={getHighResAvatar(avatarPhotoUrl)}
+                alt={realPersonName}
                 onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
               />
             ) : (
-              <div className="dash-header__avatar-initials" title={userFullName}>
-                {getInitials(userFullName)}
+              <div className="dash-header__avatar-initials" title={realPersonName}>
+                {getInitials(realPersonName)}
               </div>
             )}
             <i className="fa-solid fa-chevron-down dh-chevron-icon"></i>
           </button>
 
           {showProfileMenu && (
-            <div className="dh-dropdown dh-dropdown--profile">
-              <div className="dh-profile-card">
+            <div className="dh-dropdown dh-dropdown--profile" style={{ background: '#ffffff', minWidth: '280px', padding: '1rem', borderRadius: '14px', boxShadow: '0 10px 25px rgba(15,23,42,0.15)', border: '1px solid #e2e8f0' }}>
+              <div className="dh-profile-card" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {hasAvatarPhoto ? (
                   <img
                     className="dh-profile-card__avatar"
-                    src={getHighResAvatar(usuario.foto)}
-                    alt={userFullName}
+                    src={getHighResAvatar(avatarPhotoUrl)}
+                    alt={realPersonName}
                     onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
                   />
                 ) : (
-                  <div className="dh-profile-card__avatar-initials">
-                    {getInitials(userFullName)}
+                  <div className="dh-profile-card__avatar-initials" style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #059669, #047857)', color: '#ffffff', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {getInitials(realPersonName)}
                   </div>
                 )}
-                <div className="dh-profile-card__info">
-                  <strong title={userFullName}>{userFullName}</strong>
-                  <span className="dh-profile-card__role">{userRoleFormatted}</span>
-                  {(usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo) && (
-                    <span className="dh-profile-card__email" title={usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo} style={{ fontSize: '0.8rem', color: '#64748b', wordBreak: 'break-all', display: 'block', marginTop: '2px' }}>
-                      <i className="fa-regular fa-envelope" style={{ marginRight: '4px', color: '#059669' }}></i>
-                      {usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo}
-                    </span>
-                  )}
+                <div className="dh-profile-card__info" style={{ display: 'flex', flexDirection: 'column', gap: '3px', overflow: 'hidden' }}>
+                  <strong title={realPersonName} style={{ color: '#0f172a', fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.2 }}>
+                    {realPersonName}
+                  </strong>
+                  <span className="dh-profile-card__role" style={{ color: '#059669', fontSize: '0.82rem', fontWeight: 600 }}>
+                    {userRoleFormatted}
+                  </span>
+                  <span className="dh-profile-card__email" title={userEmail} style={{ fontSize: '0.78rem', color: '#64748b', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                    <i className="fa-regular fa-envelope" style={{ color: '#059669', fontSize: '0.75rem' }}></i>
+                    {userEmail}
+                  </span>
                 </div>
               </div>
 
-              <div className="dh-menu-divider"></div>
-
-              <nav className="dh-menu-links">
-                {usuario?.rol === 'cliente' && !window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/vet') && (
-                  <>
+              {usuario?.rol === 'cliente' && !window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/vet') && (
+                <>
+                  <div className="dh-menu-divider" style={{ height: '1px', background: '#f1f5f9', margin: '0.75rem 0 0.5rem 0' }}></div>
+                  <nav className="dh-menu-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <button type="button" className="dh-menu-item" onClick={handleOpenProfileModal}>
                       <i className="fa-solid fa-user"></i>
                       <span>Mi perfil</span>
@@ -873,19 +891,9 @@ export default function DashboardHeader({
                       <i className="fa-solid fa-shield-halved"></i>
                       <span>Contraseña y seguridad</span>
                     </button>
-
-                    <div className="dh-menu-divider"></div>
-                  </>
-                )}
-
-                {/* Para el administrador, el cierre de sesión no aparece en el header dropdown (solo en sidebar) */}
-                {!(usuario?.rol === 'admin' || window.location.pathname.startsWith('/admin')) && (
-                  <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
-                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Cerrar sesión</span>
-                  </button>
-                )}
-              </nav>
+                  </nav>
+                </>
+              )}
             </div>
           )}
         </div>

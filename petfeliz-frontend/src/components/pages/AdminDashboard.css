@@ -315,17 +315,14 @@
 
 .admin-reminder-card--urgente {
   background: #ffffff;
-  border-left: 4px solid #ef4444;
 }
 
 .admin-reminder-card--info {
   background: #ffffff;
-  border-left: 4px solid #0284c7;
 }
 
 .admin-reminder-card--exito {
   background: #ffffff;
-  border-left: 4px solid #059669;
 }
 
 .admin-reminder-card__top {

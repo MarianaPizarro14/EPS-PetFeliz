@@ -531,7 +531,7 @@
 
 /* Hero de Ficha de Mascota */
 .adm-vet-hero {
-  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
+  background: #064e3b;
   padding: 1.75rem 1.5rem;
   color: #ffffff;
   display: flex;
@@ -968,7 +968,7 @@
 }
 
 .adm-btn-primary {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: #059669;
   color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-weight: 600;

@@ -845,7 +845,12 @@ export default function DashboardHeader({
                 <div className="dh-profile-card__info">
                   <strong title={userFullName}>{userFullName}</strong>
                   <span className="dh-profile-card__role">{userRoleFormatted}</span>
-                  <span className="dh-profile-card__email" title={usuario?.email}>{usuario?.email}</span>
+                  {(usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo) && (
+                    <span className="dh-profile-card__email" title={usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo} style={{ fontSize: '0.8rem', color: '#64748b', wordBreak: 'break-all', display: 'block', marginTop: '2px' }}>
+                      <i className="fa-regular fa-envelope" style={{ marginRight: '4px', color: '#059669' }}></i>
+                      {usuario?.email || usuario?.correo || getStoredUser()?.email || getStoredUser()?.correo}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -873,10 +878,13 @@ export default function DashboardHeader({
                   </>
                 )}
 
-                <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
-                  <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                  <span>Cerrar sesión</span>
-                </button>
+                {/* Para el administrador, el cierre de sesión no aparece en el header dropdown (solo en sidebar) */}
+                {!(usuario?.rol === 'admin' || window.location.pathname.startsWith('/admin')) && (
+                  <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
+                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>
+                  </button>
+                )}
               </nav>
             </div>
           )}
@@ -1000,15 +1008,22 @@ export default function DashboardHeader({
                   </div>
 
                   <div className="dh-form-field">
-                    <label htmlFor="cedula">Cédula / Documento de Identidad</label>
+                    <label htmlFor="cedula">
+                      Cédula / Documento de Identidad {usuario?.cedula ? '(No modificable)' : ''}
+                    </label>
                     <input
                       id="cedula"
                       type="text"
                       placeholder="ej. 1020304050"
                       value={profileForm.cedula}
+                      disabled={Boolean(usuario?.cedula)}
+                      readOnly={Boolean(usuario?.cedula)}
+                      style={usuario?.cedula ? { background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' } : {}}
                       onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
                     />
-                    <span className="dh-field-hint">Solo números, entre 5 y 12 dígitos</span>
+                    <span className="dh-field-hint">
+                      {usuario?.cedula ? 'Cédula registrada en el sistema' : 'Solo números, entre 5 y 12 dígitos'}
+                    </span>
                   </div>
 
                   <div className="dh-form-field">

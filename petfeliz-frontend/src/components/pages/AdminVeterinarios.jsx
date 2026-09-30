@@ -103,6 +103,18 @@ export default function AdminVeterinarios() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState('')
 
+  // Crop modal state for doctor photo zoom & framing
+  const [showCropModal, setShowCropModal] = useState(false)
+  const [tempPhotoFile, setTempPhotoFile] = useState(null)
+  const [tempPhotoPreview, setTempPhotoPreview] = useState(null)
+  const [tempZoom, setTempZoom] = useState(1)
+  const [cropCirclePos, setCropCirclePos] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  const cropImgRef = useRef(null)
+  const cropStageRef = useRef(null)
+
   const [submittingForm, setSubmittingForm] = useState(false)
   const [formError, setFormError] = useState('')
 
@@ -319,8 +331,109 @@ export default function AdminVeterinarios() {
   const handlePhotoFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    setSelectedFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setFormError('Solo se permiten imágenes en formato JPG, JPEG, PNG o WEBP.')
+      return
+    }
+
+    setTempPhotoFile(file)
+    const reader = new FileReader()
+    reader.onload = () => {
+      setTempPhotoPreview(reader.result)
+      setTempZoom(1)
+      setCropCirclePos({ x: 0, y: 0 })
+      setShowCropModal(true)
+    }
+    reader.readAsDataURL(file)
+    e.target.value = null
+  }
+
+  // Dragging handlers for crop circle
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    setDragStart({ x: clientX - cropCirclePos.x, y: clientY - cropCirclePos.y })
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+
+    let newX = clientX - dragStart.x
+    let newY = clientY - dragStart.y
+
+    const maxLimit = 130
+    newX = Math.max(-maxLimit, Math.min(maxLimit, newX))
+    newY = Math.max(-maxLimit, Math.min(maxLimit, newY))
+
+    setCropCirclePos({ x: newX, y: newY })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  // Confirm photo crop in modal using Canvas
+  const handleConfirmPhotoCrop = () => {
+    if (!cropImgRef.current || !cropStageRef.current) {
+      setShowCropModal(false)
+      return
+    }
+
+    const img = cropImgRef.current
+    const stage = cropStageRef.current
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    const targetSize = 500
+    canvas.width = targetSize
+    canvas.height = targetSize
+
+    const imgRect = img.getBoundingClientRect()
+    const stageRect = stage.getBoundingClientRect()
+
+    const stageCenterX = stageRect.left + stageRect.width / 2
+    const stageCenterY = stageRect.top + stageRect.height / 2
+
+    const circleCenterX = stageCenterX + cropCirclePos.x
+    const circleCenterY = stageCenterY + cropCirclePos.y
+
+    const circleRadiusScreen = 80 // 160px diameter / 2
+
+    const cropXOnImg = circleCenterX - circleRadiusScreen - imgRect.left
+    const cropYOnImg = circleCenterY - circleRadiusScreen - imgRect.top
+    const cropSizeOnImg = circleRadiusScreen * 2
+
+    const scaleX = img.naturalWidth / imgRect.width
+    const scaleY = img.naturalHeight / imgRect.height
+
+    const srcX = cropXOnImg * scaleX
+    const srcY = cropYOnImg * scaleY
+    const srcW = cropSizeOnImg * scaleX
+    const srcH = cropSizeOnImg * scaleY
+
+    try {
+      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetSize, targetSize)
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const fileName = tempPhotoFile?.name || 'vet-profile.jpg'
+          const croppedFile = new File([blob], fileName, { type: 'image/jpeg' })
+          setSelectedFile(croppedFile)
+          setPhotoPreview(URL.createObjectURL(blob))
+        }
+        setShowCropModal(false)
+      }, 'image/jpeg', 0.95)
+    } catch (err) {
+      console.error('Error al recortar la imagen en canvas:', err)
+      setSelectedFile(tempPhotoFile)
+      setPhotoPreview(tempPhotoPreview)
+      setShowCropModal(false)
+    }
   }
 
   // Enviar Formulario (Crear / Editar)
@@ -465,6 +578,156 @@ export default function AdminVeterinarios() {
           <button className="adm-toast__close" onClick={() => setToast(null)} title="Cerrar notificación">
             <i className="fa-solid fa-xmark"></i>
           </button>
+        </div>
+      )}
+
+      {/* ── MODAL INTERACTIVO: ENCUADRE Y ZOOM DE FOTO VETERINARIO ── */}
+      {showCropModal && (
+        <div className="vet-modal-backdrop" style={{ zIndex: 1100 }}>
+          <div className="vet-modal-box" style={{ maxWidth: '580px', padding: '1.75rem' }}>
+            <div className="vet-modal-header">
+              <div>
+                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0 }}>
+                  Ajustar Encuadre de Foto del Médico Veterinario
+                </h3>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                  Arrastra el círculo verde sobre la imagen para enfocar el rostro del médico
+                </p>
+              </div>
+              <button
+                type="button"
+                className="vet-modal-close"
+                onClick={() => setShowCropModal(false)}
+                title="Cerrar"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            {/* Stage con la foto completa y círculo arrastrable */}
+            <div
+              ref={cropStageRef}
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '320px',
+                background: '#0f172a',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none',
+                margin: '1.25rem 0',
+                touchAction: 'none',
+              }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleMouseUp}
+            >
+              {/* Foto Original Completa */}
+              {tempPhotoPreview && (
+                <img
+                  ref={cropImgRef}
+                  src={tempPhotoPreview}
+                  alt="Foto completa"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                    transform: `scale(${tempZoom})`,
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+
+              {/* Máscara oscura con círculo de recorte verde arrastrable */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '160px',
+                    height: '160px',
+                    borderRadius: '50%',
+                    border: '3.5px solid #059669',
+                    boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65), 0 0 20px rgba(5, 150, 105, 0.4)',
+                    transform: `translate(${cropCirclePos.x}px, ${cropCirclePos.y}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.05s ease-out',
+                    position: 'relative',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: '50%', left: '20%', right: '20%', height: '1px', background: 'rgba(255,255,255,0.35)', transform: 'translateY(-50%)' }} />
+                  <div style={{ position: 'absolute', left: '50%', top: '20%', bottom: '20%', width: '1px', background: 'rgba(255,255,255,0.35)', transform: 'translateX(-50%)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Controles de Zoom y Reseteo */}
+            <div style={{ background: '#f8fafc', padding: '0.9rem 1.1rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <i className="fa-solid fa-magnifying-glass-plus" style={{ color: '#059669' }}></i>
+                  Zoom de Imagen ({tempZoom.toFixed(1)}x)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setTempZoom(1); setCropCirclePos({ x: 0, y: 0 }); }}
+                  style={{ background: 'none', border: 'none', color: '#059669', fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  <i className="fa-solid fa-rotate-left"></i>
+                  Centrar círculo
+                </button>
+              </div>
+
+              <input
+                type="range"
+                min="1"
+                max="2.5"
+                step="0.05"
+                value={tempZoom}
+                onChange={(e) => setTempZoom(parseFloat(e.target.value))}
+                style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+              />
+            </div>
+
+            {/* Acciones Modal */}
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="button"
+                className="adm-btn-secondary"
+                onClick={() => setShowCropModal(false)}
+                style={{ padding: '0.65rem 1.25rem' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-btn-primary"
+                onClick={handleConfirmPhotoCrop}
+                style={{ padding: '0.65rem 1.5rem' }}
+              >
+                <i className="fa-solid fa-check" style={{ marginRight: '6px' }}></i>
+                <span>Confirmar y Guardar Encuadre</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

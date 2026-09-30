@@ -676,13 +676,18 @@ export default function AdminConfiguracion() {
 
                   {/* Cédula de Ciudadanía */}
                   <div className="dh-form-field">
-                    <label htmlFor="cedulaAdmin">Cédula de Ciudadanía *</label>
+                    <label htmlFor="cedulaAdmin">
+                      Cédula de Ciudadanía * {usuario?.cedula || profileForm?.cedula ? '(Registrada - No modificable)' : ''}
+                    </label>
                     <input
                       id="cedulaAdmin"
                       type="text"
                       required
                       placeholder="ej. 1098765432"
                       value={profileForm.cedula}
+                      disabled={Boolean(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5))}
+                      readOnly={Boolean(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5))}
+                      style={(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5)) ? { background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' } : {}}
                       onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
                     />
                   </div>
@@ -904,7 +909,7 @@ export default function AdminConfiguracion() {
                   <div className="dh-form-field">
                     <label>Pasarela de Pagos (Wompi / MercadoPago)</label>
                     <div style={{ padding: '0.85rem 1rem', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                      <strong style={{ color: '#059669', display: 'block', marginBottom: '0.2rem' }}>
+                      <strong style={{ color: '#047857', display: 'block', marginBottom: '0.2rem' }}>
                         <i className="fa-solid fa-credit-card" style={{ marginRight: '6px' }}></i> Wompi / MercadoPago Activo
                       </strong>
                       <span style={{ fontSize: '0.8rem', color: '#334155' }}>Procesamiento seguro de pasarela PSE, Tarjetas y Nequi en producción.</span>
@@ -913,8 +918,8 @@ export default function AdminConfiguracion() {
 
                   <div className="dh-form-field">
                     <label>Almacenamiento de Archivos (Cloudinary CDN)</label>
-                    <div style={{ padding: '0.85rem 1rem', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                      <strong style={{ color: '#059669', display: 'block', marginBottom: '0.2rem' }}>
+                    <div style={{ padding: '0.85rem 1rem', background: '#f0f9ff', borderRadius: '10px', border: '1px solid #bae6fd' }}>
+                      <strong style={{ color: '#0369a1', display: 'block', marginBottom: '0.2rem' }}>
                         <i className="fa-solid fa-cloud-arrow-up" style={{ marginRight: '6px' }}></i> Cloudinary CDN Conectado
                       </strong>
                       <span style={{ fontSize: '0.8rem', color: '#334155' }}>Subida automática a carpetas institucional petfeliz/equipo.</span>
@@ -922,22 +927,22 @@ export default function AdminConfiguracion() {
                   </div>
 
                   <div className="dh-form-field">
-                    <label>Servicio de Notificaciones y Recordatorios</label>
-                    <div style={{ padding: '0.85rem 1rem', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                      <strong style={{ color: '#059669', display: 'block', marginBottom: '0.2rem' }}>
-                        <i className="fa-solid fa-bell" style={{ marginRight: '6px' }}></i> Alertas Institucionales Activas
+                    <label>Servicio de Correo Electrónico (SMTP)</label>
+                    <div style={{ padding: '0.85rem 1rem', background: '#f5f3ff', borderRadius: '10px', border: '1px solid #ddd6fe' }}>
+                      <strong style={{ color: '#6d28d9', display: 'block', marginBottom: '0.2rem' }}>
+                        <i className="fa-solid fa-envelope" style={{ marginRight: '6px' }}></i> SMTP Servidor Operativo
                       </strong>
-                      <span style={{ fontSize: '0.8rem', color: '#334155' }}>Alertas internas y notificaciones al instante para pacientes y médicos.</span>
+                      <span style={{ fontSize: '0.8rem', color: '#334155' }}>Envío automático de confirmaciones de citas y comprobantes de pago.</span>
                     </div>
                   </div>
 
                   <div className="dh-form-field">
-                    <label>Servicio de Correo Electrónico (SMTP)</label>
-                    <div style={{ padding: '0.85rem 1rem', background: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                      <strong style={{ color: '#059669', display: 'block', marginBottom: '0.2rem' }}>
-                        <i className="fa-solid fa-envelope" style={{ marginRight: '6px' }}></i> SMTP Servidor Operativo
+                    <label>Servicio de Notificaciones y Recordatorios</label>
+                    <div style={{ padding: '0.85rem 1rem', background: '#fffbe6', borderRadius: '10px', border: '1px solid #fde68a' }}>
+                      <strong style={{ color: '#b45309', display: 'block', marginBottom: '0.2rem' }}>
+                        <i className="fa-solid fa-bell" style={{ marginRight: '6px' }}></i> Alertas Institucionales Activas
                       </strong>
-                      <span style={{ fontSize: '0.8rem', color: '#334155' }}>Envío automático de confirmaciones de citas y comprobantes de pago.</span>
+                      <span style={{ fontSize: '0.8rem', color: '#334155' }}>Alertas internas y notificaciones al instante para pacientes y médicos.</span>
                     </div>
                   </div>
                 </div>

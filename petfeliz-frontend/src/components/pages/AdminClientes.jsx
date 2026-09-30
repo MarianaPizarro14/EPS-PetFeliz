@@ -669,29 +669,30 @@ export default function AdminClientes() {
                   <h5 className="adm-form-section-title">Datos Principales</h5>
 
                   <div className="adm-form-group">
-                    <label>Nombre Completo *</label>
+                    <label>Nombre Completo (Datos de Identidad - No Modificable)</label>
                     <div className="adm-input-wrap">
-                      <i className="fa-solid fa-user input-icon"></i>
+                      <i className="fa-solid fa-user input-icon" style={{ color: '#64748b' }}></i>
                       <input
                         type="text"
-                        required
-                        placeholder="Ej. Mariana Pizarro"
+                        readOnly
+                        disabled
+                        style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed', fontWeight: 600 }}
                         value={formCliente.nombre}
-                        onChange={(e) => setFormCliente({ ...formCliente, nombre: e.target.value })}
                       />
                     </div>
                   </div>
 
                   <div className="form-row-2">
                     <div className="adm-form-group">
-                      <label>Cédula / Documento</label>
+                      <label>Cédula / Documento (No Modificable)</label>
                       <div className="adm-input-wrap">
-                        <i className="fa-solid fa-id-card input-icon"></i>
+                        <i className="fa-solid fa-id-card input-icon" style={{ color: '#64748b' }}></i>
                         <input
                           type="text"
-                          placeholder="Ej. 1.020.345.678"
-                          value={formCliente.cedula}
-                          onChange={(e) => setFormCliente({ ...formCliente, cedula: e.target.value })}
+                          readOnly
+                          disabled
+                          style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed', fontWeight: 600 }}
+                          value={formCliente.cedula || 'Sin cédula registrada'}
                         />
                       </div>
                     </div>
@@ -753,7 +754,7 @@ export default function AdminClientes() {
                 </div>
 
                 <div className="adm-form-section">
-                  <h5 className="adm-form-section-title">Contacto de Emergencia & Afiliación</h5>
+                  <h5 className="adm-form-section-title">Contacto de Emergencia & Estado de Afiliación EPS</h5>
 
                   <div className="form-row-2">
                     <div className="adm-form-group">
@@ -783,18 +784,29 @@ export default function AdminClientes() {
                     </div>
                   </div>
 
-                  <div className="adm-form-group" style={{ marginTop: '0.75rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={formCliente.es_afiliado}
-                        onChange={(e) => setFormCliente({ ...formCliente, es_afiliado: e.target.checked })}
-                        style={{ width: '18px', height: '18px', accentColor: '#059669' }}
-                      />
-                      <span style={{ fontWeight: 600, color: '#1e293b' }}>
-                        Cliente Afiliado Activo a EPS PetFeliz
-                      </span>
+                  <div className="adm-form-group" style={{ marginTop: '0.85rem' }}>
+                    <label style={{ fontWeight: 600, color: '#1e293b', marginBottom: '0.4rem', display: 'block' }}>
+                      Estado de Afiliación & Facturación EPS PetFeliz *
                     </label>
+                    <div className="adm-input-wrap">
+                      <i className="fa-solid fa-shield-halved input-icon" style={{ color: formCliente.es_afiliado ? '#059669' : '#d97706' }}></i>
+                      <select
+                        style={{ paddingLeft: '2.5rem', width: '100%', height: '44px', borderRadius: '10px', border: '1px solid #cbd5e1', fontFamily: 'Inter, sans-serif', fontSize: '0.88rem' }}
+                        value={formCliente.estado_afiliacion || (formCliente.es_afiliado ? 'afiliado' : 'particular')}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setFormCliente({
+                            ...formCliente,
+                            estado_afiliacion: val,
+                            es_afiliado: val === 'afiliado' || val === 'en_mora',
+                          })
+                        }}
+                      >
+                        <option value="afiliado">🟢 Afiliado Activo (Al Día en Cobertura EPS)</option>
+                        <option value="en_mora">🟡 Afiliado en Mora (Periodo de Gracia - Pendiente de Pago)</option>
+                        <option value="particular">⚪ Particular (Sin Afiliación Activa - Tarifa Plena)</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

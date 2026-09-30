@@ -40,7 +40,7 @@
 
 .admin-citas-filter-card--active {
   border-color: #059669;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  background: #f0fdf4;
   box-shadow: 0 6px 20px rgba(5, 150, 105, 0.15);
 }
 

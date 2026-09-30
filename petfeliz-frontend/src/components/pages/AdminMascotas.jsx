@@ -682,27 +682,20 @@ export default function AdminMascotas() {
                           <button
                             type="button"
                             className="act-btn act-btn--view"
-                            title="Ver Ficha Clínica"
+                            title="Ver Ficha Clínica de la Mascota"
                             onClick={() => handleOpenFicha(m.id_mascota)}
                           >
                             <i className="fa-solid fa-notes-medical"></i>
-                            <span>Ficha</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="act-btn act-btn--edit"
-                            title="Editar Mascota"
-                            onClick={() => handleOpenEditModal(m)}
-                          >
-                            <i className="fa-solid fa-pen"></i>
+                            <span>Ver Ficha</span>
                           </button>
                           <button
                             type="button"
                             className="act-btn act-btn--delete"
-                            title="Eliminar Mascota"
+                            title="Eliminar Mascota de Todo Registro"
                             onClick={() => setDeletingMascota(m)}
                           >
                             <i className="fa-solid fa-trash-can"></i>
+                            <span>Eliminar</span>
                           </button>
                         </div>
                       </td>

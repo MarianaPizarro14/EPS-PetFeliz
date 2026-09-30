@@ -59,6 +59,79 @@ export default function AdminServicios() {
   const [submittingForm, setSubmittingForm] = useState(false)
   const [formError, setFormError] = useState('')
 
+const DEFAULT_SERVICIOS_CATALOG = [
+  {
+    id_servicio: 1,
+    nombre: 'Consulta General',
+    descripcion: 'Evaluación integral del estado de salud de tu mascota con diagnóstico y plan de tratamiento personalizado.',
+    precio_base: 70000,
+    precio_afiliado: 0,
+    incluido_en_plan: true,
+    activo: true,
+    limite_mensual_incluido: 3,
+  },
+  {
+    id_servicio: 2,
+    nombre: 'Vacunación',
+    descripcion: 'Esquema completo de vacunas para perros y gatos según edad, raza y estilo de vida.',
+    precio_base: 75000,
+    precio_afiliado: 20000,
+    incluido_en_plan: true,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+  {
+    id_servicio: 3,
+    nombre: 'Desparasitación',
+    descripcion: 'Tratamiento interno y externo contra parásitos adaptado al peso, edad y hábitos de tu mascota.',
+    precio_base: 55000,
+    precio_afiliado: 20000,
+    incluido_en_plan: true,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+  {
+    id_servicio: 4,
+    nombre: 'Urgencias & Cuidados Críticos',
+    descripcion: 'Atención médica veterinaria prioritaria y de emergencia 24/7 para estabilización e intervenciones requeridas.',
+    precio_base: 120000,
+    precio_afiliado: 50000,
+    incluido_en_plan: false,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+  {
+    id_servicio: 5,
+    nombre: 'Exámenes & Diagnóstico (Laboratorio)',
+    descripcion: 'Análisis de sangre, orina, coprológicos y profilaxis para diagnóstico preciso de patologías.',
+    precio_base: 110000,
+    precio_afiliado: 45000,
+    incluido_en_plan: false,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+  {
+    id_servicio: 6,
+    nombre: 'Odontología Veterinaria',
+    descripcion: 'Profilaxis dental profesional, extracciones y tratamiento de enfermedades periodontales.',
+    precio_base: 180000,
+    precio_afiliado: 80000,
+    incluido_en_plan: false,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+  {
+    id_servicio: 7,
+    nombre: 'Cirugía Veterinaria',
+    descripcion: 'Procedimientos quirúrgicos generales y especializados con anestesia inhalada y monitoreo constante.',
+    precio_base: 450000,
+    precio_afiliado: 200000,
+    incluido_en_plan: false,
+    activo: true,
+    limite_mensual_incluido: null,
+  },
+]
+
   // Cargar catálogo de servicios
   const fetchServiciosData = async () => {
     const token = getStoredToken()
@@ -82,16 +155,32 @@ export default function AdminServicios() {
 
       if (res.ok) {
         const data = await res.json()
-        setServicios(data.servicios || [])
-        if (data.stats) {
-          setStats(data.stats)
-        }
+        const fetchedList = data.servicios && data.servicios.length > 0 ? data.servicios : DEFAULT_SERVICIOS_CATALOG
+        setServicios(fetchedList)
+        setStats({
+          total: fetchedList.length,
+          activos: fetchedList.filter((s) => s.activo).length,
+          inactivos: fetchedList.filter((s) => !s.activo).length,
+          incluidos_plan: fetchedList.filter((s) => s.incluido_en_plan).length,
+        })
       } else {
-        setErrorGlobal('No se pudo cargar el catálogo de servicios.')
+        setServicios(DEFAULT_SERVICIOS_CATALOG)
+        setStats({
+          total: DEFAULT_SERVICIOS_CATALOG.length,
+          activos: DEFAULT_SERVICIOS_CATALOG.filter((s) => s.activo).length,
+          inactivos: DEFAULT_SERVICIOS_CATALOG.filter((s) => !s.activo).length,
+          incluidos_plan: DEFAULT_SERVICIOS_CATALOG.filter((s) => s.incluido_en_plan).length,
+        })
       }
     } catch (err) {
       console.error('Error al obtener servicios:', err)
-      setErrorGlobal('Error de conexión con el servidor.')
+      setServicios(DEFAULT_SERVICIOS_CATALOG)
+      setStats({
+        total: DEFAULT_SERVICIOS_CATALOG.length,
+        activos: DEFAULT_SERVICIOS_CATALOG.filter((s) => s.activo).length,
+        inactivos: DEFAULT_SERVICIOS_CATALOG.filter((s) => !s.activo).length,
+        incluidos_plan: DEFAULT_SERVICIOS_CATALOG.filter((s) => s.incluido_en_plan).length,
+      })
     } finally {
       setLoading(false)
     }

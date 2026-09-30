@@ -240,4 +240,56 @@ class DocumentoController extends Controller
         $pdf = Pdf::loadView('pdf.carne_eps', $data);
         return $pdf->download("Certificado_Afiliacion_EPS_PetFeliz_{$cliente->id_cliente}.pdf");
     }
+
+    /**
+     * Descargar Receta Médica / Prescripción de Medicamentos en PDF.
+     * Muestra ÚNICAMENTE los medicamentos recetados, datos del paciente, dueño y profesional firmante.
+     * NO incluye observaciones ni diagnóstico clínico interno.
+     */
+    public function recetaMedicaPdf(Request $request, $id_cita)
+    {
+        $user = $request->user();
+        
+        $cita = Cita::with(['mascota', 'cliente.usuario', 'servicio', 'veterinario'])
+            ->where('id_cita', $id_cita)
+            ->first();
+
+        if (!$cita) {
+            return response()->json(['message' => 'Cita médica no encontrada.'], 404);
+        }
+
+        // Si es cliente, verificar que la cita pertenezca a sus mascotas
+        if ($user->cliente && $cita->id_cliente !== $user->cliente->id_cliente) {
+            return response()->json(['message' => 'No tienes autorización para acceder a esta receta médica.'], 403);
+        }
+
+        $medicamentosList = [];
+        if (!empty($cita->medicamentos)) {
+            $medicamentosList = is_array($cita->medicamentos) ? $cita->medicamentos : (json_decode($cita->medicamentos, true) ?? []);
+        }
+
+        $mascota = $cita->mascota;
+        $cliente = $cita->cliente;
+        $vet = $cita->veterinario;
+
+        $data = [
+            'cita' => $cita,
+            'fecha_emision' => \Carbon\Carbon::parse($cita->fecha)->format('d/m/Y'),
+            'hora_emision' => date('h:i A', strtotime($cita->hora)),
+            'mascota_nombre' => mb_strtoupper($mascota->nombre ?? 'Mascota', 'UTF-8'),
+            'mascota_especie' => mb_strtoupper($mascota->especie ?? 'Canino', 'UTF-8'),
+            'mascota_raza' => mb_strtoupper($mascota->raza ?? 'Criollo', 'UTF-8'),
+            'mascota_peso' => $mascota->peso ? ($mascota->peso . ' kg') : 'N/R',
+            'cliente_nombre' => mb_strtoupper($cliente->nombre ?? ($cliente->usuario->nombre ?? 'Cliente EPS'), 'UTF-8'),
+            'cliente_doc' => $cliente->cedula ?? ($cliente->num_documento ?? ('DOC-' . $cliente->id_cliente)),
+            'veterinario_nombre' => $vet ? ('Dr(a). ' . $vet->nombre) : 'Dr. Médico Veterinario EPS',
+            'veterinario_especialidad' => $vet->especialidad ?? 'Medicina Veterinaria General',
+            'veterinario_tarjeta' => $vet->numero_tarjeta ?? 'MP-EPS-PETFELIZ',
+            'servicio_nombre' => $cita->servicio->nombre ?? ($cita->motivo ?? 'Consulta Médica'),
+            'medicamentos' => $medicamentosList,
+        ];
+
+        $pdf = Pdf::loadView('pdf.receta_medica', $data);
+        return $pdf->download("Receta_Medica_PetFeliz_{$cita->id_cita}.pdf");
+    }
 }

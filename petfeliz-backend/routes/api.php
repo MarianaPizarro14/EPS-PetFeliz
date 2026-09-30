@@ -94,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pacientes', [VeterinarioPortalController::class, 'pacientes']);
         Route::get('/perfil', [VeterinarioPortalController::class, 'perfilInfo']);
         Route::post('/perfil/update', [VeterinarioPortalController::class, 'updatePerfil']);
+        Route::get('/citas/{id}', [VeterinarioPortalController::class, 'detalleCita']);
         Route::post('/citas/{id}/atender', [VeterinarioPortalController::class, 'atender']);
         Route::patch('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
         Route::post('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
@@ -131,6 +132,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cliente/documentos/historial-clinico/{id_mascota}/pdf', [DocumentoController::class, 'historialClinicoPdf']);
     Route::get('/cliente/documentos/certificado-vacunacion/{id_mascota}/pdf', [DocumentoController::class, 'certificadoVacunacionPdf']);
     Route::get('/cliente/documentos/carne-eps/pdf', [DocumentoController::class, 'carneEpsPdf']);
+    Route::get('/cliente/documentos/receta-medica/{id_cita}/pdf', [DocumentoController::class, 'recetaMedicaPdf']);
 
     // Rutas del Flujo Completo de Agendar Cita (3 Pasos + Concurrencia)
     Route::get('/agendar/veterinarios', [AgendarCitaController::class, 'veterinarios']);

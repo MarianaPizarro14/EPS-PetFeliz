@@ -29,6 +29,42 @@ function MisCitas() {
   const [showDetalleModal, setShowDetalleModal] = useState(false)
 
   const [selectedCita, setSelectedCita] = useState(null)
+  const [downloadingRecetaId, setDownloadingRecetaId] = useState(null)
+
+  const handleDownloadReceta = async (idCita) => {
+    const token = getStoredToken()
+    if (!token) return
+
+    try {
+      setDownloadingRecetaId(idCita)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cliente/documentos/receta-medica/${idCita}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/pdf, application/json',
+        }
+      })
+
+      if (!res.ok) {
+        alert('No se pudo descargar la receta médica solicitada.')
+        return
+      }
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Receta_Medica_PetFeliz_${idCita}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error al descargar receta médica:', err)
+      alert('Error de conexión al descargar la receta médica.')
+    } finally {
+      setDownloadingRecetaId(null)
+    }
+  }
 
   // Cerrar modales con tecla Escape
   useEffect(() => {
@@ -400,6 +436,19 @@ function MisCitas() {
                       <i className="fa-regular fa-eye"></i> Ver detalle
                     </button>
 
+                    {cita.medicamentos && cita.medicamentos.length > 0 && (
+                      <button
+                        type="button"
+                        className="btn-action-sm"
+                        style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}
+                        onClick={() => handleDownloadReceta(cita.id)}
+                        disabled={downloadingRecetaId === cita.id}
+                      >
+                        <i className={`fa-solid ${downloadingRecetaId === cita.id ? 'fa-spinner fa-spin' : 'fa-file-prescription'}`}></i>
+                        <span>{downloadingRecetaId === cita.id ? 'Descargando...' : 'Receta PDF'}</span>
+                      </button>
+                    )}
+
                     {activeTab === 'proximas' && (
                       <>
                         <button
@@ -647,12 +696,53 @@ function MisCitas() {
               </div>
             </div>
 
-            {selectedCita.observacion && (
-              <div style={{ marginBottom: '1.25rem', fontSize: '0.85rem', color: '#475569' }}>
-                <strong>Observaciones:</strong>
-                <p style={{ marginTop: '0.25rem', color: '#64748b' }}>{selectedCita.observacion}</p>
+            {/* VISIBILIDAD CLIENTE: ÚNICAMENTE MEDICAMENTOS RECETADOS (NO OBSERVACIONES CLÍNICAS NI DIAGNÓSTICO INTERNO) */}
+            <div style={{ marginTop: '1.25rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <i className="fa-solid fa-pills" style={{ color: '#059669' }}></i> Medicamentos Recetados
+                </h4>
+                {selectedCita.medicamentos && selectedCita.medicamentos.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadReceta(selectedCita.id)}
+                    disabled={downloadingRecetaId === selectedCita.id}
+                    style={{
+                      background: '#ecfdf5',
+                      color: '#059669',
+                      border: '1px solid #a7f3d0',
+                      borderRadius: '6px',
+                      padding: '0.35rem 0.75rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
+                  >
+                    <i className={`fa-solid ${downloadingRecetaId === selectedCita.id ? 'fa-spinner fa-spin' : 'fa-file-pdf'}`}></i>
+                    Descargar Receta PDF
+                  </button>
+                )}
               </div>
-            )}
+
+              {selectedCita.medicamentos && selectedCita.medicamentos.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {selectedCita.medicamentos.map((m, idx) => (
+                    <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>
+                      <strong style={{ color: '#0f172a', fontSize: '0.88rem', display: 'block' }}>{m.nombre}</strong>
+                      <span style={{ color: '#059669', fontSize: '0.82rem', fontWeight: 600, display: 'block' }}>{m.dosis}</span>
+                      {m.indicaciones && <span style={{ color: '#64748b', fontSize: '0.8rem', display: 'block', fontStyle: 'italic', marginTop: '0.15rem' }}>{m.indicaciones}</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: '0.4rem 0' }}>
+                  No se prescribieron medicamentos para esta consulta médica.
+                </p>
+              )}
+            </div>
 
             <div className="dh-modal-footer">
               <button type="button" className="dh-btn-secondary" onClick={() => setShowDetalleModal(false)}>

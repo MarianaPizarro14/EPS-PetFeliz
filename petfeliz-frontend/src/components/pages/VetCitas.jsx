@@ -24,14 +24,6 @@ export default function VetCitas() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('todos') // 'todos' | 'pendiente' | 'atendida'
 
-  // Modal para atender cita / ver observaciones
-  const [selectedCita, setSelectedCita] = useState(null)
-  const [observacion, setObservacion] = useState('')
-  const [submittingAtender, setSubmittingAtender] = useState(false)
-  const [modalSuccess, setModalSuccess] = useState('')
-  const [modalError, setModalError] = useState('')
-  const [viewOnlyObs, setViewOnlyObs] = useState(false)
-
   // Toast flotante
   const [toast, setToast] = useState(null)
   const triggerToast = (message, type = 'success') => {
@@ -76,64 +68,6 @@ export default function VetCitas() {
   useEffect(() => {
     fetchAgenda()
   }, [navigate])
-
-  const handleOpenAtenderModal = (cita, isReadOnly = false) => {
-    setSelectedCita(cita)
-    setObservacion(cita.observacion || '')
-    setViewOnlyObs(isReadOnly)
-    setModalSuccess('')
-    setModalError('')
-  }
-
-  const handleCloseModal = () => {
-    setSelectedCita(null)
-    setObservacion('')
-    setViewOnlyObs(false)
-    setModalSuccess('')
-    setModalError('')
-  }
-
-  const handleSubmitAtender = async (e) => {
-    e.preventDefault()
-    if (!selectedCita) return
-
-    const token = getStoredToken()
-    setSubmittingAtender(true)
-    setModalError('')
-    setModalSuccess('')
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/citas/${selectedCita.id_cita}/atender`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({ observacion }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setModalError(data.message || 'No se pudo guardar la consulta.')
-        setSubmittingAtender(false)
-        return
-      }
-
-      setModalSuccess('¡Consulta registrada y cita marcada como atendida exitosamente!')
-      setTimeout(() => {
-        handleCloseModal()
-        fetchAgenda()
-        triggerToast('¡Cita marcada como atendida con éxito!')
-      }, 1200)
-    } catch (err) {
-      console.error('Error al atender cita:', err)
-      setModalError('Error de red al registrar la atención.')
-    } finally {
-      setSubmittingAtender(false)
-    }
-  }
 
   const searchLower = searchTerm.toLowerCase().trim()
 
@@ -333,7 +267,7 @@ export default function VetCitas() {
                             <button
                               type="button"
                               className="vet-btn-atender"
-                              onClick={() => handleOpenAtenderModal(cita, false)}
+                              onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}
                             >
                               <i className="fa-solid fa-stethoscope"></i>
                               <span>Atender Cita</span>
@@ -344,10 +278,10 @@ export default function VetCitas() {
                             <button
                               type="button"
                               className="vet-btn-obs"
-                              onClick={() => handleOpenAtenderModal(cita, true)}
+                              onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}
                             >
                               <i className="fa-regular fa-file-lines"></i>
-                              <span>Ver Historial / Obs.</span>
+                              <span>Ver Expediente / Receta</span>
                             </button>
                           )}
                         </div>
@@ -359,111 +293,6 @@ export default function VetCitas() {
             ))
           )}
         </div>
-
-        {/* ── MODAL ATENDER CITA / VER OBSERVACIONES ── */}
-        {selectedCita && (
-          <div className="vet-modal-backdrop">
-            <div className="vet-modal-box">
-              <div className="vet-modal-header">
-                <div>
-                  <h3>
-                    {viewOnlyObs
-                      ? `Constancia / Observaciones de ${selectedCita.mascota.nombre}`
-                      : `Atender Cita Médica de ${selectedCita.mascota.nombre}`}
-                  </h3>
-                  <p className="vet-modal-subtitle">
-                    {selectedCita.servicio.nombre_servicio} — {selectedCita.fecha} a las {selectedCita.hora}
-                  </p>
-                </div>
-                <button type="button" className="vet-modal-close" onClick={handleCloseModal}>
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-
-              {modalError && <div className="vet-modal-alert vet-modal-alert--error">{modalError}</div>}
-              {modalSuccess && <div className="vet-modal-alert vet-modal-alert--success">{modalSuccess}</div>}
-
-              <div className="vet-modal-summary-box">
-                <div className="vet-modal-pet-header">
-                  <img
-                    src={
-                      selectedCita.mascota.foto_mascota ||
-                      (selectedCita.mascota.especie === 'Gato'
-                        ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
-                        : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
-                    }
-                    alt={selectedCita.mascota.nombre}
-                    className="vet-modal-pet-img"
-                  />
-                  <div>
-                    <h4 className="vet-modal-pet-title">{selectedCita.mascota.nombre}</h4>
-                    <p className="vet-modal-pet-sub">
-                      Especie: {selectedCita.mascota.especie} {selectedCita.mascota.raza ? `| Raza: ${selectedCita.mascota.raza}` : ''}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="vet-modal-details-grid">
-                  <div>
-                    <span className="detail-lbl">Propietario / Cliente:</span>
-                    <strong>{selectedCita.cliente.nombre}</strong>
-                  </div>
-                  <div>
-                    <span className="detail-lbl">Teléfono Contacto:</span>
-                    <strong>{selectedCita.cliente.telefono}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmitAtender}>
-                <div className="vet-modal-field">
-                  <label htmlFor="observacion">
-                    {viewOnlyObs ? 'Observaciones Registradas' : 'Observaciones Clínicas / Indicaciones Médicas'}
-                  </label>
-                  <textarea
-                    id="observacion"
-                    rows={5}
-                    className="vet-modal-textarea"
-                    placeholder="Escribe aquí las observaciones clínicas de la consulta, diagnóstico, medicamentos recetados o recomendaciones para la mascota..."
-                    value={observacion}
-                    onChange={(e) => setObservacion(e.target.value)}
-                    disabled={viewOnlyObs || submittingAtender}
-                  />
-                </div>
-
-                <div className="vet-modal-actions">
-                  <button
-                    type="button"
-                    className="vet-modal-btn vet-modal-btn--secondary"
-                    onClick={handleCloseModal}
-                  >
-                    {viewOnlyObs ? 'Cerrar' : 'Cancelar'}
-                  </button>
-
-                  {!viewOnlyObs && (
-                    <button
-                      type="submit"
-                      className="vet-modal-btn vet-modal-btn--primary"
-                      disabled={submittingAtender}
-                    >
-                      {submittingAtender ? (
-                        <>
-                          <i className="fa-solid fa-spinner fa-spin"></i>
-                          <span>Guardando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fa-solid fa-check"></i>
-                          <span>Marcar Atendida y Guardar</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   )

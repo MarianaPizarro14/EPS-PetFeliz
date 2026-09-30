@@ -20,9 +20,14 @@ class Cita extends Model
         'id_servicio',
         'id_estado',
         'observacion',
+        'medicamentos',
         'id_cliente',
         'id_mascota',
         'id_veterinario',
+    ];
+
+    protected $casts = [
+        'medicamentos' => 'array',
     ];
 
     public function cliente()

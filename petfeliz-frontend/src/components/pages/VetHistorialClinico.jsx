@@ -259,10 +259,27 @@ export default function VetHistorialClinico() {
                 <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
                   Observaciones Clínicas y Recomendaciones
                 </label>
-                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1rem', minHeight: '120px', fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#0f172a', lineHeight: '1.5' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1rem', minHeight: '80px', fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#0f172a', lineHeight: '1.5' }}>
                   {selectedConsulta.observacion || 'No se registraron observaciones adicionales para esta cita médica.'}
                 </div>
               </div>
+
+              {selectedConsulta.medicamentos && Array.isArray(selectedConsulta.medicamentos) && selectedConsulta.medicamentos.length > 0 && (
+                <div className="vet-modal-field" style={{ marginTop: '1rem' }}>
+                  <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <i className="fa-solid fa-pills" style={{ color: '#059669' }}></i> Medicamentos Recetados
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.4rem' }}>
+                    {selectedConsulta.medicamentos.map((m, idx) => (
+                      <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>
+                        <strong style={{ color: '#0f172a', fontSize: '0.85rem', display: 'block' }}>{m.nombre}</strong>
+                        <span style={{ color: '#059669', fontSize: '0.8rem', fontWeight: 600, display: 'block' }}>{m.dosis}</span>
+                        {m.indicaciones && <span style={{ color: '#64748b', fontSize: '0.78rem', display: 'block', fontStyle: 'italic' }}>{m.indicaciones}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="vet-modal-actions" style={{ marginTop: '1.25rem' }}>
                 <button type="button" className="vet-modal-btn vet-modal-btn--secondary" onClick={() => setSelectedConsulta(null)}>

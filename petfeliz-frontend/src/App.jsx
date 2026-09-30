@@ -45,6 +45,7 @@ import VetPacientes from './components/pages/VetPacientes'
 import VetCitas from './components/pages/VetCitas'
 import VetHistorialClinico from './components/pages/VetHistorialClinico'
 import VetConfiguracion from './components/pages/VetConfiguracion'
+import VetAtenderCita from './components/pages/VetAtenderCita'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const APP_ROUTES = [
@@ -327,6 +328,14 @@ function AppContent() {
           element={
             <ProtectedRouteVet>
               <VetConfiguracion />
+            </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/veterinario/atender/:idCita"
+          element={
+            <ProtectedRouteVet>
+              <VetAtenderCita />
             </ProtectedRouteVet>
           }
         />

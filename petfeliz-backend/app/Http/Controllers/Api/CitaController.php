@@ -54,6 +54,7 @@ class CitaController extends Controller
                 'motivo' => $cita->motivo,
                 'servicioNombre' => $servicioNombre,
                 'observacion' => $cita->observacion,
+                'medicamentos' => is_array($cita->medicamentos) ? $cita->medicamentos : (json_decode($cita->medicamentos, true) ?? []),
                 'estado' => $estadoStr,
                 'id_estado' => $cita->id_estado,
                 'mascota' => $cita->mascota ? [

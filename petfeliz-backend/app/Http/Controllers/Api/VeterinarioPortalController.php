@@ -45,6 +45,7 @@ class VeterinarioPortalController extends Controller
                 'estado' => $nombreEstado,
                 'estado_nombre' => $nombreEstado,
                 'observacion' => $c->observacion ?? '',
+                'medicamentos' => is_array($c->medicamentos) ? $c->medicamentos : (json_decode($c->medicamentos, true) ?? []),
                 'paciente' => [
                     'id_mascota' => $c->mascota->id_mascota ?? null,
                     'nombre' => $c->mascota->nombre ?? 'Paciente',
@@ -166,7 +167,82 @@ class VeterinarioPortalController extends Controller
     }
 
     /**
-     * Registrar la atención médica de una cita y agregar observaciones clínicas.
+     * Obtener el detalle individual de una cita médica para el veterinario.
+     */
+    public function detalleCita(Request $request, $id)
+    {
+        $user = $request->user();
+        $vet = $user->veterinario;
+
+        if (!$vet) {
+            return response()->json(['message' => 'Perfil veterinario no encontrado.'], 404);
+        }
+
+        $cita = Cita::with(['mascota.cliente.usuario', 'servicio', 'estado', 'veterinario'])
+            ->where('id_cita', $id)
+            ->where('id_veterinario', $vet->id_veterinario)
+            ->first();
+
+        if (!$cita) {
+            return response()->json(['message' => 'Cita médica no encontrada.'], 404);
+        }
+
+        $mascota = $cita->mascota;
+        $cliente = $cita->cliente;
+        $servicio = $cita->servicio;
+
+        $edadCalculada = 'N/A';
+        if ($mascota && $mascota->fecha_nacimiento) {
+            $edadCalculada = Carbon::parse($mascota->fecha_nacimiento)->age . ' años';
+        }
+
+        $medicamentosList = [];
+        if (!empty($cita->medicamentos)) {
+            $medicamentosList = is_array($cita->medicamentos) ? $cita->medicamentos : (json_decode($cita->medicamentos, true) ?? []);
+        }
+
+        return response()->json([
+            'cita' => [
+                'id_cita' => $cita->id_cita,
+                'fecha' => $cita->fecha,
+                'fecha_formateada' => Carbon::parse($cita->fecha)->format('d/m/Y'),
+                'hora' => date('h:i A', strtotime($cita->hora)),
+                'hora_raw' => $cita->hora,
+                'motivo' => $cita->motivo ?? ($servicio->nombre ?? 'Consulta Médica General'),
+                'id_estado' => $cita->id_estado,
+                'estado' => $cita->estado->nombre ?? 'Pendiente',
+                'observacion' => $cita->observacion ?? '',
+                'medicamentos' => $medicamentosList,
+                'paciente' => [
+                    'id_mascota' => $mascota->id_mascota ?? null,
+                    'nombre' => $mascota->nombre ?? 'Paciente',
+                    'especie' => $mascota->especie ?? 'Canino',
+                    'raza' => $mascota->raza ?? 'Criollo',
+                    'sexo' => $mascota->sexo ?? 'Macho',
+                    'edad' => $edadCalculada,
+                    'peso' => $mascota->peso ? ($mascota->peso . ' kg') : 'N/R',
+                    'alergias' => $mascota->alergias ?? 'Ninguna registrada',
+                    'vacunas' => $mascota->vacunas ?? 'Al día',
+                    'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
+                ],
+                'dueno' => [
+                    'id_cliente' => $cliente->id_cliente ?? null,
+                    'nombre' => $cliente->nombre ?? ($cliente->usuario->nombre ?? 'Cliente EPS'),
+                    'telefono' => $cliente->telefono ?? 'N/R',
+                    'email' => $cliente->usuario->email ?? ($cliente->email ?? 'N/R'),
+                    'cedula' => $cliente->cedula ?? 'N/R',
+                ],
+                'servicio' => [
+                    'id_servicio' => $servicio->id_servicio ?? null,
+                    'nombre' => $servicio->nombre ?? 'Consulta Médica General',
+                    'descripcion' => $servicio->descripcion ?? '',
+                ]
+            ]
+        ], 200);
+    }
+
+    /**
+     * Registrar la atención médica de una cita, observaciones clínicas y medicamentos recetados.
      */
     public function atender(Request $request, $id)
     {
@@ -184,7 +260,11 @@ class VeterinarioPortalController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'observacion' => 'nullable|string|max:1000',
+            'observacion' => 'nullable|string|max:2500',
+            'medicamentos' => 'nullable|array',
+            'medicamentos.*.nombre' => 'required_with:medicamentos|string|max:200',
+            'medicamentos.*.dosis' => 'nullable|string|max:200',
+            'medicamentos.*.indicaciones' => 'nullable|string|max:500',
             'id_estado' => 'nullable|integer|in:1,2,3,4',
         ]);
 
@@ -195,12 +275,20 @@ class VeterinarioPortalController extends Controller
             $cita->observacion = trim(strip_tags($request->observacion));
         }
 
+        if ($request->has('medicamentos')) {
+            $meds = array_values(array_filter($request->medicamentos, function ($m) {
+                return !empty($m['nombre']);
+            }));
+            $cita->medicamentos = $meds;
+        }
+
         $cita->save();
 
         $cita->load(['mascota', 'cliente.usuario', 'servicio', 'estado']);
 
         return response()->json([
-            'message' => 'Atención médica registrada exitosamente.',
+            'success' => true,
+            'message' => 'Atención médica y receta registradas exitosamente.',
             'cita' => [
                 'id_cita' => $cita->id_cita,
                 'fecha' => $cita->fecha,
@@ -209,6 +297,7 @@ class VeterinarioPortalController extends Controller
                 'id_estado' => $cita->id_estado,
                 'estado' => $cita->estado->nombre ?? 'Completada',
                 'observacion' => $cita->observacion,
+                'medicamentos' => $cita->medicamentos ?? [],
                 'paciente' => $cita->mascota->nombre ?? 'Paciente',
                 'dueno' => $cita->cliente->nombre ?? 'Cliente',
             ],

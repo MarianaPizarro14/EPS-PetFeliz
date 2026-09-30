@@ -374,15 +374,15 @@ export default function DashboardVeterinario() {
 
                     <div className="vet-cita-actions">
                       {isPendiente && (
-                        <button type="button" className="vet-btn-atender" onClick={() => handleOpenAtenderModal(cita, false)}>
+                        <button type="button" className="vet-btn-atender" onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}>
                           <i className="fa-solid fa-stethoscope"></i>
                           <span>Atender Cita</span>
                         </button>
                       )}
                       {isAtendida && (
-                        <button type="button" className="vet-btn-obs" onClick={() => handleOpenAtenderModal(cita, true)}>
+                        <button type="button" className="vet-btn-obs" onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}>
                           <i className="fa-regular fa-file-lines"></i>
-                          <span>Ver Historial</span>
+                          <span>Ver Expediente</span>
                         </button>
                       )}
                     </div>

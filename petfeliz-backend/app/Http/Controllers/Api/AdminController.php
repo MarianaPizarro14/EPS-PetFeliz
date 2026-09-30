@@ -410,6 +410,7 @@ class AdminController extends Controller
                 'estado' => $c->estado->nombre ?? ($c->id_estado == 4 ? 'Completada' : ($c->id_estado == 2 ? 'Confirmada' : ($c->id_estado == 3 ? 'Cancelada' : 'Pendiente'))),
                 'id_estado' => $c->id_estado,
                 'observacion' => $c->observacion ?? 'Atención agendada en línea.',
+                'medicamentos' => is_array($c->medicamentos) ? $c->medicamentos : (json_decode($c->medicamentos, true) ?? []),
             ];
         });
 
@@ -686,6 +687,7 @@ class AdminController extends Controller
                 'motivo' => $cita->motivo,
                 'observacion' => $cita->observacion,
                 'observaciones' => $cita->observacion,
+                'medicamentos' => is_array($cita->medicamentos) ? $cita->medicamentos : (json_decode($cita->medicamentos, true) ?? []),
             ];
         });
 

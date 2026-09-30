@@ -224,28 +224,28 @@ export const generateInvoiceHTML = (pago) => {
         }
 
         .btn-download {
-          background: #0f172a;
+          background: #dc2626;
           color: #ffffff;
-          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+          box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25);
         }
 
         .btn-download:hover {
-          background: #1e293b;
+          background: #b91c1c;
           transform: translateY(-1.5px);
-          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
+          box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
         }
 
         .btn-print {
           background: #ffffff;
-          color: #334155;
-          border: 1px solid #cbd5e1;
+          color: #dc2626;
+          border: 1px solid #fca5a5;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         .btn-print:hover {
-          background: #f1f5f9;
-          color: #0f172a;
-          border-color: #94a3b8;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #f87171;
           transform: translateY(-1.5px);
         }
 

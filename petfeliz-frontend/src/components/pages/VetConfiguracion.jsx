@@ -65,12 +65,20 @@ export default function VetConfiguracion() {
     correo: storedUser?.email || storedUser?.correo || '',
   })
 
-  // Foto & Zoom/Position Adjustment State
+  // Photo & Confirmed Zoom/Offset State
   const [selectedFile, setSelectedFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(storedUser?.foto || storedUser?.foto_perfil || null)
   const [avatarZoom, setAvatarZoom] = useState(1)
   const [avatarOffsetX, setAvatarOffsetX] = useState(0)
   const [avatarOffsetY, setAvatarOffsetY] = useState(0)
+
+  // Photo Crop Modal Pop-up State
+  const [showCropModal, setShowCropModal] = useState(false)
+  const [tempPhotoFile, setTempPhotoFile] = useState(null)
+  const [tempPhotoPreview, setTempPhotoPreview] = useState(null)
+  const [tempZoom, setTempZoom] = useState(1)
+  const [tempOffsetX, setTempOffsetX] = useState(0)
+  const [tempOffsetY, setTempOffsetY] = useState(0)
 
   // Password Form State
   const [changePassForm, setChangePassForm] = useState({
@@ -149,7 +157,7 @@ export default function VetConfiguracion() {
     fetchProfile()
   }, [])
 
-  // File change handler
+  // File select handler -> opens crop modal
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
@@ -166,15 +174,23 @@ export default function VetConfiguracion() {
     }
 
     setProfileError('')
-    setSelectedFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
+    setTempPhotoFile(file)
+    setTempPhotoPreview(URL.createObjectURL(file))
+    setTempZoom(1)
+    setTempOffsetX(0)
+    setTempOffsetY(0)
+    setShowCropModal(true)
+    e.target.value = null // reset input
   }
 
-  // Reset zoom & offsets
-  const handleResetAvatarControls = () => {
-    setAvatarZoom(1)
-    setAvatarOffsetX(0)
-    setAvatarOffsetY(0)
+  // Confirm photo crop in modal
+  const handleConfirmPhotoCrop = () => {
+    setSelectedFile(tempPhotoFile)
+    setPhotoPreview(tempPhotoPreview)
+    setAvatarZoom(tempZoom)
+    setAvatarOffsetX(tempOffsetX)
+    setAvatarOffsetY(tempOffsetY)
+    setShowCropModal(false)
   }
 
   // Submit Perfil
@@ -345,6 +361,136 @@ export default function VetConfiguracion() {
         </div>
       )}
 
+      {/* ── MODAL POP-UP DE AJUSTE Y ENCUADRE DE FOTO ── */}
+      {showCropModal && (
+        <div className="vet-modal-backdrop">
+          <div className="vet-modal-box" style={{ maxWidth: '520px' }}>
+            <div className="vet-modal-header">
+              <div>
+                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                  Ajustar Encuadre de Foto
+                </h3>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                  Acomoda el zoom y la posición de tu foto antes de guardar
+                </p>
+              </div>
+              <button
+                type="button"
+                className="vet-modal-close"
+                onClick={() => setShowCropModal(false)}
+                title="Cerrar"
+                style={{ background: 'none', border: 'none', fontSize: '1.2rem', color: '#94a3b8', cursor: 'pointer' }}
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            {/* Vista previa circular interactiva */}
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '1.25rem 0' }}>
+              <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', border: '4px solid #059669', background: '#e2e8f0', boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}>
+                {tempPhotoPreview && (
+                  <img
+                    src={tempPhotoPreview}
+                    alt="Vista previa encuadre"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: `scale(${tempZoom}) translate(${tempOffsetX}px, ${tempOffsetY}px)`,
+                      transition: 'transform 0.08s ease-out',
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Panel de Controles (Sliders Zoom y Posición) */}
+            <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '14px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <i className="fa-solid fa-sliders" style={{ color: '#059669' }}></i>
+                  Controles de Posición y Zoom
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setTempZoom(1); setTempOffsetX(0); setTempOffsetY(0); }}
+                  style={{ background: 'none', border: 'none', color: '#059669', fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  <i className="fa-solid fa-rotate-left"></i>
+                  Resetear
+                </button>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                  Zoom ({tempZoom.toFixed(1)}x)
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="2.5"
+                  step="0.05"
+                  value={tempZoom}
+                  onChange={(e) => setTempZoom(parseFloat(e.target.value))}
+                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                  Mover Horizontal ({tempOffsetX}px)
+                </label>
+                <input
+                  type="range"
+                  min="-50"
+                  max="50"
+                  step="1"
+                  value={tempOffsetX}
+                  onChange={(e) => setTempOffsetX(parseInt(e.target.value, 10))}
+                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                  Mover Vertical ({tempOffsetY}px)
+                </label>
+                <input
+                  type="range"
+                  min="-50"
+                  max="50"
+                  step="1"
+                  value={tempOffsetY}
+                  onChange={(e) => setTempOffsetY(parseInt(e.target.value, 10))}
+                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                />
+              </div>
+            </div>
+
+            {/* Acciones Modal */}
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="button"
+                className="vet-modal-btn vet-modal-btn--secondary"
+                onClick={() => setShowCropModal(false)}
+                style={{ padding: '0.6rem 1.2rem' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="vet-modal-btn vet-modal-btn--primary"
+                onClick={handleConfirmPhotoCrop}
+                style={{ padding: '0.6rem 1.4rem' }}
+              >
+                <i className="fa-solid fa-check"></i>
+                <span>Confirmar y Guardar Encuadre</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="dash-main">
         <DashboardHeader
           title="Configuración de Cuenta"
@@ -376,21 +522,21 @@ export default function VetConfiguracion() {
           </div>
         </div>
 
-        {/* CONTENEDOR CENTRADO Y ANCHO (960px MAX) */}
-        <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%' }}>
+        {/* CONTENEDOR ANCHO COMPLETO (1200px MAX, CENTRADO) */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
 
           {/* ── CONTENIDO 1: PERFIL PROFESIONAL ── */}
           {activeTab === 'perfil' && (
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2.25rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem', marginBottom: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                   <i className="fa-solid fa-id-card"></i>
                 </div>
                 <div>
-                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0 }}>
                     Información Profesional de Médico Veterinario
                   </h3>
-                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
                     Datos visibles para la asignación de citas y registros de atención clínica
                   </p>
                 </div>
@@ -400,111 +546,43 @@ export default function VetConfiguracion() {
               {profileSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{profileSuccess}</div>}
 
               <form onSubmit={handleSubmitProfile}>
-                {/* Foto de perfil con controles de zoom y posición */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.75rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                    <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0, position: 'relative', background: '#e2e8f0' }}>
-                      {photoPreview ? (
-                        <img
-                          src={photoPreview}
-                          alt="Perfil"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            transform: `scale(${avatarZoom}) translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
-                            transition: 'transform 0.1s ease-out',
-                          }}
-                        />
-                      ) : (
-                        <div style={{ width: '100%', height: '100%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700 }}>
-                          {profileForm.nombreSolo ? profileForm.nombreSolo[0].toUpperCase() : 'V'}
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: '220px' }}>
-                      <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.2rem' }}>
-                        Foto de Perfil Profesional
-                      </strong>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.75rem' }}>
-                        Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB) y acomódala a tu gusto.
-                      </span>
-                      <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.5rem 1rem', cursor: 'pointer' }}>
-                        <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
-                        <i className="fa-solid fa-camera"></i>
-                        <span>{selectedFile ? 'Cambiar archivo' : 'Elegir nueva imagen'}</span>
-                      </label>
-                    </div>
+                {/* Foto de perfil limpia (abrirá modal al cambiar imagen) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.75rem', padding: '1.25rem 1.5rem', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+                  <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0, position: 'relative', background: '#e2e8f0', boxShadow: '0 4px 10px rgba(0,0,0,0.06)' }}>
+                    {photoPreview ? (
+                      <img
+                        src={photoPreview}
+                        alt="Perfil"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transform: `scale(${avatarZoom}) translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
+                        }}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700 }}>
+                        {profileForm.nombreSolo ? profileForm.nombreSolo[0].toUpperCase() : 'V'}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Panel de Ajustes de Zoom y Posición */}
-                  <div style={{ background: '#ffffff', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <i className="fa-solid fa-[#059669] fa-sliders" style={{ color: '#059669' }}></i>
-                        Ajustar encuadre (Zoom y posición de la foto)
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleResetAvatarControls}
-                        style={{ background: 'none', border: 'none', color: '#059669', fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        <i className="fa-solid fa-rotate-left"></i>
-                        Resetear encuadre
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                          Zoom ({avatarZoom.toFixed(1)}x)
-                        </label>
-                        <input
-                          type="range"
-                          min="1"
-                          max="2.5"
-                          step="0.05"
-                          value={avatarZoom}
-                          onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
-                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                          Mover Horizontal ({avatarOffsetX}px)
-                        </label>
-                        <input
-                          type="range"
-                          min="-40"
-                          max="40"
-                          step="1"
-                          value={avatarOffsetX}
-                          onChange={(e) => setAvatarOffsetX(parseInt(e.target.value, 10))}
-                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                          Mover Vertical ({avatarOffsetY}px)
-                        </label>
-                        <input
-                          type="range"
-                          min="-40"
-                          max="40"
-                          step="1"
-                          value={avatarOffsetY}
-                          onChange={(e) => setAvatarOffsetY(parseInt(e.target.value, 10))}
-                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                        />
-                      </div>
-                    </div>
+                  <div style={{ flex: 1, minWidth: '240px' }}>
+                    <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.98rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.2rem' }}>
+                      Foto de Perfil Profesional
+                    </strong>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '0.75rem' }}>
+                      Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB). Al elegir una nueva foto se abrirá la ventana para ajustar el encuadre y zoom.
+                    </span>
+                    <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.55rem 1.1rem', cursor: 'pointer' }}>
+                      <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
+                      <i className="fa-solid fa-camera"></i>
+                      <span>{selectedFile ? 'Cambiar y ajustar foto' : 'Elegir nueva imagen'}</span>
+                    </label>
                   </div>
                 </div>
 
-                {/* Grid de Campos */}
+                {/* Grid de Campos en 2 Columnas anchas */}
                 <div className="dh-info-grid" style={{ gap: '1.25rem' }}>
 
                   {/* Prefijo Dr./Dra. y Nombre Completo */}
@@ -659,16 +737,16 @@ export default function VetConfiguracion() {
 
           {/* ── CONTENIDO 2: SEGURIDAD & CONTRASEÑA ── */}
           {activeTab === 'seguridad' && (
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2.25rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
               <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem', marginBottom: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                   <i className="fa-solid fa-key"></i>
                 </div>
                 <div>
-                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0 }}>
                     Cambio de Contraseña
                   </h3>
-                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
                     Actualiza tu contraseña de acceso para mantener segura tu cuenta médica
                   </p>
                 </div>

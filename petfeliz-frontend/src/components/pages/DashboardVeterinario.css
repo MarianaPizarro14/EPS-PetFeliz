@@ -231,7 +231,7 @@
 
 .vet-cita-row {
   display: grid;
-  grid-template-columns: 150px minmax(160px, 1fr) minmax(160px, 1fr) auto auto;
+  grid-template-columns: 140px minmax(160px, 1fr) minmax(160px, 1fr) 160px 210px;
   align-items: center;
   gap: 1.25rem;
   padding: 1.1rem 1.5rem;

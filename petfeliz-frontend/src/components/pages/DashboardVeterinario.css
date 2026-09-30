@@ -231,9 +231,9 @@
 
 .vet-cita-row {
   display: grid;
-  grid-template-columns: 160px 1.2fr 1fr 120px 140px;
+  grid-template-columns: 150px minmax(160px, 1fr) minmax(160px, 1fr) auto auto;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: 1.1rem 1.5rem;
   border-bottom: 1px solid #f1f5f9;
   transition: background 0.15s ease;
@@ -341,7 +341,9 @@
 
 .vet-cita-status-block {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
 }
 
 .vet-badge {
@@ -373,6 +375,7 @@
 .vet-cita-actions {
   display: flex;
   justify-content: flex-end;
+  white-space: nowrap;
 }
 
 .vet-btn-atender {
@@ -403,9 +406,9 @@
 }
 
 .vet-btn-obs {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1.5px solid #a7f3d0;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1.5px solid #bfdbfe;
   padding: 0.6rem 1.15rem;
   border-radius: 10px;
   font-family: 'Inter', sans-serif;
@@ -416,15 +419,15 @@
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.08);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vet-btn-obs:hover {
-  background: #059669;
+  background: #2563eb;
   color: #ffffff;
-  border-color: #047857;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+  border-color: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
   transform: translateY(-1px);
 }
 

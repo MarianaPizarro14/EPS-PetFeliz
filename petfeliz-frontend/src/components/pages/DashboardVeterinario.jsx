@@ -37,6 +37,14 @@ export default function DashboardVeterinario() {
   // Modal Expediente Clínico de la Mascota
   const [selectedPaciente, setSelectedPaciente] = useState(null)
 
+  // Modal para atender cita / ver observaciones desde el panel
+  const [selectedCita, setSelectedCita] = useState(null)
+  const [observacion, setObservacion] = useState('')
+  const [submittingAtender, setSubmittingAtender] = useState(false)
+  const [modalSuccess, setModalSuccess] = useState('')
+  const [modalError, setModalError] = useState('')
+  const [viewOnlyObs, setViewOnlyObs] = useState(false)
+
   const handleOpenExpediente = (cita) => {
     const targetId = cita.mascota?.id_mascota || cita.id_mascota || cita.paciente?.id_mascota
     const pMatch = pacientes.find((p) => p.id_mascota === targetId)
@@ -750,11 +758,11 @@ export default function DashboardVeterinario() {
                 <div>
                   <h3>
                     {viewOnlyObs
-                      ? `Constancia / Observaciones de ${selectedCita.mascota.nombre}`
-                      : `Atender Cita Médica de ${selectedCita.mascota.nombre}`}
+                      ? `Constancia / Observaciones de ${selectedCita?.mascota?.nombre || selectedCita?.paciente?.nombre || 'Paciente'}`
+                      : `Atender Cita Médica de ${selectedCita?.mascota?.nombre || selectedCita?.paciente?.nombre || 'Paciente'}`}
                   </h3>
                   <p className="vet-modal-subtitle">
-                    {selectedCita.servicio.nombre_servicio} — {selectedCita.fecha} a las {selectedCita.hora}
+                    {selectedCita?.servicio?.nombre_servicio || selectedCita?.servicio?.nombre || selectedCita?.motivo || 'Consulta General'} — {selectedCita?.fecha_formateada || selectedCita?.fecha} a las {selectedCita?.hora}
                   </p>
                 </div>
                 <button type="button" className="vet-modal-close" onClick={handleCloseModal}>
@@ -769,18 +777,18 @@ export default function DashboardVeterinario() {
                 <div className="vet-modal-pet-header">
                   <img
                     src={
-                      selectedCita.mascota.foto_mascota ||
-                      (selectedCita.mascota.especie === 'Gato'
+                      selectedCita?.mascota?.foto_mascota || selectedCita?.paciente?.foto ||
+                      (selectedCita?.mascota?.especie === 'Gato'
                         ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
                         : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
                     }
-                    alt={selectedCita.mascota.nombre}
+                    alt={selectedCita?.mascota?.nombre || selectedCita?.paciente?.nombre || 'Paciente'}
                     className="vet-modal-pet-img"
                   />
                   <div>
-                    <h4 className="vet-modal-pet-title">{selectedCita.mascota.nombre}</h4>
+                    <h4 className="vet-modal-pet-title">{selectedCita?.mascota?.nombre || selectedCita?.paciente?.nombre || 'Paciente'}</h4>
                     <p className="vet-modal-pet-sub">
-                      Especie: {selectedCita.mascota.especie} {selectedCita.mascota.raza ? `| Raza: ${selectedCita.mascota.raza}` : ''}
+                      Especie: {selectedCita?.mascota?.especie || selectedCita?.paciente?.especie || 'Canino'} {selectedCita?.mascota?.raza ? `| Raza: ${selectedCita.mascota.raza}` : ''}
                     </p>
                   </div>
                 </div>
@@ -788,11 +796,11 @@ export default function DashboardVeterinario() {
                 <div className="vet-modal-details-grid">
                   <div>
                     <span className="detail-lbl">Propietario / Cliente:</span>
-                    <strong>{selectedCita.cliente.nombre}</strong>
+                    <strong>{selectedCita?.cliente?.nombre || selectedCita?.dueno?.nombre || 'Cliente EPS'}</strong>
                   </div>
                   <div>
                     <span className="detail-lbl">Teléfono Contacto:</span>
-                    <strong>{selectedCita.cliente.telefono}</strong>
+                    <strong>{selectedCita?.cliente?.telefono || selectedCita?.dueno?.telefono || 'N/R'}</strong>
                   </div>
                 </div>
               </div>

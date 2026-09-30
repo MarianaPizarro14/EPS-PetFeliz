@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, updateStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -37,20 +37,45 @@ export default function VetPacientes() {
       setLoading(true)
       setErrorGlobal('')
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/pacientes`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-      })
+      const [resPac, resDash] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/veterinario/pacientes`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/veterinario/dashboard`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        }),
+      ])
 
-      if (res.status === 401 || res.status === 403) {
+      if (resPac.status === 401 || resPac.status === 403) {
         navigate('/login')
         return
       }
 
-      if (res.ok) {
-        const data = await res.json()
+      if (resPac.ok) {
+        const data = await resPac.json()
         setPacientes(data.pacientes || [])
       } else {
         setErrorGlobal('No se pudo cargar el listado de pacientes.')
+      }
+
+      if (resDash.ok) {
+        const dashData = await resDash.json()
+        if (dashData.veterinario) {
+          const updatedUserObj = {
+            ...usuario,
+            nombre: dashData.veterinario.nombre,
+            nombreCompleto: dashData.veterinario.nombre,
+            especialidad: dashData.veterinario.especialidad || '',
+            numero_tarjeta: dashData.veterinario.numero_tarjeta || '',
+            telefono: dashData.veterinario.telefono || '',
+            correo: dashData.veterinario.correo || dashData.veterinario.email || usuario.email,
+            email: dashData.veterinario.correo || dashData.veterinario.email || usuario.email,
+            foto: dashData.veterinario.foto_perfil || usuario.foto,
+            rol: 'veterinario',
+          }
+          setUsuario(updatedUserObj)
+          updateStoredUser(updatedUserObj)
+        }
       }
     } catch (err) {
       console.error('Error al cargar pacientes del veterinario:', err)

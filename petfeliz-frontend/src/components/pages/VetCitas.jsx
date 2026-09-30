@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, updateStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -22,7 +22,7 @@ export default function VetCitas() {
   const [loading, setLoading] = useState(true)
   const [errorGlobal, setErrorGlobal] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('todos') // 'todos' | 'pendiente' | 'atendida'
+  const [filterStatus, setFilterStatus] = useState('todos') // 'todos' | 'pendiente' | 'atendida' | 'cancelada'
 
   // Toast flotante
   const [toast, setToast] = useState(null)
@@ -54,6 +54,23 @@ export default function VetCitas() {
       if (res.ok) {
         const data = await res.json()
         setAgendaSemanal(data.agenda_semanal || [])
+
+        if (data.veterinario) {
+          const updatedUserObj = {
+            ...usuario,
+            nombre: data.veterinario.nombre,
+            nombreCompleto: data.veterinario.nombre,
+            especialidad: data.veterinario.especialidad || '',
+            numero_tarjeta: data.veterinario.numero_tarjeta || '',
+            telefono: data.veterinario.telefono || '',
+            correo: data.veterinario.correo || data.veterinario.email || usuario.email,
+            email: data.veterinario.correo || data.veterinario.email || usuario.email,
+            foto: data.veterinario.foto_perfil || usuario.foto,
+            rol: 'veterinario',
+          }
+          setUsuario(updatedUserObj)
+          updateStoredUser(updatedUserObj)
+        }
       } else {
         setErrorGlobal('No se pudo cargar la agenda de citas.')
       }
@@ -76,6 +93,7 @@ export default function VetCitas() {
       const citasDelDia = dia.citas.filter((c) => {
         if (filterStatus === 'pendiente' && c.id_estado !== 1 && c.id_estado !== 2) return false
         if (filterStatus === 'atendida' && c.id_estado !== 4) return false
+        if (filterStatus === 'cancelada' && c.id_estado !== 3) return false
 
         if (!searchLower) return true
         const sNombre = c.servicio?.nombre_servicio || c.servicio?.nombre || c.motivo || ''
@@ -159,6 +177,13 @@ export default function VetCitas() {
               onClick={() => setFilterStatus('atendida')}
             >
               Atendidas
+            </button>
+            <button
+              type="button"
+              className={`vet-filter-chip ${filterStatus === 'cancelada' ? 'vet-filter-chip--active' : ''}`}
+              onClick={() => setFilterStatus('cancelada')}
+            >
+              Canceladas
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, updateStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
@@ -47,8 +47,24 @@ export default function VetHistorialClinico() {
       if (res.ok) {
         const data = await res.json()
         const citasData = data.todas_citas || data.citas || []
-        // Filtrar consultas atendidas o con observaciones
         setTodasCitas(citasData)
+
+        if (data.veterinario) {
+          const updatedUserObj = {
+            ...usuario,
+            nombre: data.veterinario.nombre,
+            nombreCompleto: data.veterinario.nombre,
+            especialidad: data.veterinario.especialidad || '',
+            numero_tarjeta: data.veterinario.numero_tarjeta || '',
+            telefono: data.veterinario.telefono || '',
+            correo: data.veterinario.correo || data.veterinario.email || usuario.email,
+            email: data.veterinario.correo || data.veterinario.email || usuario.email,
+            foto: data.veterinario.foto_perfil || usuario.foto,
+            rol: 'veterinario',
+          }
+          setUsuario(updatedUserObj)
+          updateStoredUser(updatedUserObj)
+        }
       } else {
         setErrorGlobal('No se pudo obtener el historial clínico.')
       }

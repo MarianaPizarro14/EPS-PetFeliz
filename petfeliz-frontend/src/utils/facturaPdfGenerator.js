@@ -19,67 +19,10 @@ export const generateInvoiceHTML = (pago) => {
     <head>
       <meta charset="UTF-8">
       <title>Factura_${idFactura}</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 30px 20px; }
-        
-        .no-print.action-bar {
-          max-width: 820px;
-          margin: 0 auto 20px auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 14px;
-          padding: 14px 22px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-        }
-
-        .action-bar-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .action-buttons {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .btn-action {
-          display: inline-flex;
-          align-items: center;
-          padding: 9px 18px;
-          border-radius: 9px;
-          font-family: 'Inter', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          border: none;
-          transition: all 0.2s ease;
-        }
-
-        .btn-pdf {
-          background: #059669;
-          color: #ffffff;
-        }
-
-        .btn-pdf:hover {
-          background: #047857;
-          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
-        }
-
-        .btn-print {
-          background: #0284c7;
-          color: #ffffff;
-        }
-
-        .btn-print:hover {
-          background: #0369a1;
-          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-        }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 40px 20px 60px 20px; }
 
         .invoice-box {
           max-width: 820px;
@@ -88,7 +31,7 @@ export const generateInvoiceHTML = (pago) => {
           border: 1px solid #e2e8f0;
           border-radius: 16px;
           padding: 40px;
-          box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+          box-shadow: 0 8px 30px rgba(0,0,0,0.05);
           position: relative;
           overflow: hidden;
         }
@@ -256,31 +199,108 @@ export const generateInvoiceHTML = (pago) => {
           line-height: 1.6;
         }
 
+        /* Barra de acciones inferior (No se imprime) */
+        .no-print.bottom-action-bar {
+          max-width: 820px;
+          margin: 30px auto 0 auto;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .btn-action {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 26px;
+          border-radius: 10px;
+          font-family: 'Inter', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s ease;
+        }
+
+        .btn-download {
+          background: #0f172a;
+          color: #ffffff;
+          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+        }
+
+        .btn-download:hover {
+          background: #1e293b;
+          transform: translateY(-1.5px);
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
+        }
+
+        .btn-print {
+          background: #ffffff;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-print:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+          border-color: #94a3b8;
+          transform: translateY(-1.5px);
+        }
+
         @media print {
           body { padding: 0; background: #ffffff; }
           .no-print { display: none !important; }
           .invoice-box { border: none; box-shadow: none; padding: 20px; }
         }
       </style>
+      <script>
+        function descargarPDF() {
+          const element = document.querySelector('.invoice-box');
+          const btn = document.getElementById('btn-descargar-pdf');
+          if (btn) {
+            btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px; animation: spin 1s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m0 14v1m8-8h-1M5 12H4m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path></svg> Generando PDF...';
+            btn.style.opacity = '0.8';
+          }
+
+          const opt = {
+            margin:       [8, 8, 8, 8],
+            filename:     'Factura_${idFactura}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+
+          if (typeof html2pdf !== 'undefined') {
+            html2pdf().set(opt).from(element).save().then(() => {
+              if (btn) {
+                btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar Factura (PDF)';
+                btn.style.opacity = '1';
+              }
+            }).catch((err) => {
+              console.error('Error html2pdf:', err);
+              window.print();
+              if (btn) {
+                btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar Factura (PDF)';
+                btn.style.opacity = '1';
+              }
+            });
+          } else {
+            window.print();
+            if (btn) {
+              btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar Factura (PDF)';
+              btn.style.opacity = '1';
+            }
+          }
+        }
+
+        function imprimirFactura() {
+          window.print();
+        }
+      </script>
     </head>
     <body>
-      <div class="no-print action-bar">
-        <div class="action-bar-info">
-          <strong style="color: #059669; font-family: 'Sora', sans-serif; font-size: 14px;">Comprobante Digital Oficial EPS PetFeliz</strong>
-          <span style="font-size: 12px; color: #64748b;">Visualiza tu factura digital o utiliza las opciones para guardar como PDF e imprimir</span>
-        </div>
-        <div class="action-buttons">
-          <button type="button" class="btn-action btn-pdf" onclick="window.print()">
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            Guardar / Descargar PDF
-          </button>
-          <button type="button" class="btn-action btn-print" onclick="window.print()">
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-            Imprimir Factura
-          </button>
-        </div>
-      </div>
-
       <div class="invoice-box">
         <div class="top-stripe">
           <div class="stripe-green"></div>
@@ -343,6 +363,18 @@ export const generateInvoiceHTML = (pago) => {
           <p>Este documento representa el comprobante fiscal y oficial de pago generado electrónicamente por la plataforma.</p>
         </div>
       </div>
+
+      <!-- Acciones de Descarga e Impresión al final del documento -->
+      <div class="no-print bottom-action-bar">
+        <button type="button" id="btn-descargar-pdf" class="btn-action btn-download" onclick="descargarPDF()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Descargar Factura (PDF)
+        </button>
+        <button type="button" class="btn-action btn-print" onclick="imprimirFactura()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:8px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Imprimir Comprobante
+        </button>
+      </div>
     </body>
     </html>
   `
@@ -356,3 +388,4 @@ export const openInvoiceWindow = (pago) => {
     printWindow.document.close()
   }
 }
+

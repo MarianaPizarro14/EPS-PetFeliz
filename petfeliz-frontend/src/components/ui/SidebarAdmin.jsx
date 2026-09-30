@@ -89,23 +89,6 @@ export default function SidebarAdmin() {
       </div>
 
       <div className="dash-side__nav dash-side__nav--bottom">
-        <Link
-          to="/admin/soporte"
-          className={`dash-side__link dash-side__link--support ${isHelpActive ? 'dash-side__link--active' : ''}`}
-        >
-          <i
-            className="fa-regular fa-circle-question"
-            style={{
-              fontSize: '0.95rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '18px',
-            }}
-          ></i>
-          <span>Centro de Ayuda</span>
-        </Link>
-
         <button
           type="button"
           className="dash-side__link dash-side__link--logout"

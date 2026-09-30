@@ -5,6 +5,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 .admin-stat-card {
@@ -296,45 +297,51 @@
 }
 
 .admin-reminder-card--urgente {
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+  background: #ffffff;
+  border-left: 4px solid #ef4444;
 }
 
 .admin-reminder-card--info {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  background: #ffffff;
+  border-left: 4px solid #0284c7;
 }
 
 .admin-reminder-card--exito {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  background: #ffffff;
+  border-left: 4px solid #059669;
 }
 
 .admin-reminder-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.75rem;
-  margin-bottom: 0.1rem;
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
 }
 
 .admin-reminder-card__tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-weight: 600;
+  gap: 0.4rem;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.03em;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
 }
 
 .admin-reminder-card--urgente .admin-reminder-card__tag {
   color: #dc2626;
+  font-weight: 700;
 }
 
 .admin-reminder-card--info .admin-reminder-card__tag {
-  color: #0369a1;
+  color: #0284c7;
+  font-weight: 700;
 }
 
 .admin-reminder-card--exito .admin-reminder-card__tag {
-  color: #15803d;
+  color: #059669;
+  font-weight: 700;
 }
 
 .admin-reminder-card__time {

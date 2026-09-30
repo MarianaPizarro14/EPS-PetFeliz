@@ -28,15 +28,10 @@ const getInitials = (name) => {
 
 // Helper para traducir el rol a lenguaje natural
 const getFormattedRole = (rol) => {
-  switch ((rol || '').toLowerCase()) {
-    case 'admin':
-      return 'Director Administrativo'
-    case 'veterinario':
-      return 'Médico Veterinario'
-    case 'cliente':
-    default:
-      return 'Cliente PetFeliz'
-  }
+  const r = (rol || '').toLowerCase()
+  if (r === 'admin' || window.location.pathname.startsWith('/admin')) return 'Director Administrativo'
+  if (r === 'veterinario' || window.location.pathname.startsWith('/vet')) return 'Médico Veterinario'
+  return 'Cliente PetFeliz'
 }
 
 export default function DashboardHeader({
@@ -854,11 +849,11 @@ export default function DashboardHeader({
                 </div>
               </div>
 
-              {usuario?.rol !== 'veterinario' && (
-                <>
-                  <div className="dh-menu-divider"></div>
+              <div className="dh-menu-divider"></div>
 
-                  <nav className="dh-menu-links">
+              <nav className="dh-menu-links">
+                {usuario?.rol === 'cliente' && !window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/vet') && (
+                  <>
                     <button type="button" className="dh-menu-item" onClick={handleOpenProfileModal}>
                       <i className="fa-solid fa-user"></i>
                       <span>Mi perfil</span>
@@ -875,14 +870,14 @@ export default function DashboardHeader({
                     </button>
 
                     <div className="dh-menu-divider"></div>
+                  </>
+                )}
 
-                    <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
-                      <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                      <span>Cerrar sesión</span>
-                    </button>
-                  </nav>
-                </>
-              )}
+                <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
+                  <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                  <span>Cerrar sesión</span>
+                </button>
+              </nav>
             </div>
           )}
         </div>

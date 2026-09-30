@@ -173,8 +173,8 @@ export default function SidebarVet() {
             style={{
               background: '#ffffff',
               borderRadius: '20px',
-              padding: '2.25rem 2.25rem',
-              maxWidth: '560px',
+              padding: '2.5rem 2.5rem',
+              maxWidth: '660px',
               width: '100%',
               boxShadow: '0 25px 40px -10px rgba(0, 0, 0, 0.22), 0 10px 15px -5px rgba(0, 0, 0, 0.1)',
               position: 'relative',
@@ -213,39 +213,40 @@ export default function SidebarVet() {
               <i className="fa-solid fa-xmark" style={{ fontSize: '1rem' }}></i>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
               <div
                 style={{
-                  width: '52px',
-                  height: '52px',
+                  width: '54px',
+                  height: '54px',
                   borderRadius: '14px',
                   background: '#ecfdf5',
                   color: '#059669',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.5rem',
+                  fontSize: '1.55rem',
                   flexShrink: 0,
+                  marginTop: '2px',
                 }}
               >
                 <i className="fa-solid fa-headset"></i>
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>
+                <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0f172a', fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>
                   Mesa de Ayuda Médica
                 </h3>
-                <p style={{ margin: '3px 0 0 0', fontSize: '0.88rem', color: '#64748b' }}>
+                <p style={{ margin: '8px 0 0 0', fontSize: '0.92rem', color: '#64748b', lineHeight: '1.45' }}>
                   Soporte técnico y asistencial para veterinarios EPS PetFeliz
                 </p>
               </div>
             </div>
 
-            <p style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.55', margin: '0 0 1.5rem 0' }}>
+            <p style={{ fontSize: '0.95rem', color: '#334155', lineHeight: '1.6', margin: '0 0 1.75rem 0' }}>
               ¿Tienes algún problema con el agendamiento, historia clínica, carga de datos o acceso al portal? Comunícate de inmediato con la mesa de operaciones técnicas:
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.5rem' }}>
-              {/* Botón WhatsApp: fondo elegante oscuro, logo con color neón original */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '1.75rem' }}>
+              {/* Botón WhatsApp: verde oficial vibrante */}
               <a
                 href="https://wa.me/573218854748?text=Hola%2C%20soy%20m%C3%A9dico%20veterinario%20de%20EPS%20PetFeliz%20y%20necesito%20soporte%20t%C3%A9cnico"
                 target="_blank"
@@ -254,104 +255,85 @@ export default function SidebarVet() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.65rem',
-                  background: '#0f172a',
-                  border: '1.5px solid #1e293b',
+                  gap: '0.75rem',
+                  background: '#16a34a',
+                  border: '1.5px solid #15803d',
                   color: '#ffffff',
                   textDecoration: 'none',
-                  padding: '0.85rem 1.25rem',
+                  padding: '0.9rem 1.35rem',
                   borderRadius: '12px',
                   fontWeight: 600,
-                  fontSize: '0.96rem',
-                  boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
+                  fontSize: '0.98rem',
+                  boxShadow: '0 4px 14px rgba(22, 163, 74, 0.25)',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1e293b'
+                  e.currentTarget.style.background = '#15803d'
                   e.currentTarget.style.transform = 'translateY(-1px)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#0f172a'
+                  e.currentTarget.style.background = '#16a34a'
                   e.currentTarget.style.transform = 'none'
                 }}
               >
-                <i className="fa-brands fa-whatsapp" style={{ color: '#25D366', fontSize: '1.45rem', filter: 'drop-shadow(0 0 4px rgba(37,211,102,0.3))' }}></i>
+                <i className="fa-brands fa-whatsapp" style={{ color: '#ffffff', fontSize: '1.5rem' }}></i>
                 <span>Abrir Chat de WhatsApp Soporte (+57 321 8854748)</span>
               </a>
 
-              {/* Botón Correo con copia de seguridad para garantizar que siempre funcione */}
-              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-                <a
-                  href="mailto:petfelizeps@gmail.com?subject=Soporte%20Portal%20Veterinario%20EPS%20PetFeliz"
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.6rem',
-                    background: '#f8fafc',
-                    border: '1.5px solid #cbd5e1',
-                    color: '#1e293b',
-                    textDecoration: 'none',
-                    padding: '0.85rem 1rem',
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    fontSize: '0.92rem',
-                    transition: 'all 0.18s ease',
-                  }}
-                  onMouseEnter={(e) => {
+              {/* Botón Correo unificado: solo copia el correo sin abrir mailto */}
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText('petfelizeps@gmail.com')
+                  setCopiedEmail(true)
+                  setTimeout(() => setCopiedEmail(false), 2500)
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: copiedEmail ? '#ecfdf5' : '#f8fafc',
+                  border: copiedEmail ? '1.5px solid #059669' : '1.5px solid #cbd5e1',
+                  color: copiedEmail ? '#047857' : '#1e293b',
+                  padding: '0.9rem 1.25rem',
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  fontSize: '0.94rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!copiedEmail) {
                     e.currentTarget.style.background = '#f1f5f9'
                     e.currentTarget.style.borderColor = '#94a3b8'
-                  }}
-                  onMouseLeave={(e) => {
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!copiedEmail) {
                     e.currentTarget.style.background = '#f8fafc'
                     e.currentTarget.style.borderColor = '#cbd5e1'
-                  }}
-                  onClick={() => {
-                    window.open('mailto:petfelizeps@gmail.com?subject=Soporte%20Portal%20Veterinario%20EPS%20PetFeliz', '_blank')
-                  }}
-                >
-                  <i className="fa-solid fa-envelope" style={{ color: '#2563eb', fontSize: '1.1rem' }}></i>
+                  }
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <i className="fa-solid fa-envelope" style={{ color: '#2563eb', fontSize: '1.15rem' }}></i>
                   <span>petfelizeps@gmail.com</span>
-                </a>
-
-                <button
-                  type="button"
-                  title="Copiar correo electrónico al portapapeles"
-                  onClick={() => {
-                    navigator.clipboard.writeText('petfelizeps@gmail.com')
-                    setCopiedEmail(true)
-                    setTimeout(() => setCopiedEmail(false), 2500)
-                  }}
-                  style={{
-                    background: copiedEmail ? '#ecfdf5' : '#f8fafc',
-                    border: copiedEmail ? '1.5px solid #059669' : '1.5px solid #cbd5e1',
-                    color: copiedEmail ? '#059669' : '#334155',
-                    borderRadius: '12px',
-                    padding: '0 1.15rem',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.88rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    transition: 'all 0.18s ease',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.88rem', color: copiedEmail ? '#059669' : '#64748b' }}>
                   <i className={copiedEmail ? 'fa-solid fa-check' : 'fa-regular fa-copy'}></i>
-                  <span>{copiedEmail ? '¡Copiado!' : 'Copiar'}</span>
-                </button>
-              </div>
+                  <span>{copiedEmail ? '¡Correo copiado!' : 'Copiar correo'}</span>
+                </div>
+              </button>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '0.9rem 1.15rem', borderRadius: '12px', fontSize: '0.85rem', color: '#475569', border: '1px solid #e2e8f0' }}>
+            <div style={{ background: '#f8fafc', padding: '1rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem', color: '#475569', border: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <i className="fa-regular fa-clock" style={{ color: '#059669' }}></i>
                 <span><strong>Horario de atención:</strong> Lunes a Sábado 8:00 AM - 7:00 PM</span>
               </div>
-              <div style={{ marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ marginTop: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <i className="fa-solid fa-phone" style={{ color: '#059669' }}></i>
                 <span><strong>Línea directa y WhatsApp:</strong> +57 321 8854748</span>
               </div>

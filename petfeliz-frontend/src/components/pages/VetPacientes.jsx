@@ -153,7 +153,7 @@ export default function VetPacientes() {
               <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0 }}>
                 Listado Único de Pacientes ({pacientesFiltrados.length})
               </h2>
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: '0.55rem 0 0 0' }}>
                 Mascotas que han recibido atención médica bajo tu consulta profesional
               </p>
             </div>

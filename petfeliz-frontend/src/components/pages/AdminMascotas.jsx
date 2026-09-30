@@ -897,16 +897,12 @@ export default function AdminMascotas() {
                 <div className="adm-drawer-footer">
                   <button
                     type="button"
-                    className="adm-btn-primary"
-                    onClick={() => {
-                      const target = selectedFicha
-                      setSelectedFicha(null)
-                      handleOpenEditModal(target)
-                    }}
+                    className="adm-btn-secondary"
+                    onClick={() => setSelectedFicha(null)}
                     style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
                   >
-                    <i className="fa-solid fa-pen-to-square" style={{ marginRight: '6px' }}></i>
-                    Editar Ficha de Mascota
+                    <i className="fa-solid fa-xmark" style={{ marginRight: '6px' }}></i>
+                    Cerrar Ficha
                   </button>
                 </div>
               </>

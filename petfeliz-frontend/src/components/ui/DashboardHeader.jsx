@@ -754,8 +754,12 @@ export default function DashboardHeader({
             type="button"
             className={`dash-header__bell ${showNotifs ? 'dash-header__bell--active' : ''}`}
             onClick={() => {
-              setShowNotifs(!showNotifs)
+              const nextState = !showNotifs
+              setShowNotifs(nextState)
               setShowProfileMenu(false)
+              if (nextState && unreadCount > 0) {
+                handleMarkAllAsRead()
+              }
             }}
             aria-label="Notificaciones"
           >

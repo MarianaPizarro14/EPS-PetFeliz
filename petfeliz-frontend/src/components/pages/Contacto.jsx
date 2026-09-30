@@ -165,7 +165,7 @@ export default function Contacto() {
               </div>
               <div>
                 <p className="ct-info__label">WhatsApp</p>
-                <a href="https://wa.me/573023783834" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 302 378 3834</a>
+                <a href="https://wa.me/573218854748" target="_blank" rel="noopener noreferrer" className="ct-info__value">+57 321 885 4748</a>
               </div>
             </div>
             <div className="ct-info__card">
@@ -425,7 +425,7 @@ export default function Contacto() {
         buttons={[
           {
             label: 'Escríbenos',
-            href: 'https://wa.me/573023783834?text=Hola%2C%20quiero%20más%20información%20sobre%20PetFeliz',
+            href: 'https://wa.me/573218854748?text=Hola%2C%20quiero%20más%20información%20sobre%20PetFeliz',
             variant: 'btn-primary',
             target: '_blank',
             rel: 'noopener noreferrer'

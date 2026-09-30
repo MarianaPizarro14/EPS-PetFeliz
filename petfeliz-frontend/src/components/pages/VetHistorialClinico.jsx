@@ -266,7 +266,7 @@ export default function VetHistorialClinico() {
                             <i className="fa-solid fa-notes-medical" style={{ color: '#059669', marginTop: '4px', fontSize: '0.9rem' }}></i>
                             <div style={{ flex: 1 }}>
                               <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>
-                                Dictamen Clínico:
+                                Diagnóstico:
                               </span>
                               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#334155', margin: 0, lineHeight: '1.5' }}>
                                 {cita.observacion}

@@ -382,7 +382,7 @@ export default function VetPacientes() {
                         marginBottom: '0.75rem'
                       }}>
                         <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>
-                          Dictamen Clínico:
+                          Diagnóstico:
                         </span>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#1e293b', margin: 0, lineHeight: '1.5' }}>
                           {citaItem.observacion || 'Atención general sin observaciones adicionales registradas.'}

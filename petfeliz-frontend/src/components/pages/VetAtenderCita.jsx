@@ -6,6 +6,7 @@ import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './DashboardVeterinario.css'
 import './VetAtenderCita.css'
+import { RAZAS_POR_ESPECIE } from '../../data/razasPorEspecie'
 
 export default function VetAtenderCita() {
   const { idCita } = useParams()
@@ -172,10 +173,20 @@ export default function VetAtenderCita() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isDirty])
 
-  // Cambios en paciente con sincronización de fecha y edad
+  // Cambios en paciente con sincronización de fecha, edad y razas por especie
   const handlePacienteChange = (field, value) => {
     setPacienteForm((prev) => {
       const updated = { ...prev, [field]: value }
+
+      if (field === 'especie') {
+        const razasDisponibles = RAZAS_POR_ESPECIE[value] || []
+        // Si la raza actual no pertenece a las razas de la nueva especie, seleccionamos la predeterminada
+        if (!razasDisponibles.includes(prev.raza) && value !== 'Otro') {
+          updated.raza = razasDisponibles[0] || 'Criollo / Mestizo (Sin raza definida)'
+        } else if (value === 'Otro') {
+          updated.raza = prev.raza || ''
+        }
+      }
 
       if (field === 'fecha_nacimiento' && value) {
         const year = new Date(value).getFullYear()
@@ -558,20 +569,55 @@ export default function VetAtenderCita() {
 
                   <div className="hce-field-group">
                     <label className="hce-field-label" htmlFor="paciente-raza">
-                      Raza
+                      Raza *
                     </label>
                     <div className="hce-input-wrapper">
                       <i className="fa-solid fa-dna hce-input-icon"></i>
-                      <input
+                      <select
                         id="paciente-raza"
-                        type="text"
-                        className={`hce-form-input hce-form-input--has-icon ${fieldErrors['paciente.raza'] ? 'hce-form-input--error' : ''}`}
-                        value={pacienteForm.raza}
-                        onChange={(e) => handlePacienteChange('raza', e.target.value)}
+                        className={`hce-form-select hce-form-input--has-icon ${fieldErrors['paciente.raza'] ? 'hce-form-select--error' : ''}`}
+                        value={
+                          (RAZAS_POR_ESPECIE[pacienteForm.especie] || []).filter((r) => r !== 'Otra (Especificar)').includes(pacienteForm.raza)
+                            ? pacienteForm.raza
+                            : 'Otra (Especificar)'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val === 'Otra (Especificar)') {
+                            handlePacienteChange('raza', '')
+                          } else {
+                            handlePacienteChange('raza', val)
+                          }
+                        }}
                         disabled={submitting || isAtendida}
-                        placeholder="Criollo / Mestizo o raza"
-                      />
+                      >
+                        {(RAZAS_POR_ESPECIE[pacienteForm.especie] || [
+                          'Criollo / Mestizo (Sin raza definida)',
+                          'Otra (Especificar)',
+                        ]).map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+
+                    {/* Campo de texto libre para raza específica o cuando selecciona Otra */}
+                    {(pacienteForm.especie === 'Otro' ||
+                      pacienteForm.raza === '' ||
+                      !(RAZAS_POR_ESPECIE[pacienteForm.especie] || []).filter((r) => r !== 'Otra (Especificar)').includes(pacienteForm.raza)) && (
+                      <div style={{ marginTop: '0.45rem' }}>
+                        <input
+                          type="text"
+                          className="hce-form-input"
+                          placeholder="Escribe la raza de la mascota..."
+                          value={pacienteForm.raza === 'Otra (Especificar)' ? '' : pacienteForm.raza}
+                          onChange={(e) => handlePacienteChange('raza', e.target.value)}
+                          disabled={submitting || isAtendida}
+                        />
+                      </div>
+                    )}
+
                     {fieldErrors['paciente.raza'] && (
                       <span className="hce-input-error-msg"><i className="fa-solid fa-circle-exclamation"></i> {fieldErrors['paciente.raza'][0]}</span>
                     )}

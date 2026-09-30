@@ -146,13 +146,13 @@ export default function VetHistorialClinico() {
         )}
 
         <div className="vet-agenda-container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
             <div>
-              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: '0 0 0.55rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <i className="fa-solid fa-file-waveform" style={{ color: '#059669' }}></i>
                 Registros Clínicos de Atenciones ({consultasFiltradas.length})
               </h2>
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#64748b', margin: 0 }}>
                 Buscador y consulta detallada de dictámenes médicos, diagnósticos e indicaciones registradas
               </p>
             </div>
@@ -170,7 +170,7 @@ export default function VetHistorialClinico() {
               <p>No se encontraron consultas registradas que coincidan con la búsqueda ingresada.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {consultasFiltradas.map((cita) => {
                 const isAtendida = cita.id_estado === 4
                 const isPendiente = cita.id_estado === 1 || cita.id_estado === 2
@@ -184,16 +184,16 @@ export default function VetHistorialClinico() {
                       background: '#ffffff',
                       border: '1px solid #e2e8f0',
                       borderRadius: '16px',
-                      padding: '1.25rem 1.5rem',
+                      padding: '1.35rem 1.6rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '1.25rem',
+                      gap: '1.35rem',
                       boxShadow: '0 4px 20px rgba(15, 23, 42, 0.03)',
                       transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.1rem', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flex: 1 }}>
                       <img
                         src={
                           cita.paciente?.foto || cita.paciente?.foto_mascota || cita.mascota?.foto_mascota ||
@@ -203,8 +203,8 @@ export default function VetHistorialClinico() {
                         }
                         alt={cita.paciente?.nombre || 'Paciente'}
                         style={{
-                          width: '56px',
-                          height: '56px',
+                          width: '58px',
+                          height: '58px',
                           borderRadius: '50%',
                           objectFit: 'cover',
                           aspectRatio: '1 / 1',
@@ -215,8 +215,8 @@ export default function VetHistorialClinico() {
                       />
 
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                          <strong style={{ fontFamily: 'Sora, sans-serif', fontSize: '1.05rem', color: '#0f172a', fontWeight: 700 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+                          <strong style={{ fontFamily: 'Sora, sans-serif', fontSize: '1.08rem', color: '#0f172a', fontWeight: 700 }}>
                             {cita.paciente?.nombre || cita.mascota?.nombre || 'Paciente'}
                           </strong>
                           <span style={{
@@ -224,7 +224,7 @@ export default function VetHistorialClinico() {
                             fontFamily: 'Inter, sans-serif',
                             background: '#f1f5f9',
                             color: '#334155',
-                            padding: '2px 8px',
+                            padding: '3px 10px',
                             borderRadius: '6px',
                             fontWeight: 600,
                             border: '1px solid #cbd5e1'
@@ -236,19 +236,19 @@ export default function VetHistorialClinico() {
                             fontFamily: 'Inter, sans-serif',
                             background: '#ecfdf5',
                             color: '#047857',
-                            padding: '2px 8px',
+                            padding: '3px 10px',
                             borderRadius: '6px',
                             fontWeight: 600,
                             border: '1px solid #a7f3d0'
                           }}>
-                            <i className="fa-solid fa-stethoscope" style={{ marginRight: '4px' }}></i>
+                            <i className="fa-solid fa-stethoscope" style={{ marginRight: '5px' }}></i>
                             {servicioNombre}
                           </span>
                         </div>
 
-                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#475569', margin: '0 0 0.4rem 0', display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
-                          <span><strong><i className="fa-solid fa-user" style={{ color: '#059669', marginRight: '4px' }}></i> Tutor:</strong> {cita.cliente?.nombre || cita.dueno?.nombre || 'Cliente EPS'}</span>
-                          <span><strong><i className="fa-regular fa-calendar-days" style={{ color: '#059669', marginRight: '4px' }}></i> Fecha:</strong> {fechaFmt} ({cita.hora})</span>
+                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#475569', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                          <span><strong><i className="fa-solid fa-user" style={{ color: '#059669', marginRight: '5px' }}></i> Tutor:</strong> {cita.cliente?.nombre || cita.dueno?.nombre || 'Cliente EPS'}</span>
+                          <span><strong><i className="fa-regular fa-calendar-days" style={{ color: '#059669', marginRight: '5px' }}></i> Fecha:</strong> {fechaFmt} ({cita.hora})</span>
                         </p>
 
                         {/* Dictamen / Observación Médica */}
@@ -256,32 +256,32 @@ export default function VetHistorialClinico() {
                           <div style={{
                             background: '#f8fafc',
                             border: '1px solid #e2e8f0',
-                            borderRadius: '10px',
-                            padding: '0.55rem 0.85rem',
-                            marginTop: '0.4rem',
+                            borderRadius: '12px',
+                            padding: '0.75rem 1rem',
+                            marginTop: '0.75rem',
                             display: 'flex',
                             alignItems: 'flex-start',
-                            gap: '0.55rem'
+                            gap: '0.65rem'
                           }}>
-                            <i className="fa-solid fa-notes-medical" style={{ color: '#059669', marginTop: '3px', fontSize: '0.85rem' }}></i>
+                            <i className="fa-solid fa-notes-medical" style={{ color: '#059669', marginTop: '4px', fontSize: '0.9rem' }}></i>
                             <div style={{ flex: 1 }}>
-                              <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
+                              <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>
                                 Dictamen Clínico:
                               </span>
-                              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#334155', margin: 0, lineHeight: '1.4' }}>
+                              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.86rem', color: '#334155', margin: 0, lineHeight: '1.5' }}>
                                 {cita.observacion}
                               </p>
                             </div>
                           </div>
                         ) : (
-                          <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <div style={{ marginTop: '0.65rem', fontSize: '0.82rem', color: '#94a3b8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <i className="fa-regular fa-clock"></i> Sin observaciones registradas todavía
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.65rem', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem', flexShrink: 0 }}>
                       <span className={`vet-badge ${isAtendida ? 'vet-badge--atendida' : isPendiente ? 'vet-badge--pendiente' : 'vet-badge--cancelada'}`}>
                         <i className={`fa-solid ${isAtendida ? 'fa-circle-check' : isPendiente ? 'fa-clock' : 'fa-circle-xmark'}`}></i>
                         {isAtendida ? 'Atendida' : isPendiente ? 'Pendiente' : 'Cancelada'}
@@ -373,7 +373,7 @@ export default function VetHistorialClinico() {
               </div>
 
               <div className="vet-modal-field">
-                <label style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <label style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <i className="fa-solid fa-stethoscope" style={{ color: '#059669' }}></i> Observaciones Clínicas y Recomendaciones
                 </label>
                 <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '1rem', minHeight: '90px', fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#1e293b', lineHeight: '1.5' }}>
@@ -389,8 +389,11 @@ export default function VetHistorialClinico() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {selectedConsulta.medicamentos.map((m, idx) => (
                       <div key={idx} style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '0.75rem 1rem' }}>
-                        <strong style={{ color: '#1e3a8a', fontSize: '0.88rem', display: 'block' }}>💊 {m.nombre || m.medicamento}</strong>
-                        <span style={{ color: '#1d4ed8', fontSize: '0.82rem', fontWeight: 600, display: 'block', marginTop: '2px' }}>Dosis: {m.dosis} {m.duracion ? `• ${m.duracion}` : ''}</span>
+                        <strong style={{ color: '#1e3a8a', fontSize: '0.88rem', display: 'block' }}>
+                          <i className="fa-solid fa-capsules" style={{ color: '#2563eb', marginRight: '6px' }}></i>
+                          {m.nombre || m.medicamento}
+                        </strong>
+                        <span style={{ color: '#1d4ed8', fontSize: '0.82rem', fontWeight: 600, display: 'block', marginTop: '3px' }}>Dosis: {m.dosis} {m.duracion ? `• ${m.duracion}` : ''}</span>
                       </div>
                     ))}
                   </div>

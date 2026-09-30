@@ -376,13 +376,13 @@ export default function VetPacientes() {
                       {/* Diagnóstico / Observaciones */}
                       <div style={{
                         background: '#f8fafc',
-                        borderLeft: '4px solid #059669',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
                         padding: '0.75rem 1rem',
-                        borderRadius: '0 8px 8px 0',
                         marginBottom: '0.75rem'
                       }}>
-                        <span style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.2rem' }}>
-                          Diagnóstico & Observaciones Clínicas:
+                        <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>
+                          Dictamen Clínico:
                         </span>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#1e293b', margin: 0, lineHeight: '1.5' }}>
                           {citaItem.observacion || 'Atención general sin observaciones adicionales registradas.'}
@@ -398,7 +398,10 @@ export default function VetPacientes() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                             {citaItem.medicamentos.map((med, mIdx) => (
                               <div key={mIdx} style={{ fontSize: '0.84rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.3rem' }}>
-                                <strong>💊 {med.nombre || med.medicamento || 'Medicamento'}</strong>
+                                <strong>
+                                  <i className="fa-solid fa-capsules" style={{ color: '#2563eb', marginRight: '6px' }}></i>
+                                  {med.nombre || med.medicamento || 'Medicamento'}
+                                </strong>
                                 <span style={{ background: '#dbeafe', padding: '2px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>
                                   Dosis: {med.dosis || 'Según indicación'} {med.duracion ? `• ${med.duracion}` : ''}
                                 </span>

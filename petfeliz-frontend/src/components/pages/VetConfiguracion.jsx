@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getStoredToken, getStoredUser, updateStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
@@ -65,20 +65,21 @@ export default function VetConfiguracion() {
     correo: storedUser?.email || storedUser?.correo || '',
   })
 
-  // Photo & Confirmed Zoom/Offset State
+  // Selected & Cropped Photo State
   const [selectedFile, setSelectedFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(storedUser?.foto || storedUser?.foto_perfil || null)
-  const [avatarZoom, setAvatarZoom] = useState(1)
-  const [avatarOffsetX, setAvatarOffsetX] = useState(0)
-  const [avatarOffsetY, setAvatarOffsetY] = useState(0)
 
-  // Photo Crop Modal Pop-up State
+  // Interactive Crop Modal Pop-up State
   const [showCropModal, setShowCropModal] = useState(false)
   const [tempPhotoFile, setTempPhotoFile] = useState(null)
   const [tempPhotoPreview, setTempPhotoPreview] = useState(null)
   const [tempZoom, setTempZoom] = useState(1)
-  const [tempOffsetX, setTempOffsetX] = useState(0)
-  const [tempOffsetY, setTempOffsetY] = useState(0)
+  const [cropCirclePos, setCropCirclePos] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  const cropStageRef = useRef(null)
+  const cropImgRef = useRef(null)
 
   // Password Form State
   const [changePassForm, setChangePassForm] = useState({
@@ -177,20 +178,95 @@ export default function VetConfiguracion() {
     setTempPhotoFile(file)
     setTempPhotoPreview(URL.createObjectURL(file))
     setTempZoom(1)
-    setTempOffsetX(0)
-    setTempOffsetY(0)
+    setCropCirclePos({ x: 0, y: 0 })
     setShowCropModal(true)
     e.target.value = null // reset input
   }
 
-  // Confirm photo crop in modal
+  // Dragging event handlers for crop circle
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    setDragStart({ x: clientX - cropCirclePos.x, y: clientY - cropCirclePos.y })
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+
+    let newX = clientX - dragStart.x
+    let newY = clientY - dragStart.y
+
+    const maxLimit = 130
+    newX = Math.max(-maxLimit, Math.min(maxLimit, newX))
+    newY = Math.max(-maxLimit, Math.min(maxLimit, newY))
+
+    setCropCirclePos({ x: newX, y: newY })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  // Confirm photo crop in modal using Canvas
   const handleConfirmPhotoCrop = () => {
-    setSelectedFile(tempPhotoFile)
-    setPhotoPreview(tempPhotoPreview)
-    setAvatarZoom(tempZoom)
-    setAvatarOffsetX(tempOffsetX)
-    setAvatarOffsetY(tempOffsetY)
-    setShowCropModal(false)
+    if (!cropImgRef.current || !cropStageRef.current) {
+      setShowCropModal(false)
+      return
+    }
+
+    const img = cropImgRef.current
+    const stage = cropStageRef.current
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    const targetSize = 500
+    canvas.width = targetSize
+    canvas.height = targetSize
+
+    const imgRect = img.getBoundingClientRect()
+    const stageRect = stage.getBoundingClientRect()
+
+    const stageCenterX = stageRect.left + stageRect.width / 2
+    const stageCenterY = stageRect.top + stageRect.height / 2
+
+    const circleCenterX = stageCenterX + cropCirclePos.x
+    const circleCenterY = stageCenterY + cropCirclePos.y
+
+    const circleRadiusScreen = 80 // 160px diameter / 2
+
+    const cropXOnImg = circleCenterX - circleRadiusScreen - imgRect.left
+    const cropYOnImg = circleCenterY - circleRadiusScreen - imgRect.top
+    const cropSizeOnImg = circleRadiusScreen * 2
+
+    const scaleX = img.naturalWidth / imgRect.width
+    const scaleY = img.naturalHeight / imgRect.height
+
+    const srcX = cropXOnImg * scaleX
+    const srcY = cropYOnImg * scaleY
+    const srcW = cropSizeOnImg * scaleX
+    const srcH = cropSizeOnImg * scaleY
+
+    try {
+      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetSize, targetSize)
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const fileName = tempPhotoFile?.name || 'perfil-vet.jpg'
+          const croppedFile = new File([blob], fileName, { type: 'image/jpeg' })
+          setSelectedFile(croppedFile)
+          setPhotoPreview(URL.createObjectURL(blob))
+        }
+        setShowCropModal(false)
+      }, 'image/jpeg', 0.95)
+    } catch (err) {
+      console.error('Error al recortar la imagen en canvas:', err)
+      setSelectedFile(tempPhotoFile)
+      setPhotoPreview(tempPhotoPreview)
+      setShowCropModal(false)
+    }
   }
 
   // Submit Perfil
@@ -361,17 +437,17 @@ export default function VetConfiguracion() {
         </div>
       )}
 
-      {/* ── MODAL POP-UP DE AJUSTE Y ENCUADRE DE FOTO ── */}
+      {/* ── MODAL INTERACTIVO: FOTO COMPLETA Y CÍRCULO ARRASTRABLE ── */}
       {showCropModal && (
         <div className="vet-modal-backdrop">
-          <div className="vet-modal-box" style={{ maxWidth: '520px' }}>
+          <div className="vet-modal-box" style={{ maxWidth: '580px', padding: '1.75rem' }}>
             <div className="vet-modal-header">
               <div>
-                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#0f172a', margin: 0 }}>
                   Ajustar Encuadre de Foto
                 </h3>
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
-                  Acomoda el zoom y la posición de tu foto antes de guardar
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                  Arrastra el círculo verde sobre tu foto para seleccionar el encuadre perfecto
                 </p>
               </div>
               <button
@@ -385,86 +461,107 @@ export default function VetConfiguracion() {
               </button>
             </div>
 
-            {/* Vista previa circular interactiva */}
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '1.25rem 0' }}>
-              <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', border: '4px solid #059669', background: '#e2e8f0', boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}>
-                {tempPhotoPreview && (
-                  <img
-                    src={tempPhotoPreview}
-                    alt="Vista previa encuadre"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      transform: `scale(${tempZoom}) translate(${tempOffsetX}px, ${tempOffsetY}px)`,
-                      transition: 'transform 0.08s ease-out',
-                    }}
-                  />
-                )}
+            {/* Stage con la foto completa y círculo arrastrable */}
+            <div
+              ref={cropStageRef}
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '320px',
+                background: '#0f172a',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none',
+                margin: '1.25rem 0',
+                touchAction: 'none',
+              }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchMove={handleMouseMove}
+              onTouchEnd={handleMouseUp}
+            >
+              {/* Foto Original Completa */}
+              {tempPhotoPreview && (
+                <img
+                  ref={cropImgRef}
+                  src={tempPhotoPreview}
+                  alt="Foto completa"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                    transform: `scale(${tempZoom})`,
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+
+              {/* Máscara oscura con círculo de recorte verde arrastrable */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '160px',
+                    height: '160px',
+                    borderRadius: '50%',
+                    border: '3.5px solid #059669',
+                    boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65), 0 0 20px rgba(5, 150, 105, 0.4)',
+                    transform: `translate(${cropCirclePos.x}px, ${cropCirclePos.y}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.05s ease-out',
+                    position: 'relative',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: '50%', left: '20%', right: '20%', height: '1px', background: 'rgba(255,255,255,0.35)', transform: 'translateY(-50%)' }} />
+                  <div style={{ position: 'absolute', left: '50%', top: '20%', bottom: '20%', width: '1px', background: 'rgba(255,255,255,0.35)', transform: 'translateX(-50%)' }} />
+                </div>
               </div>
             </div>
 
-            {/* Panel de Controles (Sliders Zoom y Posición) */}
-            <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '14px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {/* Controles de Zoom y Reseteo */}
+            <div style={{ background: '#f8fafc', padding: '0.9rem 1.1rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <i className="fa-solid fa-sliders" style={{ color: '#059669' }}></i>
-                  Controles de Posición y Zoom
+                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <i className="fa-solid fa-[#059669] fa-magnifying-glass-plus" style={{ color: '#059669' }}></i>
+                  Zoom de Imagen ({tempZoom.toFixed(1)}x)
                 </span>
                 <button
                   type="button"
-                  onClick={() => { setTempZoom(1); setTempOffsetX(0); setTempOffsetY(0); }}
+                  onClick={() => { setTempZoom(1); setCropCirclePos({ x: 0, y: 0 }); }}
                   style={{ background: 'none', border: 'none', color: '#059669', fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 >
                   <i className="fa-solid fa-rotate-left"></i>
-                  Resetear
+                  Centrar círculo
                 </button>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                  Zoom ({tempZoom.toFixed(1)}x)
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="2.5"
-                  step="0.05"
-                  value={tempZoom}
-                  onChange={(e) => setTempZoom(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                  Mover Horizontal ({tempOffsetX}px)
-                </label>
-                <input
-                  type="range"
-                  min="-50"
-                  max="50"
-                  step="1"
-                  value={tempOffsetX}
-                  onChange={(e) => setTempOffsetX(parseInt(e.target.value, 10))}
-                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
-                  Mover Vertical ({tempOffsetY}px)
-                </label>
-                <input
-                  type="range"
-                  min="-50"
-                  max="50"
-                  step="1"
-                  value={tempOffsetY}
-                  onChange={(e) => setTempOffsetY(parseInt(e.target.value, 10))}
-                  style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
-                />
-              </div>
+              <input
+                type="range"
+                min="1"
+                max="2.5"
+                step="0.05"
+                value={tempZoom}
+                onChange={(e) => setTempZoom(parseFloat(e.target.value))}
+                style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+              />
             </div>
 
             {/* Acciones Modal */}
@@ -473,7 +570,7 @@ export default function VetConfiguracion() {
                 type="button"
                 className="vet-modal-btn vet-modal-btn--secondary"
                 onClick={() => setShowCropModal(false)}
-                style={{ padding: '0.6rem 1.2rem' }}
+                style={{ padding: '0.65rem 1.25rem' }}
               >
                 Cancelar
               </button>
@@ -481,7 +578,7 @@ export default function VetConfiguracion() {
                 type="button"
                 className="vet-modal-btn vet-modal-btn--primary"
                 onClick={handleConfirmPhotoCrop}
-                style={{ padding: '0.6rem 1.4rem' }}
+                style={{ padding: '0.65rem 1.5rem' }}
               >
                 <i className="fa-solid fa-check"></i>
                 <span>Confirmar y Guardar Encuadre</span>
@@ -546,7 +643,7 @@ export default function VetConfiguracion() {
               {profileSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{profileSuccess}</div>}
 
               <form onSubmit={handleSubmitProfile}>
-                {/* Foto de perfil limpia (abrirá modal al cambiar imagen) */}
+                {/* Foto de perfil limpia */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.75rem', padding: '1.25rem 1.5rem', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
                   <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0, position: 'relative', background: '#e2e8f0', boxShadow: '0 4px 10px rgba(0,0,0,0.06)' }}>
                     {photoPreview ? (
@@ -557,7 +654,6 @@ export default function VetConfiguracion() {
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
-                          transform: `scale(${avatarZoom}) translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
                         }}
                       />
                     ) : (
@@ -572,12 +668,12 @@ export default function VetConfiguracion() {
                       Foto de Perfil Profesional
                     </strong>
                     <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '0.75rem' }}>
-                      Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB). Al elegir una nueva foto se abrirá la ventana para ajustar el encuadre y zoom.
+                      Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB). Al elegir una nueva foto podrás arrastrar el círculo de encuadre.
                     </span>
                     <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.55rem 1.1rem', cursor: 'pointer' }}>
                       <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
                       <i className="fa-solid fa-camera"></i>
-                      <span>{selectedFile ? 'Cambiar y ajustar foto' : 'Elegir nueva imagen'}</span>
+                      <span>{selectedFile ? 'Cambiar y encuadrar foto' : 'Elegir nueva imagen'}</span>
                     </label>
                   </div>
                 </div>

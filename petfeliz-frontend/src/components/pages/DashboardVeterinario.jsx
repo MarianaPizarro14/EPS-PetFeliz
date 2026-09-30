@@ -381,8 +381,8 @@ export default function DashboardVeterinario() {
                       )}
                       {isAtendida && (
                         <button type="button" className="vet-btn-obs" onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}>
-                          <i className="fa-regular fa-file-lines"></i>
-                          <span>Ver Expediente</span>
+                          <i className="fa-solid fa-file-prescription"></i>
+                          <span>Ver Expediente y Receta</span>
                         </button>
                       )}
                     </div>

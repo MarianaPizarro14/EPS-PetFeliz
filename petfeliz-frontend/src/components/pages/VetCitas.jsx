@@ -318,8 +318,8 @@ export default function VetCitas() {
                               className="vet-btn-obs"
                               onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}
                             >
-                              <i className="fa-regular fa-file-lines"></i>
-                              <span>Ver Expediente / Receta</span>
+                              <i className="fa-solid fa-file-prescription"></i>
+                              <span>Ver Expediente y Receta</span>
                             </button>
                           )}
                         </div>

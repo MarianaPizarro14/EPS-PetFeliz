@@ -31,6 +31,42 @@ export default function AdminCitas() {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('todas') // 'todas' | 'pendientes' | 'atendidas' | 'canceladas'
   const [selectedCitaDetail, setSelectedCitaDetail] = useState(null)
+  const [downloadingRecetaId, setDownloadingRecetaId] = useState(null)
+
+  const handleDownloadReceta = async (idCita) => {
+    const token = getStoredToken()
+    if (!token) return
+
+    try {
+      setDownloadingRecetaId(idCita)
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cliente/documentos/receta-medica/${idCita}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/pdf, application/json',
+        }
+      })
+
+      if (!res.ok) {
+        alert('No se pudo descargar la receta médica solicitada.')
+        return
+      }
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Receta_Medica_PetFeliz_${idCita}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error al descargar receta médica:', err)
+      alert('Error de conexión al descargar la receta médica.')
+    } finally {
+      setDownloadingRecetaId(null)
+    }
+  }
 
   useEffect(() => {
     const fetchCitasData = async () => {
@@ -368,7 +404,7 @@ export default function AdminCitas() {
       {/* ── MODAL DETALLE DE CITAS ── */}
       {selectedCitaDetail && (
         <div className="dh-modal-backdrop">
-          <div className="dh-modal-box" style={{ maxWidth: '480px', padding: 0, overflow: 'hidden', borderRadius: '20px' }}>
+          <div className="dh-modal-box" style={{ maxWidth: '580px', padding: 0, overflow: 'hidden', borderRadius: '20px' }}>
             {/* Header del Modal */}
             <div style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -406,7 +442,7 @@ export default function AdminCitas() {
               </button>
             </div>
 
-            <div style={{ padding: '1.5rem' }}>
+            <div style={{ padding: '1.5rem', maxHeight: '75vh', overflowY: 'auto' }}>
               {/* Tarjeta Destacada del Paciente / Mascota */}
               <div
                 style={{
@@ -453,7 +489,7 @@ export default function AdminCitas() {
                 <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.9rem 1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                     <i className="fa-regular fa-user"></i>
-                    <span>Dueño</span>
+                    <span>Tutor / Dueño</span>
                   </div>
                   <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
                     {selectedCitaDetail.dueno.nombre}
@@ -473,7 +509,7 @@ export default function AdminCitas() {
                 <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.9rem 1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0284c7', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                     <i className="fa-solid fa-user-doctor"></i>
-                    <span>Veterinario</span>
+                    <span>Médico Veterinario</span>
                   </div>
                   <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
                     {selectedCitaDetail.veterinario.nombre ? (selectedCitaDetail.veterinario.nombre.startsWith('Dr') ? selectedCitaDetail.veterinario.nombre : `Dr(a). ${selectedCitaDetail.veterinario.nombre}`) : 'Veterinario Asignado'}
@@ -484,8 +520,8 @@ export default function AdminCitas() {
                 </div>
               </div>
 
-              {/* Barra Informativa: Fecha, Hora y Servicio */}
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              {/* Barra Informativa: Fecha, Hora, Servicio y Pago */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', fontSize: '0.88rem' }}>
                   <i className="fa-regular fa-calendar-days" style={{ color: '#059669' }}></i>
                   <span style={{ fontWeight: 600 }}>{selectedCitaDetail.fecha_formateada || selectedCitaDetail.fecha}</span>
@@ -493,21 +529,77 @@ export default function AdminCitas() {
                   <i className="fa-regular fa-clock" style={{ color: '#0284c7' }}></i>
                   <span>{selectedCitaDetail.hora}</span>
                 </div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '0.25rem 0.65rem', borderRadius: '6px' }}>
-                  {selectedCitaDetail.servicio}
-                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#059669', background: '#ecfdf5', padding: '0.25rem 0.65rem', borderRadius: '6px' }}>
+                    {selectedCitaDetail.servicio}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: selectedCitaDetail.estado_pago === 'pendiente' ? '#b45309' : '#15803d', background: selectedCitaDetail.estado_pago === 'pendiente' ? '#fffbeb' : '#f0fdf4', border: selectedCitaDetail.estado_pago === 'pendiente' ? '1px solid #fde68a' : '1px solid #bbf7d0', padding: '0.25rem 0.6rem', borderRadius: '6px' }}>
+                    <i className={selectedCitaDetail.estado_pago === 'pendiente' ? 'fa-solid fa-clock' : 'fa-solid fa-check'} style={{ marginRight: '4px' }}></i>
+                    {selectedCitaDetail.estado_pago === 'pendiente' ? 'Pago Pendiente' : 'Pagado'} ({selectedCitaDetail.metodo_pago || 'En línea'})
+                  </span>
+                </div>
               </div>
 
-              {/* Bloque de Observación / Nota de la Cita */}
+              {/* Bloque de Observaciones Clínicas y Diagnóstico del Veterinario */}
               {selectedCitaDetail.observacion && (
-                <div style={{ background: '#fffbe8', border: '1px solid #fde68a', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-                  <i className="fa-regular fa-note-sticky" style={{ color: '#d97706', fontSize: '1rem', marginTop: '0.15rem' }}></i>
-                  <div style={{ fontSize: '0.85rem', color: '#92400e', lineHeight: '1.4' }}>
-                    <strong style={{ display: 'block', marginBottom: '0.15rem' }}>Observación:</strong>
+                <div style={{ background: '#fffbe8', border: '1px solid #fde68a', borderRadius: '12px', padding: '0.9rem 1rem', display: 'flex', gap: '0.65rem', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                  <i className="fa-regular fa-note-sticky" style={{ color: '#d97706', fontSize: '1.1rem', marginTop: '0.15rem' }}></i>
+                  <div style={{ fontSize: '0.86rem', color: '#92400e', lineHeight: '1.5' }}>
+                    <strong style={{ display: 'block', marginBottom: '0.2rem', fontFamily: 'Sora, sans-serif' }}>Observación y Diagnóstico Médico:</strong>
                     {selectedCitaDetail.observacion}
                   </div>
                 </div>
               )}
+
+              {/* Bloque de Medicamentos Prescritos / Fórmula Médica */}
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <i className="fa-solid fa-pills" style={{ color: '#059669' }}></i> Medicamentos Prescritos
+                  </h4>
+
+                  {/* Botón Descargar Receta Médica PDF */}
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadReceta(selectedCitaDetail.id_cita)}
+                    disabled={downloadingRecetaId === selectedCitaDetail.id_cita}
+                    style={{
+                      background: '#ecfdf5',
+                      color: '#059669',
+                      border: '1.5px solid #a7f3d0',
+                      borderRadius: '8px',
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      transition: 'all 0.18s ease',
+                    }}
+                  >
+                    <i className={`fa-solid ${downloadingRecetaId === selectedCitaDetail.id_cita ? 'fa-spinner fa-spin' : 'fa-file-pdf'}`}></i>
+                    <span>{downloadingRecetaId === selectedCitaDetail.id_cita ? 'Descargando...' : 'Descargar Receta PDF'}</span>
+                  </button>
+                </div>
+
+                {selectedCitaDetail.medicamentos && selectedCitaDetail.medicamentos.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                    {selectedCitaDetail.medicamentos.map((m, idx) => (
+                      <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
+                        <strong style={{ color: '#0f172a', fontSize: '0.9rem', display: 'block' }}>{m.nombre}</strong>
+                        <span style={{ color: '#059669', fontSize: '0.84rem', fontWeight: 600, display: 'block', marginTop: '2px' }}>{m.dosis}</span>
+                        {m.indicaciones && <span style={{ color: '#64748b', fontSize: '0.82rem', display: 'block', fontStyle: 'italic', marginTop: '0.2rem' }}>{m.indicaciones}</span>}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '0.4rem 0' }}>
+                    No se formularon medicamentos específicos para esta consulta.
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Footer con botón de cierre limpio */}

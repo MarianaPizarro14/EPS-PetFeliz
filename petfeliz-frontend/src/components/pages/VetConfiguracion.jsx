@@ -6,14 +6,45 @@ import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './DashboardVeterinario.css'
 
+const ESPECIALIDADES_LIST = [
+  'Medicina General',
+  'Cirugía',
+  'Dermatología',
+  'Odontología',
+  'Cardiología',
+  'Oftalmología',
+  'Urgencias',
+  'Desparasitación',
+  'Vacunación',
+  'Laboratorio Clínico',
+  'Médico Director',
+]
+
+// Helper para separar prefijo (Dr. / Dra.) del nombre
+const parseNombreYPrefijo = (fullNombre) => {
+  if (!fullNombre) return { prefijo: 'Dr.', nombreSolo: '' }
+  let str = fullNombre.trim()
+  if (/^dra\.?\s+/i.test(str)) {
+    return { prefijo: 'Dra.', nombreSolo: str.replace(/^dra\.?\s*/i, '') }
+  }
+  if (/^dr\.?\s+/i.test(str)) {
+    return { prefijo: 'Dr.', nombreSolo: str.replace(/^dr\.?\s*/i, '') }
+  }
+  return { prefijo: 'Dr.', nombreSolo: str }
+}
+
 export default function VetConfiguracion() {
   const navigate = useNavigate()
   const storedUser = getStoredUser()
+  const initialParsed = parseNombreYPrefijo(storedUser?.nombre || '')
 
   const [usuario, setUsuario] = useState({
+    prefijo: initialParsed.prefijo,
+    nombreSolo: initialParsed.nombreSolo,
     nombre: storedUser?.nombre || 'Dr. Veterinario',
     nombreCompleto: storedUser?.nombre || 'Médico Veterinario',
-    especialidad: storedUser?.especialidad || '',
+    cedula: storedUser?.cedula || storedUser?.documento || '',
+    especialidad: storedUser?.especialidad || 'Medicina General',
     numero_tarjeta: storedUser?.numero_tarjeta || '',
     telefono: storedUser?.telefono || '',
     foto: isValidAvatarUrl(storedUser?.foto || storedUser?.foto_perfil) ? (storedUser?.foto || storedUser?.foto_perfil) : null,
@@ -25,16 +56,21 @@ export default function VetConfiguracion() {
 
   // Perfil Form State
   const [profileForm, setProfileForm] = useState({
-    nombre: storedUser?.nombre || '',
-    especialidad: storedUser?.especialidad || '',
+    prefijo: initialParsed.prefijo,
+    nombreSolo: initialParsed.nombreSolo,
+    cedula: storedUser?.cedula || storedUser?.documento || '',
+    especialidad: storedUser?.especialidad || 'Medicina General',
     numero_tarjeta: storedUser?.numero_tarjeta || '',
     telefono: storedUser?.telefono || '',
     correo: storedUser?.email || storedUser?.correo || '',
   })
 
-  // Foto State
+  // Foto & Zoom/Position Adjustment State
   const [selectedFile, setSelectedFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(storedUser?.foto || storedUser?.foto_perfil || null)
+  const [avatarZoom, setAvatarZoom] = useState(1)
+  const [avatarOffsetX, setAvatarOffsetX] = useState(0)
+  const [avatarOffsetY, setAvatarOffsetY] = useState(0)
 
   // Password Form State
   const [changePassForm, setChangePassForm] = useState({
@@ -62,6 +98,13 @@ export default function VetConfiguracion() {
     setTimeout(() => setToast(null), 4000)
   }
 
+  // Password Validation Helpers
+  const nuevaPass = changePassForm.nueva_contrasena
+  const passHasMinLength = nuevaPass.length >= 6
+  const passHasUppercase = /[A-Z]/.test(nuevaPass)
+  const digitMatches = nuevaPass.match(/\d/g)
+  const passHas4Digits = digitMatches ? digitMatches.length >= 4 : false
+
   // Fetch initial profile
   useEffect(() => {
     const fetchProfile = async () => {
@@ -74,9 +117,12 @@ export default function VetConfiguracion() {
         if (res.ok) {
           const data = await res.json()
           if (data.veterinario) {
+            const parsed = parseNombreYPrefijo(data.veterinario.nombre || '')
             setProfileForm({
-              nombre: data.veterinario.nombre || '',
-              especialidad: data.veterinario.especialidad || '',
+              prefijo: parsed.prefijo,
+              nombreSolo: parsed.nombreSolo,
+              cedula: data.veterinario.cedula || data.veterinario.documento || '',
+              especialidad: data.veterinario.especialidad || 'Medicina General',
               numero_tarjeta: data.veterinario.numero_tarjeta || '',
               telefono: data.veterinario.telefono || '',
               correo: data.veterinario.correo || usuario.email || '',
@@ -84,9 +130,12 @@ export default function VetConfiguracion() {
             setPhotoPreview(data.veterinario.foto_perfil || null)
             setUsuario((prev) => ({
               ...prev,
-              nombre: data.veterinario.nombre,
-              nombreCompleto: data.veterinario.nombre,
-              especialidad: data.veterinario.especialidad || '',
+              prefijo: parsed.prefijo,
+              nombreSolo: parsed.nombreSolo,
+              nombre: `${parsed.prefijo} ${parsed.nombreSolo}`.trim(),
+              nombreCompleto: `${parsed.prefijo} ${parsed.nombreSolo}`.trim(),
+              cedula: data.veterinario.cedula || data.veterinario.documento || '',
+              especialidad: data.veterinario.especialidad || 'Medicina General',
               numero_tarjeta: data.veterinario.numero_tarjeta || '',
               telefono: data.veterinario.telefono || '',
               foto: data.veterinario.foto_perfil || prev.foto,
@@ -121,6 +170,13 @@ export default function VetConfiguracion() {
     setPhotoPreview(URL.createObjectURL(file))
   }
 
+  // Reset zoom & offsets
+  const handleResetAvatarControls = () => {
+    setAvatarZoom(1)
+    setAvatarOffsetX(0)
+    setAvatarOffsetY(0)
+  }
+
   // Submit Perfil
   const handleSubmitProfile = async (e) => {
     e.preventDefault()
@@ -128,15 +184,23 @@ export default function VetConfiguracion() {
     setProfileError('')
     setProfileSuccess('')
 
-    if (!profileForm.nombre || !profileForm.nombre.trim()) {
-      setProfileError('El nombre completo es obligatorio.')
+    if (!profileForm.nombreSolo || !profileForm.nombreSolo.trim()) {
+      setProfileError('Ingresa el nombre del médico.')
       setSubmittingProfile(false)
       return
     }
 
+    if (!profileForm.cedula || !profileForm.cedula.trim()) {
+      setProfileError('Ingresa el número de cédula.')
+      setSubmittingProfile(false)
+      return
+    }
+
+    const fullNombre = `${profileForm.prefijo} ${profileForm.nombreSolo.trim()}`
     const token = getStoredToken()
     const formData = new FormData()
-    formData.append('nombre', profileForm.nombre.trim())
+    formData.append('nombre', fullNombre)
+    formData.append('cedula', profileForm.cedula ? profileForm.cedula.trim() : '')
     formData.append('especialidad', profileForm.especialidad ? profileForm.especialidad.trim() : '')
     formData.append('numero_tarjeta', profileForm.numero_tarjeta ? profileForm.numero_tarjeta.trim() : '')
     formData.append('telefono', profileForm.telefono ? profileForm.telefono.trim() : '')
@@ -166,14 +230,26 @@ export default function VetConfiguracion() {
       if (data.veterinario) {
         const updatedUserObj = {
           ...usuario,
-          nombre: data.veterinario.nombre,
-          nombreCompleto: data.veterinario.nombre,
-          especialidad: data.veterinario.especialidad || '',
-          numero_tarjeta: data.veterinario.numero_tarjeta || '',
-          telefono: data.veterinario.telefono || '',
+          nombre: data.veterinario.nombre || fullNombre,
+          nombreCompleto: data.veterinario.nombre || fullNombre,
+          cedula: data.veterinario.cedula || profileForm.cedula,
+          especialidad: data.veterinario.especialidad || profileForm.especialidad,
+          numero_tarjeta: data.veterinario.numero_tarjeta || profileForm.numero_tarjeta,
+          telefono: data.veterinario.telefono || profileForm.telefono,
           correo: data.veterinario.correo || usuario.email,
           email: data.veterinario.correo || usuario.email,
           foto: data.veterinario.foto_perfil || usuario.foto,
+        }
+        setUsuario(updatedUserObj)
+        updateStoredUser(updatedUserObj)
+      } else {
+        const updatedUserObj = {
+          ...usuario,
+          nombre: fullNombre,
+          nombreCompleto: fullNombre,
+          cedula: profileForm.cedula,
+          especialidad: profileForm.especialidad,
+          telefono: profileForm.telefono,
         }
         setUsuario(updatedUserObj)
         updateStoredUser(updatedUserObj)
@@ -200,8 +276,20 @@ export default function VetConfiguracion() {
       return
     }
 
-    if (changePassForm.nueva_contrasena.length < 6) {
+    if (!passHasMinLength) {
       setPassError('La nueva contraseña debe tener al menos 6 caracteres.')
+      setSubmittingPass(false)
+      return
+    }
+
+    if (!passHasUppercase) {
+      setPassError('La nueva contraseña debe incluir al menos 1 letra mayúscula (A-Z).')
+      setSubmittingPass(false)
+      return
+    }
+
+    if (!passHas4Digits) {
+      setPassError('La nueva contraseña debe incluir al menos 4 números (0-9).')
       setSubmittingPass(false)
       return
     }
@@ -288,256 +376,429 @@ export default function VetConfiguracion() {
           </div>
         </div>
 
-        {/* ── CONTENIDO 1: PERFIL PROFESIONAL ── */}
-        {activeTab === 'perfil' && (
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', maxWidth: '780px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-            <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem' }}>
-                <i className="fa-solid fa-id-card"></i>
-              </div>
-              <div>
-                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: 0 }}>
-                  Información Profesional de Médico Veterinario
-                </h3>
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
-                  Datos visibles para la asignación de citas y registros de atención clínica
-                </p>
-              </div>
-            </div>
+        {/* CONTENEDOR CENTRADO Y ANCHO (960px MAX) */}
+        <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%' }}>
 
-            {profileError && <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.25rem' }}>{profileError}</div>}
-            {profileSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{profileSuccess}</div>}
-
-            <form onSubmit={handleSubmitProfile}>
-              {/* Foto de perfil */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0 }}>
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: 700 }}>
-                      {usuario.nombre ? usuario.nombre[0].toUpperCase() : 'V'}
-                    </div>
-                  )}
+          {/* ── CONTENIDO 1: PERFIL PROFESIONAL ── */}
+          {activeTab === 'perfil' && (
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+              <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem', marginBottom: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                  <i className="fa-solid fa-id-card"></i>
                 </div>
-
                 <div>
-                  <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#0f172a', display: 'block', marginBottom: '0.2rem' }}>
-                    Foto de Perfil Profesional
-                  </strong>
-                  <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.65rem' }}>
-                    Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB).
-                  </span>
-                  <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.45rem 0.85rem' }}>
-                    <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
-                    <i className="fa-solid fa-camera"></i>
-                    <span>{selectedFile ? 'Cambiar archivo' : 'Elegir nueva imagen'}</span>
-                  </label>
+                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                    Información Profesional de Médico Veterinario
+                  </h3>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
+                    Datos visibles para la asignación de citas y registros de atención clínica
+                  </p>
                 </div>
               </div>
 
-              {/* Grid de Campos */}
-              <div className="dh-info-grid" style={{ gap: '1.1rem' }}>
-                <div className="dh-form-field">
-                  <label htmlFor="nombre">Nombre Completo *</label>
-                  <input
-                    id="nombre"
-                    type="text"
-                    required
-                    placeholder="Dr. Nombre Apellido"
-                    value={profileForm.nombre}
-                    onChange={(e) => setProfileForm({ ...profileForm, nombre: e.target.value })}
-                  />
+              {profileError && <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.25rem' }}>{profileError}</div>}
+              {profileSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{profileSuccess}</div>}
+
+              <form onSubmit={handleSubmitProfile}>
+                {/* Foto de perfil con controles de zoom y posición */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.75rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0, position: 'relative', background: '#e2e8f0' }}>
+                      {photoPreview ? (
+                        <img
+                          src={photoPreview}
+                          alt="Perfil"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transform: `scale(${avatarZoom}) translate(${avatarOffsetX}px, ${avatarOffsetY}px)`,
+                            transition: 'transform 0.1s ease-out',
+                          }}
+                        />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700 }}>
+                          {profileForm.nombreSolo ? profileForm.nombreSolo[0].toUpperCase() : 'V'}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: '220px' }}>
+                      <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.2rem' }}>
+                        Foto de Perfil Profesional
+                      </strong>
+                      <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.75rem' }}>
+                        Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB) y acomódala a tu gusto.
+                      </span>
+                      <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.5rem 1rem', cursor: 'pointer' }}>
+                        <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
+                        <i className="fa-solid fa-camera"></i>
+                        <span>{selectedFile ? 'Cambiar archivo' : 'Elegir nueva imagen'}</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Panel de Ajustes de Zoom y Posición */}
+                  <div style={{ background: '#ffffff', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.82rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <i className="fa-solid fa-[#059669] fa-sliders" style={{ color: '#059669' }}></i>
+                        Ajustar encuadre (Zoom y posición de la foto)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleResetAvatarControls}
+                        style={{ background: 'none', border: 'none', color: '#059669', fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        Resetear encuadre
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                          Zoom ({avatarZoom.toFixed(1)}x)
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="2.5"
+                          step="0.05"
+                          value={avatarZoom}
+                          onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
+                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                          Mover Horizontal ({avatarOffsetX}px)
+                        </label>
+                        <input
+                          type="range"
+                          min="-40"
+                          max="40"
+                          step="1"
+                          value={avatarOffsetX}
+                          onChange={(e) => setAvatarOffsetX(parseInt(e.target.value, 10))}
+                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem' }}>
+                          Mover Vertical ({avatarOffsetY}px)
+                        </label>
+                        <input
+                          type="range"
+                          min="-40"
+                          max="40"
+                          step="1"
+                          value={avatarOffsetY}
+                          onChange={(e) => setAvatarOffsetY(parseInt(e.target.value, 10))}
+                          style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="dh-form-field">
-                  <label htmlFor="especialidad">Especialidad Médica</label>
-                  <input
-                    id="especialidad"
-                    type="text"
-                    placeholder="ej. Cirugía Veterinaria, Medicina Interna, Consulta General"
-                    value={profileForm.especialidad}
-                    onChange={(e) => setProfileForm({ ...profileForm, especialidad: e.target.value })}
-                  />
+                {/* Grid de Campos */}
+                <div className="dh-info-grid" style={{ gap: '1.25rem' }}>
+
+                  {/* Prefijo Dr./Dra. y Nombre Completo */}
+                  <div className="dh-form-field">
+                    <label htmlFor="nombreSolo">Nombre Completo *</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <select
+                        value={profileForm.prefijo}
+                        onChange={(e) => setProfileForm({ ...profileForm, prefijo: e.target.value })}
+                        style={{
+                          width: '95px',
+                          padding: '0.6rem 0.6rem',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontFamily: 'Inter, sans-serif',
+                          fontSize: '0.86rem',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          background: '#ffffff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value="Dr.">Dr.</option>
+                        <option value="Dra.">Dra.</option>
+                      </select>
+
+                      <input
+                        id="nombreSolo"
+                        type="text"
+                        required
+                        placeholder="Nombres y Apellidos"
+                        value={profileForm.nombreSolo}
+                        onChange={(e) => setProfileForm({ ...profileForm, nombreSolo: e.target.value })}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Cédula de Ciudadanía */}
+                  <div className="dh-form-field">
+                    <label htmlFor="cedula">Cédula de Ciudadanía *</label>
+                    <input
+                      id="cedula"
+                      type="text"
+                      required
+                      placeholder="ej. 1012345678"
+                      value={profileForm.cedula}
+                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Especialidad Médica Dropdown */}
+                  <div className="dh-form-field">
+                    <label htmlFor="especialidad">Especialidad Médica *</label>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <select
+                        id="especialidad"
+                        required
+                        value={profileForm.especialidad}
+                        onChange={(e) => setProfileForm({ ...profileForm, especialidad: e.target.value })}
+                        style={{
+                          width: '100%',
+                          paddingRight: '2.5rem',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          cursor: 'pointer',
+                          background: '#ffffff',
+                        }}
+                      >
+                        {ESPECIALIDADES_LIST.map((esp) => (
+                          <option key={esp} value={esp}>
+                            {esp}
+                          </option>
+                        ))}
+                      </select>
+                      <i
+                        className="fa-solid fa-chevron-down"
+                        style={{
+                          position: 'absolute',
+                          right: '12px',
+                          pointerEvents: 'none',
+                          color: '#64748b',
+                          fontSize: '0.8rem',
+                        }}
+                      ></i>
+                    </div>
+                  </div>
+
+                  {/* Número de Tarjeta Profesional (Solo Lectura) */}
+                  <div className="dh-form-field">
+                    <label htmlFor="numero_tarjeta">Número de Tarjeta Profesional (Solo Lectura)</label>
+                    <input
+                      id="numero_tarjeta"
+                      type="text"
+                      readOnly
+                      disabled
+                      style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
+                      value={profileForm.numero_tarjeta || 'No asignado'}
+                    />
+                    <span className="dh-field-hint" style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                      El número de tarjeta profesional institucional no es modificable.
+                    </span>
+                  </div>
+
+                  {/* Teléfono de Contacto */}
+                  <div className="dh-form-field">
+                    <label htmlFor="telefono">Teléfono de Contacto</label>
+                    <input
+                      id="telefono"
+                      type="text"
+                      placeholder="ej. 3001234567"
+                      value={profileForm.telefono}
+                      onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Correo Electrónico Institucional */}
+                  <div className="dh-form-field">
+                    <label htmlFor="correo">Correo Electrónico Institucional (Solo Lectura)</label>
+                    <input
+                      id="correo"
+                      type="email"
+                      readOnly
+                      disabled
+                      style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
+                      value={profileForm.correo}
+                    />
+                    <span className="dh-field-hint" style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                      Correo asignado por administración.
+                    </span>
+                  </div>
                 </div>
 
-                <div className="dh-form-field">
-                  <label htmlFor="numero_tarjeta">Número de Tarjeta Profesional</label>
-                  <input
-                    id="numero_tarjeta"
-                    type="text"
-                    placeholder="ej. TP-123456"
-                    value={profileForm.numero_tarjeta}
-                    onChange={(e) => setProfileForm({ ...profileForm, numero_tarjeta: e.target.value })}
-                  />
+                <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button type="submit" className="vet-modal-btn vet-modal-btn--primary" disabled={submittingProfile} style={{ padding: '0.7rem 1.6rem' }}>
+                    {submittingProfile ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        <span>Guardando Cambios...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-floppy-disk"></i>
+                        <span>Guardar Perfil Profesional</span>
+                      </>
+                    )}
+                  </button>
                 </div>
-
-                <div className="dh-form-field">
-                  <label htmlFor="telefono">Teléfono de Contacto</label>
-                  <input
-                    id="telefono"
-                    type="text"
-                    placeholder="ej. 3001234567"
-                    value={profileForm.telefono}
-                    onChange={(e) => setProfileForm({ ...profileForm, telefono: e.target.value })}
-                  />
-                </div>
-
-                <div className="dh-form-field dh-form-field--full">
-                  <label htmlFor="correo">Correo Electrónico Institucional (Solo Lectura)</label>
-                  <input
-                    id="correo"
-                    type="email"
-                    readOnly
-                    disabled
-                    style={{ background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
-                    value={profileForm.correo}
-                  />
-                  <span className="dh-field-hint">Tu correo electrónico institucional no se puede modificar desde esta vista.</span>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '1.75rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" className="vet-modal-btn vet-modal-btn--primary" disabled={submittingProfile}>
-                  {submittingProfile ? (
-                    <>
-                      <i className="fa-solid fa-spinner fa-spin"></i>
-                      <span>Guardando Cambios...</span>
-                    </>
-                  ) : (
-                    <>
-                      <i className="fa-solid fa-floppy-disk"></i>
-                      <span>Guardar Perfil Profesional</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ── CONTENIDO 2: SEGURIDAD & CONTRASEÑA ── */}
-        {activeTab === 'seguridad' && (
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', maxWidth: '560px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-            <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.15rem' }}>
-                <i className="fa-solid fa-key"></i>
-              </div>
-              <div>
-                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: 0 }}>
-                  Cambio de Contraseña
-                </h3>
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.84rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
-                  Actualiza tu contraseña de acceso para mantener segura tu cuenta médica
-                </p>
-              </div>
+              </form>
             </div>
+          )}
 
-            {passError && <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.25rem' }}>{passError}</div>}
-            {passSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{passSuccess}</div>}
-
-            <form onSubmit={handleSubmitPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-              <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                <label htmlFor="contrasena_actual" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                  Contraseña Actual o Temporal *
-                </label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <input
-                    id="contrasena_actual"
-                    type={showActualPass ? 'text' : 'password'}
-                    required
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                    placeholder="Ingresa tu clave actual o temporal"
-                    value={changePassForm.contrasena_actual}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowActualPass(!showActualPass)}
-                    style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
-                    title={showActualPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    tabIndex={-1}
-                  >
-                    <i className={`fa-solid ${showActualPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                  </button>
+          {/* ── CONTENIDO 2: SEGURIDAD & CONTRASEÑA ── */}
+          {activeTab === 'seguridad' && (
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2rem', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+              <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem', marginBottom: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                  <i className="fa-solid fa-key"></i>
+                </div>
+                <div>
+                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', margin: 0 }}>
+                    Cambio de Contraseña
+                  </h3>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
+                    Actualiza tu contraseña de acceso para mantener segura tu cuenta médica
+                  </p>
                 </div>
               </div>
 
-              <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                <label htmlFor="nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                  Nueva Contraseña *
-                </label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <input
-                    id="nueva_contrasena"
-                    type={showNuevaPass ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                    placeholder="Mínimo 6 caracteres"
-                    value={changePassForm.nueva_contrasena}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNuevaPass(!showNuevaPass)}
-                    style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
-                    title={showNuevaPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    tabIndex={-1}
-                  >
-                    <i className={`fa-solid ${showNuevaPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              {passError && <div className="vet-modal-alert vet-modal-alert--error" style={{ marginBottom: '1.25rem' }}>{passError}</div>}
+              {passSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{passSuccess}</div>}
+
+              <form onSubmit={handleSubmitPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="contrasena_actual" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Contraseña Actual o Temporal *
+                  </label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="contrasena_actual"
+                      type={showActualPass ? 'text' : 'password'}
+                      required
+                      className="vet-modal-textarea"
+                      style={{ height: '46px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.95rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Ingresa tu clave actual o temporal"
+                      value={changePassForm.contrasena_actual}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, contrasena_actual: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowActualPass(!showActualPass)}
+                      style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
+                      title={showActualPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showActualPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Nueva Contraseña *
+                  </label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="nueva_contrasena"
+                      type={showNuevaPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      className="vet-modal-textarea"
+                      style={{ height: '46px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.95rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Nueva contraseña segura"
+                      value={changePassForm.nueva_contrasena}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, nueva_contrasena: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNuevaPass(!showNuevaPass)}
+                      style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
+                      title={showNuevaPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showNuevaPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+
+                  {/* Especificaciones y Requisitos de la nueva contraseña */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.65rem', padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.82rem' }}>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, color: '#334155' }}>
+                      Requisitos de la nueva contraseña:
+                    </span>
+                    <span style={{ color: passHasMinLength ? '#059669' : '#64748b', display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: passHasMinLength ? 600 : 400 }}>
+                      <i className={`fa-solid ${passHasMinLength ? 'fa-circle-check' : 'fa-circle-dot'}`}></i>
+                      Mínimo 6 caracteres
+                    </span>
+                    <span style={{ color: passHasUppercase ? '#059669' : '#64748b', display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: passHasUppercase ? 600 : 400 }}>
+                      <i className={`fa-solid ${passHasUppercase ? 'fa-circle-check' : 'fa-circle-dot'}`}></i>
+                      Al menos 1 letra mayúscula (A-Z)
+                    </span>
+                    <span style={{ color: passHas4Digits ? '#059669' : '#64748b', display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: passHas4Digits ? 600 : 400 }}>
+                      <i className={`fa-solid ${passHas4Digits ? 'fa-circle-check' : 'fa-circle-dot'}`}></i>
+                      Al menos 4 números (0-9)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="vet-modal-field" style={{ marginBottom: 0 }}>
+                  <label htmlFor="confirmar_nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
+                    Confirmar Nueva Contraseña *
+                  </label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="confirmar_nueva_contrasena"
+                      type={showConfirmarPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      className="vet-modal-textarea"
+                      style={{ height: '46px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.95rem', borderRadius: '10px', width: '100%' }}
+                      placeholder="Repite la nueva contraseña"
+                      value={changePassForm.confirmar_nueva_contrasena}
+                      onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmarPass(!showConfirmarPass)}
+                      style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
+                      title={showConfirmarPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      tabIndex={-1}
+                    >
+                      <i className={`fa-solid ${showConfirmarPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button type="submit" className="vet-modal-btn vet-modal-btn--primary" disabled={submittingPass} style={{ padding: '0.7rem 1.6rem' }}>
+                    {submittingPass ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        <span>Actualizando Contraseña...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-shield-halved"></i>
+                        <span>Actualizar Contraseña</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
-
-              <div className="vet-modal-field" style={{ marginBottom: 0 }}>
-                <label htmlFor="confirmar_nueva_contrasena" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.86rem', color: '#334155' }}>
-                  Confirmar Nueva Contraseña *
-                </label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <input
-                    id="confirmar_nueva_contrasena"
-                    type={showConfirmarPass ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    className="vet-modal-textarea"
-                    style={{ height: '44px', minHeight: 'auto', padding: '0.6rem 2.6rem 0.6rem 0.9rem', borderRadius: '10px', width: '100%' }}
-                    placeholder="Repite la nueva contraseña"
-                    value={changePassForm.confirmar_nueva_contrasena}
-                    onChange={(e) => setChangePassForm({ ...changePassForm, confirmar_nueva_contrasena: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmarPass(!showConfirmarPass)}
-                    style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '6px' }}
-                    title={showConfirmarPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    tabIndex={-1}
-                  >
-                    <i className={`fa-solid ${showConfirmarPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '1.25rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" className="vet-modal-btn vet-modal-btn--primary" disabled={submittingPass}>
-                  {submittingPass ? (
-                    <>
-                      <i className="fa-solid fa-spinner fa-spin"></i>
-                      <span>Actualizando Contraseña...</span>
-                    </>
-                  ) : (
-                    <>
-                      <i className="fa-solid fa-shield-halved"></i>
-                      <span>Actualizar Contraseña</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+              </form>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

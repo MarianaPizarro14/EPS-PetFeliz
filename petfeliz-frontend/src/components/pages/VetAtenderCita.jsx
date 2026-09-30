@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getStoredToken, getStoredUser, isValidAvatarUrl } from '../../utils/authStorage'
 import SidebarVet from '../ui/SidebarVet'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
 import './DashboardVeterinario.css'
+import './VetAtenderCita.css'
 
 export default function VetAtenderCita() {
   const { idCita } = useParams()
@@ -24,12 +25,36 @@ export default function VetAtenderCita() {
   const [submitting, setSubmitting] = useState(false)
   const [errorGlobal, setErrorGlobal] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
 
-  // Form states
+  // Form states - Paciente
+  const [pacienteForm, setPacienteForm] = useState({
+    nombre: '',
+    especie: 'Canino',
+    raza: '',
+    sexo: 'Macho',
+    fecha_nacimiento: '',
+    peso: '',
+    alergias: '',
+  })
+
+  // Form states - Tutor
+  const [duenoForm, setDuenoForm] = useState({
+    nombre: '',
+    telefono: '',
+    email: '',
+    cedula: '',
+  })
+
+  // Form states - Consulta clínica
   const [observacion, setObservacion] = useState('')
   const [medicamentos, setMedicamentos] = useState([
     { nombre: '', dosis: '', indicaciones: '' }
   ])
+
+  // Control de cambios no guardados
+  const [isDirty, setIsDirty] = useState(false)
+  const initialDataLoadedRef = useRef(false)
 
   const fetchCitaDetalle = async () => {
     const token = getStoredToken()
@@ -55,13 +80,38 @@ export default function VetAtenderCita() {
         const data = await res.json()
         const c = data.cita
         setCita(c)
+
+        // Cargar datos del paciente
+        setPacienteForm({
+          nombre: c.paciente?.nombre || '',
+          especie: c.paciente?.especie || 'Canino',
+          raza: c.paciente?.raza || '',
+          sexo: c.paciente?.sexo === 'Hembra' ? 'Hembra' : 'Macho',
+          fecha_nacimiento: c.paciente?.fecha_nacimiento || '',
+          peso: c.paciente?.peso !== null && c.paciente?.peso !== undefined ? String(c.paciente.peso) : '',
+          alergias: c.paciente?.alergias || '',
+        })
+
+        // Cargar datos del tutor
+        setDuenoForm({
+          nombre: c.dueno?.nombre || '',
+          telefono: c.dueno?.telefono || '',
+          email: c.dueno?.email || '',
+          cedula: c.dueno?.cedula || '',
+        })
+
+        // Observación médica limpia (nota de pago separada en backend)
         setObservacion(c.observacion || '')
 
+        // Medicamentos
         if (c.medicamentos && Array.isArray(c.medicamentos) && c.medicamentos.length > 0) {
           setMedicamentos(c.medicamentos)
         } else {
           setMedicamentos([{ nombre: '', dosis: '', indicaciones: '' }])
         }
+
+        initialDataLoadedRef.current = true
+        setIsDirty(false)
       } else {
         setErrorGlobal('No se pudo cargar la información de la cita médica.')
       }
@@ -77,13 +127,54 @@ export default function VetAtenderCita() {
     fetchCitaDetalle()
   }, [idCita])
 
-  // Manejo de tabla dinámica de medicamentos
+  // Aviso al intentar salir con cambios sin guardar
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isDirty])
+
+  // Helper para cambios en paciente
+  const handlePacienteChange = (field, value) => {
+    setPacienteForm((prev) => ({ ...prev, [field]: value }))
+    setIsDirty(true)
+    if (fieldErrors[`paciente.${field}`]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev }
+        delete copy[`paciente.${field}`]
+        return copy
+      })
+    }
+  }
+
+  // Helper para cambios en tutor
+  const handleDuenoChange = (field, value) => {
+    setDuenoForm((prev) => ({ ...prev, [field]: value }))
+    setIsDirty(true)
+    if (fieldErrors[`dueno.${field}`]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev }
+        delete copy[`dueno.${field}`]
+        return copy
+      })
+    }
+  }
+
+  // Helper para cambios en medicamentos
   const handleAddMedicamento = () => {
     setMedicamentos((prev) => [...prev, { nombre: '', dosis: '', indicaciones: '' }])
+    setIsDirty(true)
   }
 
   const handleRemoveMedicamento = (index) => {
     setMedicamentos((prev) => prev.filter((_, i) => i !== index))
+    setIsDirty(true)
   }
 
   const handleMedicamentoChange = (index, field, value) => {
@@ -92,6 +183,28 @@ export default function VetAtenderCita() {
       updated[index] = { ...updated[index], [field]: value }
       return updated
     })
+    setIsDirty(true)
+  }
+
+  const handleObservacionChange = (value) => {
+    setObservacion(value)
+    setIsDirty(true)
+    if (fieldErrors['observacion']) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev }
+        delete copy['observacion']
+        return copy
+      })
+    }
+  }
+
+  // Confirmación de salida manual si hay cambios
+  const handleSafeNavigate = (toPath) => {
+    if (isDirty) {
+      const confirmLeave = window.confirm('Tienes cambios sin guardar en esta atención clínica. ¿Deseas salir de todas formas?')
+      if (!confirmLeave) return
+    }
+    navigate(toPath)
   }
 
   const handleSubmit = async (e) => {
@@ -102,9 +215,31 @@ export default function VetAtenderCita() {
     setSubmitting(true)
     setErrorGlobal('')
     setSuccessMsg('')
+    setFieldErrors({})
 
     // Filtrar medicamentos vacíos
-    const medsFiltrados = medicamentos.filter((m) => m.nombre.trim() !== '')
+    const medsFiltrados = medicamentos.filter((m) => m.nombre && m.nombre.trim() !== '')
+
+    // Preparar payload completo con paciente, dueño, observaciones y medicamentos
+    const payload = {
+      paciente: {
+        nombre: pacienteForm.nombre.trim(),
+        especie: pacienteForm.especie.trim(),
+        raza: pacienteForm.raza.trim(),
+        sexo: pacienteForm.sexo,
+        fecha_nacimiento: pacienteForm.fecha_nacimiento || null,
+        peso: pacienteForm.peso !== '' ? Number(pacienteForm.peso) : null,
+        alergias: pacienteForm.alergias.trim() || 'Ninguna registrada',
+      },
+      dueno: {
+        nombre: duenoForm.nombre.trim(),
+        telefono: duenoForm.telefono.trim(),
+        cedula: duenoForm.cedula.trim(),
+        email: duenoForm.email.trim(),
+      },
+      observacion: observacion.trim(),
+      medicamentos: medsFiltrados,
+    }
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/veterinario/citas/${idCita}/atender`, {
@@ -114,24 +249,27 @@ export default function VetAtenderCita() {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify({
-          observacion: observacion.trim(),
-          medicamentos: medsFiltrados,
-        }),
+        body: JSON.stringify(payload),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        setErrorGlobal(data.message || 'Error al guardar la consulta médica.')
+        if (res.status === 422 && data.errors) {
+          setFieldErrors(data.errors)
+          setErrorGlobal('Existen errores de validación en el formulario. Por favor revisa los campos señalados.')
+        } else {
+          setErrorGlobal(data.message || 'Error al guardar la consulta médica.')
+        }
         setSubmitting(false)
         return
       }
 
-      setSuccessMsg('¡Atención médica y receta registradas exitosamente!')
+      setIsDirty(false)
+      setSuccessMsg('Atención clínica, actualización de datos y receta médica registradas exitosamente.')
       setTimeout(() => {
         navigate('/veterinario/citas')
-      }, 1500)
+      }, 1400)
     } catch (err) {
       console.error('Error al guardar atención:', err)
       setErrorGlobal('Error de red al intentar registrar la consulta.')
@@ -142,399 +280,497 @@ export default function VetAtenderCita() {
 
   const isAtendida = cita?.id_estado === 4
 
+  // Verificar si hay alergias reales para la franja resumen
+  const hasAlergias = pacienteForm.alergias &&
+    pacienteForm.alergias.trim() !== '' &&
+    pacienteForm.alergias.trim().toLowerCase() !== 'ninguna' &&
+    pacienteForm.alergias.trim().toLowerCase() !== 'ninguna registrada'
+
   return (
     <div className="dash">
       <SidebarVet />
 
       <main className="dash-main">
         <DashboardHeader
-          title={isAtendida ? 'Expediente de Atención Médica' : 'Atención Médica en Consulta'}
-          subtitle={`Registro clínico y prescripción para la cita N° ${idCita}`}
+          title="Atención Médica en Consulta"
+          subtitle={`Historia Clínica Electrónica • Cita N° ${idCita}`}
           usuario={usuario}
           onUserUpdated={setUsuario}
         />
 
-        {/* BREADCRUMB Y BOTÓN REGRESAR */}
-        <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link
-            to="/veterinario/citas"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              color: '#059669',
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              textDecoration: 'none',
-              background: '#ecfdf5',
-              padding: '0.4rem 0.85rem',
-              borderRadius: '8px',
-              border: '1px solid #a7f3d0'
-            }}
-          >
-            <i className="fa-solid fa-arrow-left"></i> Volver a Gestión de Citas
-          </Link>
+        <div className="hce-container">
+          {/* ── BREADCRUMB SOBRIO TIPO ENLACE ── */}
+          <div className="hce-page-header">
+            <div>
+              <button
+                type="button"
+                onClick={() => handleSafeNavigate('/veterinario/citas')}
+                className="hce-breadcrumb"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                <i className="fa-solid fa-arrow-left"></i>
+                <span>Citas / Atender cita N° {idCita}</span>
+              </button>
+              <h2 className="hce-page-title" style={{ marginTop: '0.4rem' }}>
+                {isAtendida ? 'Expediente Clínico Finalizado' : 'Registro de Atención y Receta'}
+              </h2>
+              <p className="hce-page-subtitle">
+                Software clínico veterinario • Ingrese hallazgos, actualización de ficha y prescripción.
+              </p>
+            </div>
 
-          {isAtendida && (
-            <span className="vet-badge vet-badge--atendida" style={{ padding: '0.4rem 0.85rem', fontSize: '0.85rem' }}>
-              <i className="fa-solid fa-circle-check"></i> Consulta Finalizada / Atendida
-            </span>
+            {isAtendida && (
+              <span className="vet-badge vet-badge--atendida" style={{ borderRadius: '6px' }}>
+                <i className="fa-solid fa-circle-check"></i> Consulta Finalizada
+              </span>
+            )}
+          </div>
+
+          {/* ── MENSAJES GLOBALES ── */}
+          {errorGlobal && (
+            <div className="dash-alert dash-alert--danger" style={{ borderRadius: '6px', margin: 0 }}>
+              <i className="fa-solid fa-triangle-exclamation"></i>
+              <span>{errorGlobal}</span>
+            </div>
           )}
-        </div>
 
-        {errorGlobal && (
-          <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.5rem' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i>
-            <span>{errorGlobal}</span>
-          </div>
-        )}
+          {successMsg && (
+            <div
+              className="dash-alert dash-alert--success"
+              style={{
+                borderRadius: '6px',
+                margin: 0,
+                background: '#f0fdf4',
+                color: '#15803d',
+                border: '1px solid #bbf7d0',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem'
+              }}
+            >
+              <i className="fa-solid fa-circle-check" style={{ fontSize: '1.1rem' }}></i>
+              <span>{successMsg}</span>
+            </div>
+          )}
 
-        {successMsg && (
-          <div className="dash-alert dash-alert--success" style={{ marginBottom: '1.5rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '0.9rem 1.1rem', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <i className="fa-solid fa-circle-check" style={{ fontSize: '1.2rem' }}></i>
-            <strong style={{ fontFamily: 'Inter, sans-serif' }}>{successMsg}</strong>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="vet-loading-box">
-            <i className="fa-solid fa-spinner fa-spin"></i>
-            <p>Cargando información del paciente y consulta...</p>
-          </div>
-        ) : !cita ? (
-          <div className="vet-empty-box">
-            <i className="fa-solid fa-circle-exclamation"></i>
-            <h3>No se encontró la cita</h3>
-            <p>La cita médica solicitada no existe o no tienes permiso para acceder a ella.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* ── GRID DE RESUMEN PACIENTE Y DUEÑO ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+          {loading ? (
+            <div className="vet-loading-box" style={{ borderRadius: '6px' }}>
+              <i className="fa-solid fa-spinner fa-spin"></i>
+              <p>Cargando información del paciente y consulta...</p>
+            </div>
+          ) : !cita ? (
+            <div className="vet-empty-box" style={{ borderRadius: '6px' }}>
+              <i className="fa-solid fa-circle-exclamation"></i>
+              <h3>No se encontró la cita</h3>
+              <p>La cita solicitada no existe o no cuentas con los permisos para atenderla.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
-              {/* SECCIÓN 1: PACIENTE (MASCOTA) */}
-              <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1.35rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem' }}>
-                  <i className="fa-solid fa-paw" style={{ color: '#059669', fontSize: '1.15rem' }}></i>
-                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', margin: 0 }}>
-                    Información del Paciente
-                  </h3>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem', marginBottom: '1rem' }}>
-                  <img
-                    src={cita.paciente?.foto || 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg'}
-                    alt={cita.paciente?.nombre}
-                    style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #a7f3d0', flexShrink: 0 }}
-                  />
-                  <div>
-                    <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: '0 0 0.2rem 0' }}>
-                      {cita.paciente?.nombre}
-                    </h4>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#059669', fontWeight: 600 }}>
-                      {cita.paciente?.especie} • {cita.paciente?.raza}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
-                  <div>
-                    <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Sexo:</span>
-                    <strong style={{ color: '#0f172a' }}>{cita.paciente?.sexo}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Edad Aproximada:</span>
-                    <strong style={{ color: '#0f172a' }}>{cita.paciente?.edad}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Peso Corporal:</span>
-                    <strong style={{ color: '#0f172a' }}>{cita.paciente?.peso}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Alergias Registradas:</span>
-                    <strong style={{ color: cita.paciente?.alergias !== 'Ninguna registrada' ? '#dc2626' : '#0f172a' }}>
-                      {cita.paciente?.alergias}
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECCIÓN 2: INFORMACIÓN DEL DUEÑO / TUTOR */}
-              <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1.35rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem' }}>
-                  <i className="fa-solid fa-user-doctor" style={{ color: '#059669', fontSize: '1.15rem' }}></i>
-                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', margin: 0 }}>
-                    Tutor / Dueño del Paciente
-                  </h3>
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', margin: '0 0 0.2rem 0' }}>
-                    {cita.dueno?.nombre}
-                  </h4>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#64748b' }}>
-                    Cédula / Doc: {cita.dueno?.cedula}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem', background: '#f8fafc', padding: '0.85rem', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <i className="fa-solid fa-phone" style={{ color: '#059669', width: '16px' }}></i>
-                    <span style={{ color: '#64748b' }}>Teléfono:</span>
-                    <strong style={{ color: '#0f172a' }}>{cita.dueno?.telefono}</strong>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <i className="fa-solid fa-envelope" style={{ color: '#059669', width: '16px' }}></i>
-                    <span style={{ color: '#64748b' }}>Correo:</span>
-                    <strong style={{ color: '#0f172a' }}>{cita.dueno?.email}</strong>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <i className="fa-solid fa-stethoscope" style={{ color: '#059669', width: '16px' }}></i>
-                    <span style={{ color: '#64748b' }}>Servicio:</span>
-                    <strong style={{ color: '#059669' }}>{cita.servicio?.nombre}</strong>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* ── SECCIÓN 3: OBSERVACIONES CLÍNICAS Y DIAGNÓSTICO ── */}
-            <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1.5rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem' }}>
-                <i className="fa-solid fa-notes-medical" style={{ color: '#059669', fontSize: '1.2rem' }}></i>
-                <div>
-                  <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', margin: 0 }}>
-                    Observaciones Clínicas y Diagnóstico
-                  </h3>
-                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.82rem', color: '#64748b', margin: '0.1rem 0 0 0' }}>
-                    Dictamen médico interno, síntomas observados, recomendaciones generales y constante vitales.
-                  </p>
-                </div>
-              </div>
-
-              <textarea
-                rows={6}
-                value={observacion}
-                onChange={(e) => setObservacion(e.target.value)}
-                placeholder="Escriba aquí los hallazgos clínicos durante la consulta, constantes fisiológicas, diagnóstico presuntivo/definitivo y recomendaciones para el paciente..."
-                disabled={submitting}
-                style={{
-                  width: '100%',
-                  padding: '0.85rem 1rem',
-                  borderRadius: '10px',
-                  border: '1px solid #cbd5e1',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.9rem',
-                  color: '#0f172a',
-                  lineHeight: '1.5',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                }}
-              />
-            </div>
-
-            {/* ── SECCIÓN 4: PRESCRIPCIÓN DE MEDICAMENTOS (TABLA DINÁMICA) ── */}
-            <div style={{ background: '#ffffff', borderRadius: '14px', padding: '1.5rem', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <i className="fa-solid fa-pills" style={{ color: '#059669', fontSize: '1.2rem' }}></i>
-                  <div>
-                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', margin: 0 }}>
-                      Medicamentos Recetados (Fórmula Médica)
-                    </h3>
-                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.82rem', color: '#64748b', margin: '0.1rem 0 0 0' }}>
-                      Listado de fármacos prescriptos. Esta información será visible en el portal del cliente y en su PDF de receta.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAddMedicamento}
-                  disabled={submitting}
-                  style={{
-                    background: '#ecfdf5',
-                    color: '#059669',
-                    border: '1px solid #a7f3d0',
-                    borderRadius: '8px',
-                    padding: '0.45rem 0.9rem',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
-                >
-                  <i className="fa-solid fa-plus"></i> Agregar Medicamento
-                </button>
-              </div>
-
-              {medicamentos.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#94a3b8', fontFamily: 'Inter, sans-serif', padding: '1.5rem 0' }}>
-                  No ha agregado ningún medicamento. Haga clic en "+ Agregar Medicamento" si requiere prescribir fármacos.
-                </p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  {medicamentos.map((med, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        padding: '1rem',
-                        display: 'grid',
-                        gridTemplateColumns: '1.2fr 1fr 1.5fr auto',
-                        gap: '0.75rem',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
-                          Nombre del Medicamento:
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: Amoxicilina 250mg"
-                          value={med.nombre}
-                          onChange={(e) => handleMedicamentoChange(idx, 'nombre', e.target.value)}
-                          disabled={submitting}
-                          style={{
-                            width: '100%',
-                            padding: '0.45rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '0.85rem',
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
-                          Dosis y Frecuencia:
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: 1 tab c/12h por 7 días"
-                          value={med.dosis}
-                          onChange={(e) => handleMedicamentoChange(idx, 'dosis', e.target.value)}
-                          disabled={submitting}
-                          style={{
-                            width: '100%',
-                            padding: '0.45rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '0.85rem',
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
-                          Indicaciones Especiales:
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: Administrar junto a las comidas"
-                          value={med.indicaciones}
-                          onChange={(e) => handleMedicamentoChange(idx, 'indicaciones', e.target.value)}
-                          disabled={submitting}
-                          style={{
-                            width: '100%',
-                            padding: '0.45rem 0.65rem',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '0.85rem',
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ marginTop: '1.1rem' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveMedicamento(idx)}
-                          disabled={submitting || medicamentos.length === 1}
-                          title="Eliminar medicamento"
-                          style={{
-                            background: medicamentos.length === 1 ? '#f1f5f9' : '#fef2f2',
-                            color: medicamentos.length === 1 ? '#cbd5e1' : '#ef4444',
-                            border: '1px solid #fecaca',
-                            borderRadius: '6px',
-                            padding: '0.5rem 0.65rem',
-                            cursor: medicamentos.length === 1 ? 'not-allowed' : 'pointer'
-                          }}
-                        >
-                          <i className="fa-solid fa-trash-can"></i>
-                        </button>
+              {/* ── FRANJA RESUMEN DEL PACIENTE ── */}
+              <div className="hce-summary-strip">
+                <div className="hce-summary-main">
+                  <div className="hce-summary-patient">
+                    <img
+                      src={cita.paciente?.foto || 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg'}
+                      alt={pacienteForm.nombre || 'Paciente'}
+                      className="hce-patient-avatar"
+                    />
+                    <div>
+                      <h3 className="hce-patient-name">{pacienteForm.nombre || 'Paciente sin nombre'}</h3>
+                      <div className="hce-patient-meta">
+                        <span>{pacienteForm.especie} • {pacienteForm.raza || 'Criollo / Mestizo'}</span>
+                        <span className="hce-meta-separator">•</span>
+                        <span>Sexo: {pacienteForm.sexo}</span>
+                        <span className="hce-meta-separator">•</span>
+                        <span>Edad: {cita.paciente?.edad || 'N/R'}</span>
+                        <span className="hce-meta-separator">•</span>
+                        <span>Peso: {pacienteForm.peso ? `${pacienteForm.peso} kg` : 'Sin registrar'}</span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="hce-patient-meta" style={{ justifyContent: 'flex-end' }}>
+                    <span><strong>Cita:</strong> #{idCita}</span>
+                    <span className="hce-meta-separator">•</span>
+                    <span><strong>Servicio:</strong> {cita.servicio?.nombre || 'Consulta General'}</span>
+                    <span className="hce-meta-separator">•</span>
+                    <span><strong>Fecha:</strong> {cita.fecha_formateada} ({cita.hora})</span>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* ── BARRA DE ACCIÓN (GUARDAR / CANCELAR) ── */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
-              <Link
-                to="/veterinario/citas"
-                style={{
-                  padding: '0.65rem 1.25rem',
-                  borderRadius: '10px',
-                  background: '#f1f5f9',
-                  color: '#475569',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  textDecoration: 'none'
-                }}
-              >
-                Cancelar
-              </Link>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  padding: '0.65rem 1.5rem',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  color: '#ffffff',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.92rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 4px 6px -1px rgba(5, 150, 105, 0.2)'
-                }}
-              >
-                {submitting ? (
-                  <>
-                    <i className="fa-solid fa-spinner fa-spin"></i>
-                    <span>Guardando Consulta...</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-check"></i>
-                    <span>Finalizar Consulta y Guardar Receta</span>
-                  </>
+                {/* ALERTA DE ALERGIAS VISIBLE */}
+                {hasAlergias && (
+                  <div className="hce-alert-allergies">
+                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <span><strong>ALERGIAS REGISTRADAS:</strong> {pacienteForm.alergias}</span>
+                  </div>
                 )}
-              </button>
-            </div>
-          </form>
-        )}
+
+                {/* NOTA DE LA CITA / RESERVA */}
+                {cita.nota_cita && (
+                  <div className="hce-note-badge">
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span><strong>Nota de la cita:</strong> {cita.nota_cita}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* ── SECCIÓN 1: DATOS DEL PACIENTE (EDITABLE IN-PLACE) ── */}
+              <div className="hce-card">
+                <div className="hce-card-header">
+                  <h3 className="hce-section-title">Datos del Paciente</h3>
+                  <span className="hce-section-desc">Actualización directa en la ficha clínica de la mascota</span>
+                </div>
+
+                <div className="hce-grid-3">
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-nombre">Nombre de la mascota *</label>
+                    <input
+                      id="paciente-nombre"
+                      type="text"
+                      className={`hce-input ${fieldErrors['paciente.nombre'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.nombre}
+                      onChange={(e) => handlePacienteChange('nombre', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Nombre del paciente"
+                    />
+                    {fieldErrors['paciente.nombre'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.nombre'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-especie">Especie *</label>
+                    <input
+                      id="paciente-especie"
+                      type="text"
+                      className={`hce-input ${fieldErrors['paciente.especie'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.especie}
+                      onChange={(e) => handlePacienteChange('especie', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Canino, Felino, etc."
+                    />
+                    {fieldErrors['paciente.especie'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.especie'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-raza">Raza</label>
+                    <input
+                      id="paciente-raza"
+                      type="text"
+                      className={`hce-input ${fieldErrors['paciente.raza'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.raza}
+                      onChange={(e) => handlePacienteChange('raza', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Criollo / Mestizo o raza"
+                    />
+                    {fieldErrors['paciente.raza'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.raza'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-sexo">Sexo *</label>
+                    <select
+                      id="paciente-sexo"
+                      className={`hce-select ${fieldErrors['paciente.sexo'] ? 'hce-select--error' : ''}`}
+                      value={pacienteForm.sexo}
+                      onChange={(e) => handlePacienteChange('sexo', e.target.value)}
+                      disabled={submitting || isAtendida}
+                    >
+                      <option value="Macho">Macho</option>
+                      <option value="Hembra">Hembra</option>
+                    </select>
+                    {fieldErrors['paciente.sexo'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.sexo'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-fecha-nacimiento">Fecha de nacimiento</label>
+                    <input
+                      id="paciente-fecha-nacimiento"
+                      type="date"
+                      className={`hce-input ${fieldErrors['paciente.fecha_nacimiento'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.fecha_nacimiento}
+                      onChange={(e) => handlePacienteChange('fecha_nacimiento', e.target.value)}
+                      disabled={submitting || isAtendida}
+                    />
+                    {fieldErrors['paciente.fecha_nacimiento'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.fecha_nacimiento'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="paciente-peso">Peso actual (kg)</label>
+                    <input
+                      id="paciente-peso"
+                      type="number"
+                      step="0.01"
+                      min="0.05"
+                      max="250"
+                      className={`hce-input ${fieldErrors['paciente.peso'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.peso}
+                      onChange={(e) => handlePacienteChange('peso', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Ej: 12.50"
+                    />
+                    {fieldErrors['paciente.peso'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.peso'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field hce-col-span-full">
+                    <label className="hce-label" htmlFor="paciente-alergias">Alergias o sensibilidades</label>
+                    <input
+                      id="paciente-alergias"
+                      type="text"
+                      className={`hce-input ${fieldErrors['paciente.alergias'] ? 'hce-input--error' : ''}`}
+                      value={pacienteForm.alergias}
+                      onChange={(e) => handlePacienteChange('alergias', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Ej: Alérgico a penicilinas, intolerancia al pollo..."
+                    />
+                    {fieldErrors['paciente.alergias'] && (
+                      <span className="hce-field-error">{fieldErrors['paciente.alergias'][0]}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── SECCIÓN 2: DATOS DEL TUTOR (EDITABLE IN-PLACE) ── */}
+              <div className="hce-card">
+                <div className="hce-card-header">
+                  <h3 className="hce-section-title">Datos del Tutor</h3>
+                  <span className="hce-section-desc">Actualización de contacto del titular responsable</span>
+                </div>
+
+                <div className="hce-grid-2">
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="dueno-nombre">Nombres y Apellidos *</label>
+                    <input
+                      id="dueno-nombre"
+                      type="text"
+                      className={`hce-input ${fieldErrors['dueno.nombre'] ? 'hce-input--error' : ''}`}
+                      value={duenoForm.nombre}
+                      onChange={(e) => handleDuenoChange('nombre', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Nombre completo del tutor"
+                    />
+                    {fieldErrors['dueno.nombre'] && (
+                      <span className="hce-field-error">{fieldErrors['dueno.nombre'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="dueno-cedula">Cédula / Documento de Identidad *</label>
+                    <input
+                      id="dueno-cedula"
+                      type="text"
+                      className={`hce-input ${fieldErrors['dueno.cedula'] ? 'hce-input--error' : ''}`}
+                      value={duenoForm.cedula}
+                      onChange={(e) => handleDuenoChange('cedula', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Número de documento"
+                    />
+                    {fieldErrors['dueno.cedula'] && (
+                      <span className="hce-field-error">{fieldErrors['dueno.cedula'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="dueno-telefono">Teléfono de contacto *</label>
+                    <input
+                      id="dueno-telefono"
+                      type="text"
+                      className={`hce-input ${fieldErrors['dueno.telefono'] ? 'hce-input--error' : ''}`}
+                      value={duenoForm.telefono}
+                      onChange={(e) => handleDuenoChange('telefono', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="Ej: 3001234567"
+                    />
+                    {fieldErrors['dueno.telefono'] && (
+                      <span className="hce-field-error">{fieldErrors['dueno.telefono'][0]}</span>
+                    )}
+                  </div>
+
+                  <div className="hce-field">
+                    <label className="hce-label" htmlFor="dueno-email">Correo Electrónico *</label>
+                    <input
+                      id="dueno-email"
+                      type="email"
+                      className={`hce-input ${fieldErrors['dueno.email'] ? 'hce-input--error' : ''}`}
+                      value={duenoForm.email}
+                      onChange={(e) => handleDuenoChange('email', e.target.value)}
+                      disabled={submitting || isAtendida}
+                      placeholder="correo@ejemplo.com"
+                    />
+                    {fieldErrors['dueno.email'] && (
+                      <span className="hce-field-error">{fieldErrors['dueno.email'][0]}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── SECCIÓN 3: OBSERVACIONES CLÍNICAS Y DIAGNÓSTICO ── */}
+              <div className="hce-card">
+                <div className="hce-card-header">
+                  <h3 className="hce-section-title">Observaciones Clínicas y Diagnóstico</h3>
+                  <span className="hce-section-desc">Dictamen médico, signos clínicos y plan terapéutico</span>
+                </div>
+
+                <div className="hce-field">
+                  <textarea
+                    rows={5}
+                    id="consulta-observacion"
+                    className={`hce-textarea ${fieldErrors['observacion'] ? 'hce-textarea--error' : ''}`}
+                    value={observacion}
+                    onChange={(e) => handleObservacionChange(e.target.value)}
+                    placeholder="Escriba aquí los hallazgos clínicos durante la consulta, constantes fisiológicas, diagnóstico presuntivo o definitivo y recomendaciones generales..."
+                    disabled={submitting || isAtendida}
+                  />
+                  {fieldErrors['observacion'] && (
+                    <span className="hce-field-error">{fieldErrors['observacion'][0]}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* ── SECCIÓN 4: MEDICAMENTOS RECETADOS (TABLA REAL) ── */}
+              <div className="hce-card">
+                <div className="hce-card-header">
+                  <h3 className="hce-section-title">Medicamentos Prescritos</h3>
+                  <span className="hce-section-desc">Fórmula médica visible en portal cliente y PDF de receta</span>
+                </div>
+
+                <div className="hce-table-wrapper">
+                  <table className="hce-med-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '30%' }}>Medicamento</th>
+                        <th style={{ width: '30%' }}>Dosis y Frecuencia</th>
+                        <th style={{ width: '34%' }}>Indicaciones Especiales</th>
+                        <th style={{ width: '6%', textAlign: 'center' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {medicamentos.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.25rem' }}>
+                            Sin medicamentos prescritos. Use el botón inferior si requiere agregar fármacos.
+                          </td>
+                        </tr>
+                      ) : (
+                        medicamentos.map((med, idx) => (
+                          <tr key={idx}>
+                            <td>
+                              <input
+                                type="text"
+                                className="hce-table-input"
+                                placeholder="Ej: Amoxicilina 250mg"
+                                value={med.nombre}
+                                onChange={(e) => handleMedicamentoChange(idx, 'nombre', e.target.value)}
+                                disabled={submitting || isAtendida}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="hce-table-input"
+                                placeholder="Ej: 1 tab cada 12h por 7 días"
+                                value={med.dosis}
+                                onChange={(e) => handleMedicamentoChange(idx, 'dosis', e.target.value)}
+                                disabled={submitting || isAtendida}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="hce-table-input"
+                                placeholder="Ej: Administrar junto a las comidas"
+                                value={med.indicaciones}
+                                onChange={(e) => handleMedicamentoChange(idx, 'indicaciones', e.target.value)}
+                                disabled={submitting || isAtendida}
+                              />
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                className="hce-btn-delete-row"
+                                onClick={() => handleRemoveMedicamento(idx)}
+                                disabled={submitting || isAtendida || medicamentos.length === 1}
+                                title="Eliminar fila"
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {!isAtendida && (
+                  <button
+                    type="button"
+                    onClick={handleAddMedicamento}
+                    disabled={submitting}
+                    className="hce-btn-outline"
+                  >
+                    <i className="fa-solid fa-plus"></i>
+                    <span>Agregar medicamento</span>
+                  </button>
+                )}
+              </div>
+
+              {/* ── BARRA DE ACCIONES FIJA INFERIOR ── */}
+              <div className="hce-actions-bar">
+                <button
+                  type="button"
+                  onClick={() => handleSafeNavigate('/veterinario/citas')}
+                  className="hce-btn-secondary"
+                  disabled={submitting}
+                >
+                  Cancelar
+                </button>
+
+                {!isAtendida ? (
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="hce-btn-primary"
+                  >
+                    {submitting ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        <span>Guardando consulta...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-check"></i>
+                        <span>Finalizar consulta y guardar receta</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/veterinario/citas')}
+                    className="hce-btn-primary"
+                  >
+                    <i className="fa-solid fa-arrow-left"></i>
+                    <span>Volver a Citas</span>
+                  </button>
+                )}
+              </div>
+
+            </form>
+          )}
+        </div>
       </main>
     </div>
   )

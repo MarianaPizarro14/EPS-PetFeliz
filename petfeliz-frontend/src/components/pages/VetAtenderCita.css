@@ -13,7 +13,7 @@
   flex-direction: column;
   gap: 1.5rem;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0;
   width: 100%;
   padding-bottom: 6.5rem; /* Espacio para que la barra fija no tape nada */
 }
@@ -22,27 +22,29 @@
 .hce-modern-breadcrumb {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #1d4ed8;
+  color: #2563eb;
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 0.4rem 0.9rem;
+  background: #ffffff;
+  padding: 0.45rem 1rem;
   border-radius: 20px;
-  border: 1px solid #bfdbfe;
+  border: 1.5px solid #bfdbfe;
   width: fit-content;
   transition: all 0.2s ease;
-  backdrop-filter: blur(6px);
   cursor: pointer;
+  margin-left: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .hce-modern-breadcrumb:hover {
-  background: #ffffff;
-  color: #1e40af;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #93c5fd;
   transform: translateX(-2px);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.12);
 }
 
 /* ── HERO BANNER DEL PACIENTE (AZUL PROFESIONAL) ── */
@@ -692,66 +694,67 @@
   right: 0;
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
-  padding: 0.85rem 2rem;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.07);
+  padding: 0.9rem 2.25rem;
   z-index: 900;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   box-sizing: border-box;
 }
 
 .hce-bar-content {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: 1.15rem;
 }
 
 .hce-btn-cancel-outline {
-  height: 44px;
-  padding: 0 1.5rem;
+  height: 50px;
+  padding: 0 2.1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #475569;
+  color: #334155;
   cursor: pointer;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
 .hce-btn-cancel-outline:hover {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #ef4444;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.18);
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #b91c1c;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.28);
   transform: translateY(-1px);
 }
 
 .hce-btn-submit-primary {
-  height: 44px;
-  padding: 0 1.85rem;
+  height: 50px;
+  padding: 0 2.35rem;
   background: #059669;
-  border: 1.5px solid #047857;
-  border-radius: 10px;
+  border: 2px solid #047857;
+  border-radius: 12px;
   font-family: 'Inter', sans-serif;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  gap: 0.65rem;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.22);
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -759,7 +762,7 @@
 .hce-btn-submit-primary:hover {
   background: #047857;
   border-color: #065f46;
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+  box-shadow: 0 6px 18px rgba(4, 120, 87, 0.38);
   transform: translateY(-1px);
 }
 

@@ -284,26 +284,66 @@ export default function AdminCitas() {
                         </div>
                       </td>
                       <td>
-                        <span
-                          className={`admin-table__badge ${
-                            c.id_estado === 2 || c.id_estado === 4
-                              ? 'admin-table__badge--confirmada'
-                              : c.id_estado === 3
-                              ? 'admin-table__badge--cancelada'
-                              : 'admin-table__badge--pendiente'
-                          }`}
-                        >
-                          <i
-                            className={`fa-solid ${
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
+                          <span
+                            className={`admin-table__badge ${
                               c.id_estado === 2 || c.id_estado === 4
-                                ? 'fa-check'
+                                ? 'admin-table__badge--confirmada'
                                 : c.id_estado === 3
-                                ? 'fa-xmark'
-                                : 'fa-clock'
+                                ? 'admin-table__badge--cancelada'
+                                : 'admin-table__badge--pendiente'
                             }`}
-                          ></i>
-                          {c.estado}
-                        </span>
+                          >
+                            <i
+                              className={`fa-solid ${
+                                c.id_estado === 2 || c.id_estado === 4
+                                  ? 'fa-check'
+                                  : c.id_estado === 3
+                                  ? 'fa-xmark'
+                                  : 'fa-clock'
+                              }`}
+                            ></i>
+                            {c.estado}
+                          </span>
+
+                          {c.estado_pago === 'pendiente' ? (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                fontSize: '0.72rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '4px',
+                                fontWeight: 600,
+                                background: '#fffbeb',
+                                color: '#b45309',
+                                border: '1px solid #fde68a'
+                              }}
+                              title={`Método: ${c.metodo_pago || 'Pendiente'}`}
+                            >
+                              <i className="fa-solid fa-clock"></i> Pago Pendiente
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                fontSize: '0.72rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '4px',
+                                fontWeight: 600,
+                                background: '#f0fdf4',
+                                color: '#15803d',
+                                border: '1px solid #bbf7d0'
+                              }}
+                              title={`Método: ${c.metodo_pago || 'En línea'}`}
+                            >
+                              <i className="fa-solid fa-check"></i> Pagado
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <button

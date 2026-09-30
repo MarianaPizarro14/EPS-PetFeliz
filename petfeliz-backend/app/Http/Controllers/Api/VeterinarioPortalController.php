@@ -46,6 +46,8 @@ class VeterinarioPortalController extends Controller
                 'id_estado' => $c->id_estado,
                 'estado' => $nombreEstado,
                 'estado_nombre' => $nombreEstado,
+                'estado_pago' => $c->estado_pago ?? 'pagado',
+                'metodo_pago' => $c->metodo_pago ?? 'Pago en línea',
                 'observacion' => $c->observacion ?? '',
                 'medicamentos' => is_array($c->medicamentos) ? $c->medicamentos : (json_decode($c->medicamentos, true) ?? []),
                 'paciente' => [
@@ -193,10 +195,15 @@ class VeterinarioPortalController extends Controller
         $cliente = $cita->cliente;
         $servicio = $cita->servicio;
 
-        $edadCalculada = 'N/A';
-        if ($mascota && $mascota->fecha_nacimiento) {
-            $edadCalculada = Carbon::parse($mascota->fecha_nacimiento)->age . ' años';
+        $pesoValor = ($mascota && $mascota->peso !== null && $mascota->peso > 0) ? (float) $mascota->peso : 12.00;
+        $fechaNacimiento = ($mascota && $mascota->fecha_nacimiento) ? Carbon::parse($mascota->fecha_nacimiento)->format('Y-m-d') : null;
+        $edadAprox = 16;
+        if ($fechaNacimiento) {
+            $edadAprox = Carbon::parse($fechaNacimiento)->age;
+        } else {
+            $fechaNacimiento = Carbon::now()->subYears(16)->format('Y-01-01');
         }
+        $edadTexto = $edadAprox . ($edadAprox === 1 ? ' año' : ' años');
 
         $medicamentosList = [];
         if (!empty($cita->medicamentos)) {
@@ -207,11 +214,15 @@ class VeterinarioPortalController extends Controller
         $notaCita = '';
         $observacionMedica = $rawObservacion;
 
-        // Si la cita aún no ha sido finalizada o la observación contiene notas automáticas de pago/reserva:
-        if ($cita->id_estado != 4 && preg_match('/pago|wompi|verificado|confirmado|agendada|reserva/i', $rawObservacion)) {
+        // Si la observación contenía notas de pago o de reserva, limpiarla por completo
+        if (preg_match('/pago|wompi|verificado|confirmado|agendada|reserva/i', $rawObservacion)) {
             $notaCita = $rawObservacion;
-            $observacionMedica = ''; // Iniciar vacío para que el veterinario redacte su diagnóstico real
+            $observacionMedica = '';
         }
+
+        $montoValor = $cita->monto_pago !== null ? (float) $cita->monto_pago : (float) ($servicio->precio ?? 35000);
+        $metodoPagoFinal = $cita->metodo_pago ?? 'Pago en línea';
+        $estadoPagoFinal = $cita->estado_pago ?? 'pagado';
 
         return response()->json([
             'cita' => [
@@ -226,17 +237,27 @@ class VeterinarioPortalController extends Controller
                 'observacion' => $observacionMedica,
                 'nota_cita' => $notaCita,
                 'medicamentos' => $medicamentosList,
+                'metodo_pago' => $metodoPagoFinal,
+                'estado_pago' => $estadoPagoFinal,
+                'monto_pago' => $montoValor,
+                'pago' => [
+                    'metodo_pago' => $metodoPagoFinal,
+                    'estado_pago' => $estadoPagoFinal,
+                    'monto' => $montoValor,
+                    'monto_formateado' => '$ ' . number_format($montoValor, 0, ',', '.'),
+                ],
                 'paciente' => [
                     'id_mascota' => $mascota->id_mascota ?? null,
                     'nombre' => $mascota->nombre ?? 'Paciente',
                     'especie' => $mascota->especie ?? 'Canino',
-                    'raza' => $mascota->raza ?? 'Criollo',
+                    'raza' => $mascota->raza ?? 'Criollo / Mestizo',
                     'sexo' => $mascota->sexo ?? 'Macho',
-                    'fecha_nacimiento' => $mascota->fecha_nacimiento ?? '',
-                    'edad' => $edadCalculada,
-                    'peso' => $mascota->peso !== null ? (float) $mascota->peso : null,
-                    'peso_formateado' => $mascota->peso ? ($mascota->peso . ' kg') : 'N/R',
-                    'alergias' => $mascota->alergias ?? '',
+                    'fecha_nacimiento' => $fechaNacimiento,
+                    'edad' => $edadTexto,
+                    'edad_aproximada' => $edadAprox,
+                    'peso' => $pesoValor,
+                    'peso_formateado' => number_format($pesoValor, 2) . ' kg',
+                    'alergias' => $mascota->alergias ?? 'Ninguna registrada',
                     'vacunas' => $mascota->vacunas ?? 'Al día',
                     'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
                 ],
@@ -251,6 +272,7 @@ class VeterinarioPortalController extends Controller
                     'id_servicio' => $servicio->id_servicio ?? null,
                     'nombre' => $servicio->nombre ?? 'Consulta Médica General',
                     'descripcion' => $servicio->descripcion ?? '',
+                    'precio' => $montoValor,
                 ]
             ]
         ], 200);
@@ -329,6 +351,8 @@ class VeterinarioPortalController extends Controller
             $mascota->sexo = $pData['sexo'];
             if (array_key_exists('fecha_nacimiento', $pData)) {
                 $mascota->fecha_nacimiento = !empty($pData['fecha_nacimiento']) ? $pData['fecha_nacimiento'] : null;
+            } elseif (isset($pData['edad_aproximada']) && is_numeric($pData['edad_aproximada'])) {
+                $mascota->fecha_nacimiento = Carbon::now()->subYears((int) $pData['edad_aproximada'])->format('Y-01-01');
             }
             if (array_key_exists('peso', $pData)) {
                 $mascota->peso = is_numeric($pData['peso']) ? (float) $pData['peso'] : null;
@@ -347,6 +371,14 @@ class VeterinarioPortalController extends Controller
             if ($usuarioCliente && !empty($dData['email'])) {
                 $usuarioCliente->email = strtolower(trim($dData['email']));
                 $usuarioCliente->save();
+            }
+
+            if ($request->has('pago')) {
+                $pagoData = $request->input('pago', []);
+                if (!empty($pagoData['metodo_pago'])) $cita->metodo_pago = trim($pagoData['metodo_pago']);
+                if (!empty($pagoData['estado_pago'])) $cita->estado_pago = trim($pagoData['estado_pago']);
+                if (isset($pagoData['monto']) && is_numeric($pagoData['monto'])) $cita->monto_pago = (float) $pagoData['monto'];
+                $cita->save();
             }
         });
 
@@ -443,6 +475,8 @@ class VeterinarioPortalController extends Controller
                 if (isset($pData['sexo'])) $mascota->sexo = $pData['sexo'];
                 if (array_key_exists('fecha_nacimiento', $pData)) {
                     $mascota->fecha_nacimiento = !empty($pData['fecha_nacimiento']) ? $pData['fecha_nacimiento'] : null;
+                } elseif (isset($pData['edad_aproximada']) && is_numeric($pData['edad_aproximada'])) {
+                    $mascota->fecha_nacimiento = Carbon::now()->subYears((int) $pData['edad_aproximada'])->format('Y-01-01');
                 }
                 if (array_key_exists('peso', $pData)) {
                     $mascota->peso = is_numeric($pData['peso']) ? (float) $pData['peso'] : null;
@@ -467,8 +501,15 @@ class VeterinarioPortalController extends Controller
                 }
             }
 
-            // 3. Actualizar cita clínica y medicamentos
+            // 3. Actualizar cita clínica, pago y medicamentos
             $cita->id_estado = $request->id_estado ?? 4;
+
+            if ($request->has('pago')) {
+                $pData = $request->input('pago', []);
+                if (!empty($pData['metodo_pago'])) $cita->metodo_pago = trim($pData['metodo_pago']);
+                if (!empty($pData['estado_pago'])) $cita->estado_pago = trim($pData['estado_pago']);
+                if (isset($pData['monto']) && is_numeric($pData['monto'])) $cita->monto_pago = (float) $pData['monto'];
+            }
 
             if ($request->has('observacion')) {
                 $cita->observacion = trim(strip_tags($request->observacion));

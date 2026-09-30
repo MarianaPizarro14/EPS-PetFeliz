@@ -238,7 +238,7 @@ export default function VetCitas() {
                         </div>
 
                         {/* Estado */}
-                        <div className="vet-cita-status-block">
+                        <div className="vet-cita-status-block" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
                           <span
                             className={`vet-badge ${
                               isAtendida
@@ -259,6 +259,44 @@ export default function VetCitas() {
                             ></i>
                             {estadoTexto}
                           </span>
+
+                          {cita.estado_pago === 'pendiente' ? (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                fontSize: '0.74rem',
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: '6px',
+                                fontWeight: 600,
+                                background: '#fffbeb',
+                                color: '#b45309',
+                                border: '1px solid #fde68a'
+                              }}
+                              title={`Método: ${cita.metodo_pago || 'Pendiente'}`}
+                            >
+                              <i className="fa-solid fa-clock"></i> Pago Pendiente
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                fontSize: '0.74rem',
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: '6px',
+                                fontWeight: 600,
+                                background: '#f0fdf4',
+                                color: '#15803d',
+                                border: '1px solid #bbf7d0'
+                              }}
+                              title={`Método: ${cita.metodo_pago || 'En línea'}`}
+                            >
+                              <i className="fa-solid fa-check"></i> Pagado
+                            </span>
+                          )}
                         </div>
 
                         {/* Acciones */}

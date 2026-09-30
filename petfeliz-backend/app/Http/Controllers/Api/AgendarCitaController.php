@@ -409,7 +409,10 @@ class AgendarCitaController extends Controller
             'motivo' => $motivoFinal,
             'fecha' => $reserva->fecha,
             'hora' => $horaSql,
-            'observacion' => $request->observacion ?? 'Pago verificado con Wompi',
+            'observacion' => $request->observacion ?? null,
+            'metodo_pago' => $metodoFinal ?? 'Pago en línea',
+            'estado_pago' => 'pagado',
+            'monto_pago' => $monto,
             'id_estado' => 2, // 2 = Confirmada
             'id_veterinario' => $reserva->id_veterinario,
         ]);

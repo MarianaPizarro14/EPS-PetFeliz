@@ -1823,6 +1823,10 @@ class AdminController extends Controller
                 'titulo' => 'Error de Base de Datos',
                 'mensaje' => 'No hay conexión con la base de datos: ' . $e->getMessage(),
                 'icono' => 'fa-solid fa-database',
+            ];
+        }
+    }
+
     /**
      * Actualizar datos de perfil del Director Administrativo.
      */

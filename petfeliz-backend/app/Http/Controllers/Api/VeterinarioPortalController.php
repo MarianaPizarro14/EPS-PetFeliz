@@ -137,18 +137,48 @@ class VeterinarioPortalController extends Controller
         $mascotas = Mascota::whereHas('citas', function ($q) use ($vet) {
             $q->where('id_veterinario', $vet->id_veterinario);
         })->with(['cliente.usuario', 'citas' => function ($q) use ($vet) {
-            $q->where('id_veterinario', $vet->id_veterinario)->orderBy('fecha', 'desc');
-        }])->get();
+            $q->where('id_veterinario', $vet->id_veterinario)
+              ->orderBy('fecha', 'desc')
+              ->orderBy('hora', 'desc');
+        }, 'citas.servicio', 'citas.veterinario'])->get();
 
         $pacientes = $mascotas->map(function ($mascota) {
             $ultimaCita = $mascota->citas->first();
             $fechaUltima = $ultimaCita ? Carbon::parse($ultimaCita->fecha)->format('d/m/Y') : 'N/A';
 
+            $citasFormatted = $mascota->citas->map(function ($c) {
+                $medicamentosList = [];
+                if (!empty($c->medicamentos)) {
+                    $medicamentosList = is_array($c->medicamentos) ? $c->medicamentos : (json_decode($c->medicamentos, true) ?? []);
+                }
+
+                $rawObs = $c->observacion ?? '';
+                $observacionMedica = $rawObs;
+                if (preg_match('/pago|wompi|verificado|confirmado|agendada|reserva/i', $rawObs)) {
+                    $observacionMedica = '';
+                }
+
+                $horaFormateada = $c->hora ? date('h:i A', strtotime($c->hora)) : '10:00 AM';
+
+                return [
+                    'id_cita' => $c->id_cita,
+                    'fecha' => $c->fecha,
+                    'fecha_formateada' => Carbon::parse($c->fecha)->format('d/m/Y'),
+                    'hora' => $horaFormateada,
+                    'servicio' => $c->servicio ? $c->servicio->nombre : ($c->motivo ?? 'Consulta Médica General'),
+                    'id_estado' => $c->id_estado,
+                    'estado_nombre' => $c->id_estado === 4 ? 'Atendida' : ($c->id_estado === 3 ? 'Cancelada' : 'Pendiente'),
+                    'observacion' => $observacionMedica,
+                    'medicamentos' => $medicamentosList,
+                    'veterinario' => $c->veterinario ? $c->veterinario->nombre : 'Médico Veterinario',
+                ];
+            })->values();
+
             return [
                 'id_mascota' => $mascota->id_mascota,
                 'nombre' => $mascota->nombre,
                 'especie' => $mascota->especie ?? 'Canino',
-                'raza' => $mascota->raza ?? 'Criollo',
+                'raza' => $mascota->raza ?? 'Criollo / Mestizo',
                 'sexo' => $mascota->sexo ?? 'Macho',
                 'alergias' => $mascota->alergias ?? 'Ninguna registrada',
                 'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
@@ -161,6 +191,7 @@ class VeterinarioPortalController extends Controller
                 ] : null,
                 'total_atenciones' => $mascota->citas->count(),
                 'ultima_cita' => $fechaUltima,
+                'citas' => $citasFormatted,
             ];
         });
 

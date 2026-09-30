@@ -43,7 +43,21 @@ export default function SidebarVet() {
 
   return (
     <>
-      <aside className="dash-side" style={{ minHeight: '100vh', height: '100vh', position: 'sticky', top: 0, boxSizing: 'border-box', overflowY: 'auto' }}>
+      <aside
+        className="dash-side"
+        style={{
+          minHeight: '100vh',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          boxSizing: 'border-box',
+          overflowY: 'auto',
+          zIndex: 950,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
         <div>
           <div className="dash-side__logo">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -81,7 +95,7 @@ export default function SidebarVet() {
           </nav>
         </div>
 
-        <div className="dash-side__nav dash-side__nav--bottom">
+        <div className="dash-side__nav dash-side__nav--bottom" style={{ marginTop: 'auto', paddingTop: '0.85rem' }}>
           <button
             type="button"
             className="dash-side__link"

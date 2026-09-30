@@ -48,19 +48,20 @@ import VetConfiguracion from './components/pages/VetConfiguracion'
 import VetAtenderCita from './components/pages/VetAtenderCita'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
-const APP_ROUTES = [
-  '/dashboard-client', '/dashboard-cliente', '/dashboard-client/afiliacion', '/afiliacion',
-  '/dashboard-client/servicios', '/servicios-cliente', '/dashboard-client/pagos', '/pagos', 
-  '/dashboard-client/documentos', '/documentos', '/dashboard-client/soporte', 
-  '/soporte', '/mis-mascotas', '/citas', '/agendar-cita',
-  '/admin/historias', '/admin/historias-cuidadores', '/admin/dashboard', '/admin/citas', '/admin/mascotas', '/admin/veterinarios', '/admin/servicios', '/admin/clientes', '/admin/pagos', '/admin/configuracion',
-  '/veterinario', '/veterinario/dashboard', '/veterinario/pacientes', '/veterinario/citas', '/veterinario/historial', '/veterinario/configuracion'
+const CLIENT_PORTAL_ROUTES = [
+  '/dashboard-client', '/dashboard-cliente', '/afiliacion',
+  '/servicios-cliente', '/pagos', '/documentos', '/soporte',
+  '/mis-mascotas', '/citas', '/agendar-cita'
 ]
 
 function AppContent() {
   const { pathname } = useLocation()
   const isAuthPage = AUTH_ROUTES.includes(pathname)
-  const isAppPage = APP_ROUTES.includes(pathname)
+  const isAppPage =
+    pathname.startsWith('/veterinario') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/dashboard') ||
+    CLIENT_PORTAL_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'))
   const hideChrome = isAuthPage || isAppPage
 
   return (

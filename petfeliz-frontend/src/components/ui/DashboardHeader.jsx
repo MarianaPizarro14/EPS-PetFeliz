@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import CustomDatePicker from '../ui/CustomDatePicker'
 import { DEPARTAMENTOS_Y_CIUDADES_COLOMBIA } from '../../data/departamentosYCiudadesColombia'
 import { DEFAULT_USER_AVATAR } from '../../constants/images'
-import { getStoredToken, clearStoredAuth, isValidAvatarUrl } from '../../utils/authStorage'
+import { getStoredToken, getStoredUser, updateStoredUser, clearStoredAuth, isValidAvatarUrl } from '../../utils/authStorage'
 import './DashboardHeader.css'
 
 // Helper para optimizar resolución de avatar Cloudinary
@@ -1182,7 +1182,7 @@ export default function DashboardHeader({
               <div className="dh-photo-preview-container">
                 {isRemovingPhoto ? (
                   <div className="dh-photo-preview-initials">
-                    {getInitials(userFullName)}
+                    {getInitials(realPersonName)}
                   </div>
                 ) : photoPreview ? (
                   <img
@@ -1193,7 +1193,7 @@ export default function DashboardHeader({
                   />
                 ) : (
                   <div className="dh-photo-preview-initials">
-                    {getInitials(userFullName)}
+                    {getInitials(realPersonName)}
                   </div>
                 )}
               </div>

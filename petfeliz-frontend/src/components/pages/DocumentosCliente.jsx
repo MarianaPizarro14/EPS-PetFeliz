@@ -7,6 +7,7 @@ import './DashboardClient.css'
 import './DocumentosCliente.css'
 
 import { useUser } from '../../context/UserContext'
+import { openInvoiceWindow } from '../../utils/facturaPdfGenerator'
 
 export default function DocumentosCliente() {
   const navigate = useNavigate()
@@ -461,21 +462,10 @@ export default function DocumentosCliente() {
                         <button
                           type="button"
                           className="docs-cli-invoice-btn"
-                          disabled={downloadingType === `factura-${p.id_pago}`}
-                          onClick={() =>
-                            handleDescargarPdf(
-                              `${import.meta.env.VITE_API_URL}/cliente/documentos/factura/${p.id_pago}/pdf`,
-                              `Factura_${p.referencia_transaccion || p.id_pago}.pdf`,
-                              `factura-${p.id_pago}`
-                            )
-                          }
+                          onClick={() => openInvoiceWindow(p)}
                         >
-                          {downloadingType === `factura-${p.id_pago}` ? (
-                            <i className="fa-solid fa-circle-notch fa-spin"></i>
-                          ) : (
-                            <i className="fa-solid fa-download"></i>
-                          )}
-                          <span>PDF</span>
+                          <i className="fa-solid fa-file-pdf"></i>
+                          <span>Ver / Descargar PDF</span>
                         </button>
                       </div>
                     ))

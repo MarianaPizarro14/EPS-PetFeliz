@@ -4,7 +4,7 @@ import { getStoredToken } from '../../utils/authStorage'
 import SidebarClient from '../ui/SidebarClient'
 import DashboardHeader from '../ui/DashboardHeader'
 import './DashboardClient.css'
-import './PagosCliente.css'
+import { openInvoiceWindow } from '../../utils/facturaPdfGenerator'
 
 const FALLBACK_PET_IMG = '/img/card_mascota.png'
 
@@ -388,11 +388,11 @@ export default function PagosCliente() {
               <button
                 type="button"
                 className="pagos-cli-btn-recibo"
-                style={{ background: '#0d9488', color: '#ffffff', border: 'none' }}
-                onClick={() => window.print()}
+                style={{ background: '#059669', color: '#ffffff', border: 'none' }}
+                onClick={() => openInvoiceWindow(selectedPagoModal)}
               >
-                <i className="fa-solid fa-print"></i>
-                <span>Imprimir Comprobante</span>
+                <i className="fa-solid fa-file-pdf"></i>
+                <span>Ver / Descargar Factura PDF</span>
               </button>
               <button
                 type="button"

@@ -686,12 +686,12 @@ class VeterinarioPortalController extends Controller
         }
 
         if ($request->hasFile('foto')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
             if ($fotoUrl) {
                 $vet->foto_perfil = $fotoUrl;
             }
         } elseif ($request->hasFile('foto_perfil')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
             if ($fotoUrl) {
                 $vet->foto_perfil = $fotoUrl;
             }

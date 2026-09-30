@@ -957,9 +957,9 @@ class AdminController extends Controller
 
         $fotoUrl = null;
         if ($request->hasFile('foto')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
         } elseif ($request->hasFile('foto_perfil')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
         } elseif ($request->filled('foto_perfil') && is_string($request->foto_perfil)) {
             $rawUrl = trim($request->foto_perfil);
             if (!empty($rawUrl)) {
@@ -1044,10 +1044,10 @@ class AdminController extends Controller
         $hasFotoParam = false;
 
         if ($request->hasFile('foto')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
             $hasFotoParam = true;
         } elseif ($request->hasFile('foto_perfil')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'veterinarios');
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
             $hasFotoParam = true;
         } elseif ($request->has('foto_perfil')) {
             $hasFotoParam = true;

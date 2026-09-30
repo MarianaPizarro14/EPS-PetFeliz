@@ -6,6 +6,18 @@ import { DEFAULT_USER_AVATAR } from '../../constants/images'
 import { getStoredToken, clearStoredAuth, isValidAvatarUrl } from '../../utils/authStorage'
 import './DashboardHeader.css'
 
+// Helper para optimizar resolución de avatar Cloudinary
+const getHighResAvatar = (url) => {
+  if (!url) return url
+  if (typeof url === 'string' && url.includes('cloudinary.com') && url.includes('/upload/')) {
+    if (url.includes('/upload/c_fill') || url.includes('/upload/w_')) {
+      return url.replace(/\/upload\/[^/]+\//, '/upload/c_fill,g_face,w_600,h_600,q_auto:best,f_auto/')
+    }
+    return url.replace('/upload/', '/upload/c_fill,g_face,w_600,h_600,q_auto:best,f_auto/')
+  }
+  return url
+}
+
 // Helper para obtener iniciales del nombre
 const getInitials = (name) => {
   if (!name) return 'U'
@@ -808,7 +820,7 @@ export default function DashboardHeader({
             {hasAvatarPhoto ? (
               <img
                 className="dash-header__avatar"
-                src={usuario.foto}
+                src={getHighResAvatar(usuario.foto)}
                 alt={userFullName}
                 onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
               />
@@ -826,7 +838,7 @@ export default function DashboardHeader({
                 {hasAvatarPhoto ? (
                   <img
                     className="dh-profile-card__avatar"
-                    src={usuario.foto}
+                    src={getHighResAvatar(usuario.foto)}
                     alt={userFullName}
                     onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_USER_AVATAR }}
                   />
@@ -842,11 +854,11 @@ export default function DashboardHeader({
                 </div>
               </div>
 
-              <div className="dh-menu-divider"></div>
+              {usuario?.rol !== 'veterinario' && (
+                <>
+                  <div className="dh-menu-divider"></div>
 
-              <nav className="dh-menu-links">
-                {usuario?.rol !== 'veterinario' && (
-                  <>
+                  <nav className="dh-menu-links">
                     <button type="button" className="dh-menu-item" onClick={handleOpenProfileModal}>
                       <i className="fa-solid fa-user"></i>
                       <span>Mi perfil</span>
@@ -863,14 +875,14 @@ export default function DashboardHeader({
                     </button>
 
                     <div className="dh-menu-divider"></div>
-                  </>
-                )}
 
-                <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
-                  <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                  <span>Cerrar sesión</span>
-                </button>
-              </nav>
+                    <button type="button" className="dh-menu-item dh-menu-item--logout" onClick={handleLogout}>
+                      <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                      <span>Cerrar sesión</span>
+                    </button>
+                  </nav>
+                </>
+              )}
             </div>
           )}
         </div>

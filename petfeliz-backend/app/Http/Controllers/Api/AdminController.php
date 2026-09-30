@@ -1823,8 +1823,50 @@ class AdminController extends Controller
                 'titulo' => 'Error de Base de Datos',
                 'mensaje' => 'No hay conexión con la base de datos: ' . $e->getMessage(),
                 'icono' => 'fa-solid fa-database',
-            ];
+    /**
+     * Actualizar datos de perfil del Director Administrativo.
+     */
+    public function perfilUpdate(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'nombre' => 'required|string|max:150',
+            'telefono' => 'nullable|string|max:50',
+            'cedula' => 'nullable|string|max:50',
+            'foto' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
+
+        $fotoUrl = null;
+
+        if ($user->cliente) {
+            $user->cliente->nombre = $request->nombre;
+            if ($request->has('telefono')) $user->cliente->telefono = $request->telefono;
+            if ($request->has('cedula')) $user->cliente->cedula = $request->cedula;
+            if ($request->hasFile('foto')) {
+                $user->cliente->foto_perfil = CloudinaryService::upload($request->file('foto'), 'usuarios');
+            }
+            $user->cliente->save();
+            $fotoUrl = $user->cliente->foto_perfil;
+        } else {
+            $cliente = Cliente::create([
+                'id_usuario' => $user->id_usuario,
+                'nombre' => $request->nombre,
+                'telefono' => $request->telefono ?? '',
+                'cedula' => $request->cedula ?? '',
+            ]);
+            if ($request->hasFile('foto')) {
+                $cliente->foto_perfil = CloudinaryService::upload($request->file('foto'), 'usuarios');
+                $cliente->save();
+            }
+            $fotoUrl = $cliente->foto_perfil;
         }
+
+        return response()->json([
+            'message' => 'Perfil administrativo actualizado correctamente.',
+            'nombre' => $request->nombre,
+            'foto_perfil' => $fotoUrl,
+        ], 200);
     }
 }
 

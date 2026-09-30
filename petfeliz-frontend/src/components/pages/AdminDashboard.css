@@ -1,11 +1,19 @@
 /* src/components/pages/AdminDashboard.css */
 
 .admin-dash-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 1.25rem;
-  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  width: 100% !important;
+}
+
+.admin-dash-grid-4 {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  width: 100% !important;
 }
 
 .admin-stat-card {
@@ -88,10 +96,19 @@
 
 @media (max-width: 1024px) {
   .admin-dash-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+  }
+  .admin-dash-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
   .admin-content-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dash-grid-4 {
+    grid-template-columns: 1fr !important;
   }
 }
 

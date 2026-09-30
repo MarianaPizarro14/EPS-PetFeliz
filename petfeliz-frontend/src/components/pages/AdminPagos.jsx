@@ -194,7 +194,7 @@ export default function AdminPagos() {
         )}
 
         {/* ── 4 TARJETAS MÉTRICAS ── */}
-        <div className="admin-dash-grid">
+        <div className="admin-dash-grid-4">
           <div className="admin-stat-card" style={{ gap: '1.25rem' }}>
             <div className="admin-stat-card__info" style={{ paddingRight: '0.5rem' }}>
               <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem', marginBottom: '0.35rem', display: 'block' }}>

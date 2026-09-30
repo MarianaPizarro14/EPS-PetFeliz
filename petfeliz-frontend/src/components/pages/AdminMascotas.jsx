@@ -484,7 +484,7 @@ export default function AdminMascotas() {
         )}
 
         {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES (GRID DE 4 COLUMNAS) ── */}
-        <div className="admin-dash-grid">
+        <div className="admin-dash-grid-4">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
               <span className="admin-stat-card__title" style={{ color: '#059669', fontWeight: 700, fontSize: '0.86rem' }}>Total Mascotas</span>

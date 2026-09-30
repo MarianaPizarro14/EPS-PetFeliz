@@ -486,7 +486,7 @@ export default function AdminVeterinarios() {
         )}
 
         {/* ── 4 TARJETAS DE ESTADÍSTICAS REALES ── */}
-        <div className="admin-dash-grid">
+        <div className="admin-dash-grid-4">
           <div className="admin-stat-card">
             <div className="admin-stat-card__info">
               <span>Total Registrados</span>

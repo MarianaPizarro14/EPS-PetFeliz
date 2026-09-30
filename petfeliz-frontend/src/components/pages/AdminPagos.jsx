@@ -140,31 +140,45 @@ export default function AdminPagos() {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap');
           body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; margin: 0; padding: 40px; }
-          .invoice-box { max-width: 800px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo-title { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; color: #059669; margin: 0; }
-          .logo-sub { font-size: 13px; color: #64748b; margin-top: 4px; }
-          .badge { background: #dcfce7; color: #15803d; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
-          .info-card { background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px 20px; border-radius: 12px; }
-          .info-card h4 { font-family: 'Sora', sans-serif; margin: 0 0 8px 0; color: #334155; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
-          .info-card p { margin: 3px 0; font-size: 14px; color: #475569; }
-          .info-card p strong { color: #0f172a; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 30px; }
-          th { background: #059669; color: #ffffff; text-align: left; padding: 12px 16px; font-size: 13px; font-weight: 600; border-radius: 6px 6px 0 0; }
-          td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; }
-          .total-box { display: flex; justify-content: flex-end; align-items: center; gap: 20px; padding: 16px; background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; }
-          .total-box span { font-size: 14px; color: #047857; font-weight: 600; }
-          .total-box strong { font-size: 22px; color: #047857; font-weight: 700; }
-          .footer { margin-top: 40px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #94a3b8; }
-          @media print { body { padding: 0; } .invoice-box { border: none; box-shadow: none; } }
+          .invoice-box { max-width: 820px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+          .top-stripe { display: flex; height: 5px; width: 100%; position: absolute; top: 0; left: 0; }
+          .stripe-green { flex: 2; background: #059669; }
+          .stripe-blue { flex: 1; background: #0284c7; }
+          .stripe-yellow { flex: 1; background: #f59e0b; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 30px; margin-top: 10px; }
+          .logo-title { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; color: #059669; margin: 0; letter-spacing: -0.02em; }
+          .logo-sub { font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500; }
+          .badge { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+          .info-card-client { background: #fffbe6; border: 1px solid #fde68a; border-left: 4px solid #d97706; padding: 18px 22px; border-radius: 12px; }
+          .info-card-client h4 { font-family: 'Sora', sans-serif; margin: 0 0 10px 0; color: #b45309; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+          .info-card-tx { background: #f0f9ff; border: 1px solid #bae6fd; border-left: 4px solid #0284c7; padding: 18px 22px; border-radius: 12px; }
+          .info-card-tx h4 { font-family: 'Sora', sans-serif; margin: 0 0 10px 0; color: #0369a1; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+          .info-card p { margin: 5px 0; font-size: 14px; color: #334155; }
+          .info-card p strong { color: #0f172a; font-weight: 600; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; }
+          th { background: #059669; color: #ffffff; text-align: left; padding: 14px 18px; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+          th:first-child { border-top-left-radius: 8px; }
+          th:last-child { border-top-right-radius: 8px; }
+          td { padding: 16px 18px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; }
+          .total-box { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; background: #ecfdf5; border-radius: 12px; border: 1.5px solid #a7f3d0; margin-bottom: 30px; }
+          .total-box span { font-size: 15px; color: #047857; font-weight: 700; }
+          .total-box strong { font-size: 24px; color: #059669; font-weight: 700; font-family: 'Sora', sans-serif; }
+          .footer { margin-top: 40px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 24px; font-size: 12px; color: #64748b; line-height: 1.6; }
+          @media print { body { padding: 0; background: #ffffff; } .invoice-box { border: none; box-shadow: none; padding: 20px; } }
         </style>
       </head>
       <body>
         <div class="invoice-box">
+          <div class="top-stripe">
+            <div class="stripe-green"></div>
+            <div class="stripe-blue"></div>
+            <div class="stripe-yellow"></div>
+          </div>
+
           <div class="header">
             <div>
-              <h1 class="logo-title">🐾 EPS PetFeliz</h1>
+              <h1 class="logo-title">EPS PetFeliz</h1>
               <div class="logo-sub">Factura Electrónica de Venta y Comprobante Oficial</div>
             </div>
             <div>
@@ -173,17 +187,17 @@ export default function AdminPagos() {
           </div>
 
           <div class="info-grid">
-            <div class="info-card">
+            <div class="info-card-client info-card">
               <h4>DATOS DEL CLIENTE / AFILIADO</h4>
               <p><strong>Nombre:</strong> ${clienteNombre}</p>
-              <p><strong>Cédula:</strong> ${clienteCedula}</p>
+              <p><strong>Cédula / Documento:</strong> ${clienteCedula}</p>
               <p><strong>Método de Pago:</strong> ${metodo}</p>
             </div>
-            <div class="info-card">
+            <div class="info-card-tx info-card">
               <h4>DETALLES DE LA TRANSACCIÓN</h4>
               <p><strong>N° Factura:</strong> ${idFactura}</p>
               <p><strong>Fecha / Hora:</strong> ${fecha}</p>
-              <p><strong>Estado:</strong> <span style="color:#059669; font-weight:700;">PROCESADO Y VERIFICADO</span></p>
+              <p><strong>Estado:</strong> <span style="color:#0284c7; font-weight:700;">PROCESADO Y VERIFICADO</span></p>
             </div>
           </div>
 
@@ -197,9 +211,12 @@ export default function AdminPagos() {
             </thead>
             <tbody>
               <tr>
-                <td><strong>${servicio}</strong><br><span style="font-size:12px; color:#64748b;">Atención médica veterinaria institucional en EPS PetFeliz</span></td>
-                <td style="text-align:center;">1</td>
-                <td style="text-align:right; font-weight:700; color:#059669;">${monto}</td>
+                <td>
+                  <strong style="color: #0f172a; font-size: 15px;">${servicio}</strong><br>
+                  <span style="font-size:12.5px; color:#64748b;">Atención médica veterinaria e intervenciones clínicas institucionales en EPS PetFeliz</span>
+                </td>
+                <td style="text-align:center; font-weight: 600;">1</td>
+                <td style="text-align:right; font-weight:700; color:#059669; font-size: 16px;">${monto}</td>
               </tr>
             </tbody>
           </table>
@@ -210,8 +227,8 @@ export default function AdminPagos() {
           </div>
 
           <div class="footer">
-            <p>EPS PetFeliz S.A.S. • NIT 901.458.963-4 • Sistema de Salud Veterinaria</p>
-            <p>Este documento representa el comprobante oficial de pago generado electrónicamente.</p>
+            <p><strong>EPS PetFeliz S.A.S.</strong> • NIT 901.458.963-4 • Sistema Integral de Salud Veterinaria</p>
+            <p>Este documento representa el comprobante fiscal y oficial de pago generado electrónicamente por la plataforma.</p>
           </div>
         </div>
         <script>

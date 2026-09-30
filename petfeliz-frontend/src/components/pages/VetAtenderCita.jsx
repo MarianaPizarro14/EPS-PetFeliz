@@ -448,19 +448,24 @@ export default function VetAtenderCita() {
 
                     <div className="hce-hero-chips">
                       <span className="hce-hero-chip">
-                        <i className="fa-solid fa-paw"></i> {pacienteForm.especie}
+                        <i className="fa-solid fa-paw"></i>
+                        <span>{pacienteForm.especie}</span>
                       </span>
                       <span className="hce-hero-chip">
-                        <i className="fa-solid fa-dna"></i> {pacienteForm.raza || 'Criollo / Mestizo'}
+                        <i className="fa-solid fa-dna"></i>
+                        <span>{pacienteForm.raza || 'Criollo / Mestizo'}</span>
                       </span>
                       <span className="hce-hero-chip">
-                        <i className="fa-solid fa-venus-mars"></i> {pacienteForm.sexo}
+                        <i className={pacienteForm.sexo === 'Hembra' ? 'fa-solid fa-venus' : 'fa-solid fa-mars'}></i>
+                        <span>{pacienteForm.sexo}</span>
                       </span>
                       <span className="hce-hero-chip">
-                        <i className="fa-regular fa-clock"></i> {pacienteForm.edad_aproximada ? `${pacienteForm.edad_aproximada} años aprox.` : '16 años aprox.'}
+                        <i className="fa-regular fa-clock"></i>
+                        <span>{pacienteForm.edad_aproximada ? `${pacienteForm.edad_aproximada} años aprox.` : '16 años aprox.'}</span>
                       </span>
                       <span className="hce-hero-chip">
-                        <i className="fa-solid fa-weight-scale"></i> {pacienteForm.peso ? `${pacienteForm.peso} kg` : '12.00 kg'}
+                        <i className="fa-solid fa-weight-scale"></i>
+                        <span>{pacienteForm.peso ? `${pacienteForm.peso} kg` : '12.00 kg'}</span>
                       </span>
 
                       {/* Chip visible de alerta por alergias */}
@@ -529,15 +534,22 @@ export default function VetAtenderCita() {
                     </label>
                     <div className="hce-input-wrapper">
                       <i className="fa-solid fa-paw hce-input-icon"></i>
-                      <input
+                      <select
                         id="paciente-especie"
-                        type="text"
-                        className={`hce-form-input hce-form-input--has-icon ${fieldErrors['paciente.especie'] ? 'hce-form-input--error' : ''}`}
+                        className={`hce-form-select hce-form-input--has-icon ${fieldErrors['paciente.especie'] ? 'hce-form-select--error' : ''}`}
                         value={pacienteForm.especie}
                         onChange={(e) => handlePacienteChange('especie', e.target.value)}
                         disabled={submitting || isAtendida}
-                        placeholder="Canino, Felino..."
-                      />
+                      >
+                        <option value="Canino">Canino (Perro)</option>
+                        <option value="Felino">Felino (Gato)</option>
+                        <option value="Ave">Ave</option>
+                        <option value="Roedor">Roedor</option>
+                        <option value="Otro">Otro / Exótico</option>
+                        {!['Canino', 'Felino', 'Ave', 'Roedor', 'Otro'].includes(pacienteForm.especie) && pacienteForm.especie && (
+                          <option value={pacienteForm.especie}>{pacienteForm.especie}</option>
+                        )}
+                      </select>
                     </div>
                     {fieldErrors['paciente.especie'] && (
                       <span className="hce-input-error-msg"><i className="fa-solid fa-circle-exclamation"></i> {fieldErrors['paciente.especie'][0]}</span>
@@ -570,7 +582,7 @@ export default function VetAtenderCita() {
                       Sexo *
                     </label>
                     <div className="hce-input-wrapper">
-                      <i className="fa-solid fa-venus-mars hce-input-icon"></i>
+                      <i className={`${pacienteForm.sexo === 'Hembra' ? 'fa-solid fa-venus' : 'fa-solid fa-mars'} hce-input-icon`}></i>
                       <select
                         id="paciente-sexo"
                         className={`hce-form-select hce-form-input--has-icon ${fieldErrors['paciente.sexo'] ? 'hce-form-select--error' : ''}`}
@@ -775,91 +787,7 @@ export default function VetAtenderCita() {
                 </div>
               </div>
 
-              {/* ── SECCIÓN 3: PAGO DE LA CONSULTA (ÁMBAR) ── */}
-              <div className="hce-section-card hce-card--amber">
-                <div className="hce-card-header-styled">
-                  <div className="hce-card-header-left">
-                    <div className="hce-section-icon-badge hce-icon-badge--amber">
-                      <i className="fa-solid fa-receipt"></i>
-                    </div>
-                    <div className="hce-card-header-text">
-                      <h3>Pago de la Consulta</h3>
-                      <p>Método seleccionado, estado del cobro y monto del servicio</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tarjetas seleccionables de método de pago */}
-                <div style={{ marginBottom: '0.65rem' }}>
-                  <label className="hce-field-label" style={{ marginBottom: '0.5rem' }}>
-                    Método de Pago:
-                  </label>
-                  <div className="hce-payment-methods-grid">
-                    {metodosPago.map((m) => {
-                      const isSelected = pagoForm.metodo_pago === m.id
-                      return (
-                        <div
-                          key={m.id}
-                          className={`hce-payment-card-option ${isSelected ? 'hce-payment-card-option--selected' : ''}`}
-                          onClick={() => !isAtendida && handlePagoChange('metodo_pago', m.id)}
-                        >
-                          {isSelected && (
-                            <i className="fa-solid fa-circle-check hce-payment-card-check"></i>
-                          )}
-                          <i className={`${m.icon} hce-payment-card-icon`}></i>
-                          <span className="hce-payment-card-label">{m.label}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Fila de Estado de Pago y Monto */}
-                <div className="hce-payment-status-row">
-                  <div>
-                    <label className="hce-field-label" style={{ marginBottom: '0.45rem' }}>
-                      Estado del Pago:
-                    </label>
-                    <div className="hce-payment-status-chips">
-                      <button
-                        type="button"
-                        className={`hce-status-chip-btn ${pagoForm.estado_pago === 'pagado' ? 'hce-status-chip-btn--pagado-active' : ''}`}
-                        onClick={() => !isAtendida && handlePagoChange('estado_pago', 'pagado')}
-                      >
-                        <i className="fa-solid fa-circle-check"></i> Pagado
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`hce-status-chip-btn ${pagoForm.estado_pago === 'pendiente' ? 'hce-status-chip-btn--pendiente-active' : ''}`}
-                        onClick={() => !isAtendida && handlePagoChange('estado_pago', 'pendiente')}
-                      >
-                        <i className="fa-solid fa-clock"></i> Pendiente
-                      </button>
-                    </div>
-                  </div>
-
-                  <div style={{ minWidth: '220px' }}>
-                    <label className="hce-field-label" htmlFor="pago-monto" style={{ marginBottom: '0.45rem' }}>
-                      Valor de la Consulta (COP):
-                    </label>
-                    <div className="hce-input-wrapper">
-                      <i className="fa-solid fa-dollar-sign hce-input-icon"></i>
-                      <input
-                        id="pago-monto"
-                        type="number"
-                        className="hce-form-input hce-form-input--has-icon"
-                        value={pagoForm.monto}
-                        onChange={(e) => handlePagoChange('monto', e.target.value)}
-                        disabled={submitting || isAtendida}
-                        placeholder="35000"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── SECCIÓN 4: OBSERVACIONES CLÍNICAS (VIOLETA) ── */}
+              {/* ── SECCIÓN 3: OBSERVACIONES CLÍNICAS (VIOLETA) ── */}
               <div className="hce-section-card hce-card--purple">
                 <div className="hce-card-header-styled">
                   <div className="hce-card-header-left">
@@ -890,7 +818,7 @@ export default function VetAtenderCita() {
                 </div>
               </div>
 
-              {/* ── SECCIÓN 5: MEDICAMENTOS RECETADOS (ESMERALDA) ── */}
+              {/* ── SECCIÓN 4: MEDICAMENTOS RECETADOS (ESMERALDA) ── */}
               <div className="hce-section-card hce-card--emerald">
                 <div className="hce-card-header-styled">
                   <div className="hce-card-header-left">

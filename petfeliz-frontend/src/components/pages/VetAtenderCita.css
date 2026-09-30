@@ -1,181 +1,297 @@
-/* Estilos clínicos para VetAtenderCita - Software Veterinario HCE */
+/* ==========================================================================
+   VetAtenderCita.css - Rediseño Moderno, Colorido y Humano (Salud Animal)
+   ========================================================================== */
 
-.hce-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding-bottom: 2rem;
+/* Fondo general suave de la página */
+.hce-modern-bg {
+  background: linear-gradient(145deg, #f0fdf4 0%, #f8fafc 45%, #f0f9ff 100%);
+  min-height: 100vh;
+  padding-bottom: 6rem; /* Espacio para que la barra fija no tape nada */
 }
 
-/* Breadcrumb sobrio */
-.hce-breadcrumb {
+.hce-page-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── BREADCRUMB ── */
+.hce-modern-breadcrumb {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  color: #64748b;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s ease;
-}
-
-.hce-breadcrumb:hover {
-  color: #0f172a;
-}
-
-/* Encabezado de página */
-.hce-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.25rem;
-}
-
-.hce-page-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 21px;
+  font-size: 14px;
   font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 0.25rem 0;
-  letter-spacing: -0.2px;
+  color: #0f766e;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid #ccfbf1;
+  width: fit-content;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
 }
 
-.hce-page-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  color: #64748b;
-  margin: 0;
-}
-
-/* Franja resumen superior del paciente */
-.hce-summary-strip {
+.hce-modern-breadcrumb:hover {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  color: #0d9488;
+  transform: translateX(-2px);
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.12);
 }
 
-.hce-summary-main {
+/* ── HERO BANNER DEL PACIENTE ── */
+.hce-hero-card {
+  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.28), 0 8px 10px -6px rgba(5, 150, 105, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.hce-summary-patient {
+.hce-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hce-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 1.35rem;
+  z-index: 1;
+}
+
+.hce-hero-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hce-hero-avatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3.5px solid #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+}
+
+.hce-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.hce-hero-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hce-hero-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.hce-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.hce-hero-chip {
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hce-hero-chip--allergy {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1.5px solid #fca5a5 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.hce-hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+.hce-hero-meta-box {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: right;
+}
+
+.hce-hero-meta-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0fdf4;
+}
+
+.hce-hero-meta-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #e6fffa;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+/* ── TARJETAS DE SECCIÓN CON COLORES DISTINTOS ── */
+.hce-section-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  border: 1px solid #e2e8f0;
+  border-left-width: 5px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.hce-section-card:hover {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 3px 8px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* Colores por sección */
+.hce-card--teal {
+  border-left-color: #0d9488;
+}
+.hce-card--blue {
+  border-left-color: #2563eb;
+}
+.hce-card--amber {
+  border-left-color: #d97706;
+}
+.hce-card--purple {
+  border-left-color: #7c3aed;
+}
+.hce-card--emerald {
+  border-left-color: #059669;
+}
+
+/* Encabezado de la tarjeta */
+.hce-card-header-styled {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.35rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.hce-card-header-left {
   display: flex;
   align-items: center;
   gap: 0.85rem;
 }
 
-.hce-patient-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
-  object-fit: cover;
-  border: 1px solid #e2e8f0;
+.hce-section-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
   flex-shrink: 0;
 }
 
-.hce-patient-name {
+.hce-icon-badge--teal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+.hce-icon-badge--blue {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.hce-icon-badge--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+.hce-icon-badge--purple {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.hce-icon-badge--emerald {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.hce-card-header-text h3 {
   font-family: 'Sora', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: #0f172a;
   margin: 0 0 0.15rem 0;
 }
 
-.hce-patient-meta {
+.hce-card-header-text p {
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.hce-meta-separator {
-  color: #cbd5e1;
-}
-
-/* Alerta de alergias */
-.hce-alert-allergies {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: #b91c1c;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-/* Nota de cita de reserva */
-.hce-note-badge {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: #475569;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* Tarjetas clínicas generales */
-.hce-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 16px 20px;
-}
-
-.hce-card-header {
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 8px;
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.hce-section-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
-}
-
-.hce-section-desc {
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #64748b;
   margin: 0;
 }
 
-/* Grillas de formularios */
+/* ── FORMULARIOS E INPUTS ── */
 .hce-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px 16px;
+  gap: 1rem 1.25rem;
 }
 
 .hce-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px 16px;
+  gap: 1rem 1.25rem;
 }
 
 .hce-col-span-full {
@@ -186,228 +302,481 @@
   grid-column: span 2;
 }
 
-/* Campos de entrada */
-.hce-field {
+.hce-field-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.35rem;
 }
 
-.hce-label {
+.hce-field-label {
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.hce-input,
-.hce-select,
-.hce-textarea {
+.hce-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hce-input-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  font-size: 14px;
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.hce-form-input,
+.hce-form-select,
+.hce-form-textarea {
+  width: 100%;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   color: #0f172a;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 7px 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
   box-sizing: border-box;
-  width: 100%;
-  transition: border-color 0.15s ease;
+  transition: all 0.18s ease;
   outline: none;
 }
 
-.hce-input:focus,
-.hce-select:focus,
-.hce-textarea:focus {
-  border-color: #059669;
+.hce-form-input--has-icon {
+  padding-left: 2.3rem;
 }
 
-.hce-input--error,
-.hce-select--error,
-.hce-textarea--error {
+.hce-form-input {
+  height: 44px;
+}
+
+.hce-form-select {
+  height: 44px;
+  cursor: pointer;
+}
+
+/* Halos de enfoque por color de sección */
+.hce-card--teal .hce-form-input:focus,
+.hce-card--teal .hce-form-select:focus,
+.hce-card--teal .hce-form-textarea:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+.hce-card--teal .hce-input-wrapper:focus-within .hce-input-icon {
+  color: #0d9488;
+}
+
+.hce-card--blue .hce-form-input:focus,
+.hce-card--blue .hce-form-select:focus,
+.hce-card--blue .hce-form-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.hce-card--blue .hce-input-wrapper:focus-within .hce-input-icon {
+  color: #2563eb;
+}
+
+.hce-card--amber .hce-form-input:focus,
+.hce-card--amber .hce-form-select:focus,
+.hce-card--amber .hce-form-textarea:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+.hce-card--amber .hce-input-wrapper:focus-within .hce-input-icon {
+  color: #d97706;
+}
+
+.hce-card--purple .hce-form-input:focus,
+.hce-card--purple .hce-form-select:focus,
+.hce-card--purple .hce-form-textarea:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+.hce-card--purple .hce-input-wrapper:focus-within .hce-input-icon {
+  color: #7c3aed;
+}
+
+.hce-card--emerald .hce-form-input:focus,
+.hce-card--emerald .hce-form-select:focus,
+.hce-card--emerald .hce-form-textarea:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+.hce-card--emerald .hce-input-wrapper:focus-within .hce-input-icon {
+  color: #059669;
+}
+
+.hce-form-input--error,
+.hce-form-select--error,
+.hce-form-textarea--error {
   border-color: #ef4444 !important;
   background-color: #fffafb;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
 }
 
-.hce-field-error {
+.hce-input-error-msg {
   font-family: 'Inter', sans-serif;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #dc2626;
-  margin-top: 2px;
   font-weight: 500;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.hce-input:disabled,
-.hce-select:disabled,
-.hce-textarea:disabled {
-  background: #f8fafc;
+/* ── OPCIONES DE MÉTODO DE PAGO TIPO TARJETAS ── */
+.hce-payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.hce-payment-card-option {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.9rem 0.75rem;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.hce-payment-card-option:hover {
+  border-color: #f59e0b;
+  background: #fffdf5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.08);
+}
+
+.hce-payment-card-option--selected {
+  border-color: #d97706 !important;
+  background: #fffbeb !important;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15) !important;
+}
+
+.hce-payment-card-icon {
+  font-size: 1.5rem;
   color: #64748b;
-  cursor: not-allowed;
+  transition: color 0.18s ease;
 }
 
-/* Tabla de Medicamentos */
-.hce-table-wrapper {
+.hce-payment-card-option--selected .hce-payment-card-icon {
+  color: #d97706;
+}
+
+.hce-payment-card-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.25;
+}
+
+.hce-payment-card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #d97706;
+  font-size: 0.85rem;
+}
+
+/* CHIPS DE ESTADO DE PAGO */
+.hce-payment-status-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.hce-payment-status-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.hce-status-chip-btn {
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+}
+
+.hce-status-chip-btn:hover {
+  background: #f1f5f9;
+}
+
+.hce-status-chip-btn--pagado-active {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.15);
+}
+
+.hce-status-chip-btn--pendiente-active {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
+}
+
+/* ── TABLA DE MEDICAMENTOS RECETADOS ── */
+.hce-meds-table-container {
   overflow-x: auto;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  margin-bottom: 12px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  background: #ffffff;
 }
 
-.hce-med-table {
+.hce-modern-table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  text-align: left;
+  font-size: 13.5px;
 }
 
-.hce-med-table th {
-  background: #f8fafc;
-  color: #475569;
+.hce-modern-table th {
+  background: #ecfdf5;
+  color: #065f46;
   font-weight: 600;
-  font-size: 12px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #e2e8f0;
+  font-size: 12.5px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1.5px solid #a7f3d0;
 }
 
-.hce-med-table td {
+.hce-modern-table td {
   padding: 8px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
 }
 
-.hce-med-table tr:last-child td {
-  border-bottom: none;
+.hce-modern-table tr:hover {
+  background: #fafafa;
 }
 
-.hce-table-input {
+.hce-table-inline-input {
+  width: 100%;
+  height: 38px;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   color: #0f172a;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 5px 8px;
-  width: 100%;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
   box-sizing: border-box;
-}
-
-.hce-table-input:focus {
-  border-color: #059669;
+  transition: all 0.15s ease;
   outline: none;
 }
 
-.hce-btn-delete-row {
-  background: transparent;
+.hce-table-inline-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.hce-btn-delete-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   border: none;
+  background: #f8fafc;
   color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: all 0.18s ease;
+  margin: 0 auto;
 }
 
-.hce-btn-delete-row:hover {
+.hce-btn-delete-circle:hover {
+  background: #fee2e2;
   color: #ef4444;
-  background: #fef2f2;
+  transform: scale(1.08);
 }
 
-.hce-btn-delete-row:disabled {
-  opacity: 0.3;
+.hce-btn-delete-circle:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* Botón outline para agregar medicamento */
-.hce-btn-outline {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 6px 12px;
+.hce-btn-add-med {
+  background: #ecfdf5;
+  border: 1.5px dashed #a7f3d0;
+  border-radius: 10px;
+  color: #059669;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #334155;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  transition: all 0.15s ease;
+  gap: 0.5rem;
+  transition: all 0.18s ease;
 }
 
-.hce-btn-outline:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
+.hce-btn-add-med:hover {
+  background: #d1fae5;
+  border-color: #34d399;
+  transform: translateY(-1px);
 }
 
-/* Barra de acciones fija inferior */
-.hce-actions-bar {
-  position: sticky;
+/* Animación de filas */
+@keyframes hceFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hce-table-animated-row {
+  animation: hceFadeInUp 0.22s ease-out;
+}
+
+/* ── BARRA DE ACCIONES FIJA INFERIOR ── */
+.hce-sticky-action-bar {
+  position: fixed;
   bottom: 0;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 12px 20px;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.06);
+  padding: 0.85rem 2rem;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
-  z-index: 100;
 }
 
-.hce-btn-secondary {
+.hce-bar-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hce-btn-cancel-outline {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 8px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.65rem 1.4rem;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #475569;
-  text-decoration: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 }
 
-.hce-btn-secondary:hover {
-  background: #f8fafc;
+.hce-btn-cancel-outline:hover {
+  background: #f1f5f9;
   color: #0f172a;
+  border-color: #94a3b8;
 }
 
-.hce-btn-primary {
-  background: #059669;
-  border: 1px solid #059669;
-  border-radius: 6px;
-  padding: 8px 20px;
+.hce-btn-submit-primary {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.85rem;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: background 0.15s ease;
+  gap: 0.55rem;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+  transition: all 0.2s ease;
 }
 
-.hce-btn-primary:hover {
-  background: #047857;
-  border-color: #047857;
+.hce-btn-submit-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35);
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
 }
 
-.hce-btn-primary:disabled {
+.hce-btn-submit-primary:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
   .hce-grid-3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
+  .hce-payment-methods-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .hce-grid-3,
   .hce-grid-2 {
     grid-template-columns: 1fr;
   }
+  .hce-col-span-full,
   .hce-col-span-2 {
     grid-column: span 1;
+  }
+  .hce-payment-methods-grid {
+    grid-template-columns: 1fr;
+  }
+  .hce-hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hce-hero-right {
+    align-items: flex-start;
+    width: 100%;
+  }
+  .hce-hero-meta-box {
+    text-align: left;
+    width: 100%;
+  }
+  .hce-hero-meta-sub {
+    justify-content: flex-start;
   }
 }

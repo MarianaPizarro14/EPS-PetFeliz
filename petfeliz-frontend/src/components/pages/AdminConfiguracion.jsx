@@ -252,6 +252,15 @@ export default function AdminConfiguracion() {
       return
     }
 
+    if (profileForm.cedula && profileForm.cedula.trim()) {
+      const cleanedCedula = profileForm.cedula.trim()
+      if (!/^[0-9]{7,10}$/.test(cleanedCedula)) {
+        setProfileError('La cédula de ciudadanía debe contener entre 7 y 10 dígitos numéricos.')
+        setSubmittingProfile(false)
+        return
+      }
+    }
+
     const token = getStoredToken()
     const formData = new FormData()
     formData.append('nombre', profileForm.nombre.trim())
@@ -677,7 +686,7 @@ export default function AdminConfiguracion() {
                   {/* Cédula de Ciudadanía */}
                   <div className="dh-form-field">
                     <label htmlFor="cedulaAdmin">
-                      Cédula de Ciudadanía * {usuario?.cedula || profileForm?.cedula ? '(Registrada - No modificable)' : ''}
+                      Cédula de Ciudadanía *
                     </label>
                     <input
                       id="cedulaAdmin"
@@ -685,11 +694,12 @@ export default function AdminConfiguracion() {
                       required
                       placeholder="ej. 1098765432"
                       value={profileForm.cedula}
-                      disabled={Boolean(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5))}
-                      readOnly={Boolean(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5))}
-                      style={(usuario?.cedula || (profileForm.cedula && profileForm.cedula.length >= 5)) ? { background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' } : {}}
-                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
+                    <small style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+                      Debe contener entre 7 y 10 dígitos numéricos.
+                    </small>
                   </div>
 
                   {/* Teléfono de Contacto */}

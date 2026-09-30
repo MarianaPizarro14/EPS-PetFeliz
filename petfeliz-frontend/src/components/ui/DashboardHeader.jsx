@@ -554,8 +554,8 @@ export default function DashboardHeader({
     setModalSuccess('')
 
     // Validación de Cédula
-    if (profileForm.cedula && !/^[0-9]{5,12}$/.test(profileForm.cedula.trim())) {
-      setModalError('La cédula de ciudadanía debe contener únicamente números (entre 5 y 12 dígitos).')
+    if (profileForm.cedula && !/^[0-9]{7,10}$/.test(profileForm.cedula.trim())) {
+      setModalError('La cédula de ciudadanía debe contener únicamente números (entre 7 y 10 dígitos).')
       setSaving(false)
       return
     }
@@ -1031,10 +1031,11 @@ export default function DashboardHeader({
                       disabled={Boolean(usuario?.cedula)}
                       readOnly={Boolean(usuario?.cedula)}
                       style={usuario?.cedula ? { background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' } : {}}
-                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
                     <span className="dh-field-hint">
-                      {usuario?.cedula ? 'Cédula registrada en el sistema' : 'Solo números, entre 5 y 12 dígitos'}
+                      {usuario?.cedula ? 'Cédula registrada en el sistema' : 'Solo números, entre 7 y 10 dígitos'}
                     </span>
                   </div>
 

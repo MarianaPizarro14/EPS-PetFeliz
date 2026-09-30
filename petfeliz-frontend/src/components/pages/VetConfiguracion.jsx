@@ -288,6 +288,12 @@ export default function VetConfiguracion() {
       return
     }
 
+    if (!/^[0-9]{7,10}$/.test(profileForm.cedula.trim())) {
+      setProfileError('La cédula de ciudadanía debe contener entre 7 y 10 dígitos numéricos.')
+      setSubmittingProfile(false)
+      return
+    }
+
     const fullNombre = `${profileForm.prefijo} ${profileForm.nombreSolo.trim()}`
     const token = getStoredToken()
     const formData = new FormData()
@@ -726,8 +732,12 @@ export default function VetConfiguracion() {
                       required
                       placeholder="ej. 1012345678"
                       value={profileForm.cedula}
-                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => setProfileForm({ ...profileForm, cedula: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     />
+                    <small style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+                      Debe contener entre 7 y 10 dígitos numéricos.
+                    </small>
                   </div>
 
                   {/* Especialidad Médica Dropdown */}

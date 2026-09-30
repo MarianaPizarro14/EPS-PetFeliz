@@ -779,7 +779,8 @@ export default function VetAtenderCita() {
                         type="text"
                         className={`hce-form-input hce-form-input--has-icon ${fieldErrors['dueno.cedula'] ? 'hce-form-input--error' : ''}`}
                         value={duenoForm.cedula}
-                        onChange={(e) => handleDuenoChange('cedula', e.target.value)}
+                        maxLength={10}
+                        onChange={(e) => handleDuenoChange('cedula', e.target.value.replace(/\D/g, '').slice(0, 10))}
                         disabled={submitting || isAtendida}
                         placeholder="Número de documento"
                       />

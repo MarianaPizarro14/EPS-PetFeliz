@@ -34,13 +34,67 @@ export default function DashboardVeterinario() {
   const [loading, setLoading] = useState(true)
   const [errorGlobal, setErrorGlobal] = useState('')
 
-  // Modal para atender cita desde el panel
-  const [selectedCita, setSelectedCita] = useState(null)
-  const [observacion, setObservacion] = useState('')
-  const [submittingAtender, setSubmittingAtender] = useState(false)
-  const [modalSuccess, setModalSuccess] = useState('')
-  const [modalError, setModalError] = useState('')
-  const [viewOnlyObs, setViewOnlyObs] = useState(false)
+  // Modal Expediente Clínico de la Mascota
+  const [selectedPaciente, setSelectedPaciente] = useState(null)
+
+  const handleOpenExpediente = (cita) => {
+    const targetId = cita.mascota?.id_mascota || cita.id_mascota || cita.paciente?.id_mascota
+    const pMatch = pacientes.find((p) => p.id_mascota === targetId)
+
+    if (pMatch) {
+      setSelectedPaciente(pMatch)
+    } else {
+      const fallbackPaciente = {
+        id_mascota: targetId || 1,
+        nombre: cita.mascota?.nombre || cita.paciente?.nombre || 'Paciente',
+        especie: cita.mascota?.especie || cita.paciente?.especie || 'Canino',
+        raza: cita.mascota?.raza || cita.paciente?.raza || 'Criollo',
+        sexo: cita.mascota?.sexo || cita.paciente?.sexo || 'Macho',
+        alergias: cita.mascota?.alergias || cita.paciente?.alergias || 'Ninguna registrada',
+        foto: cita.mascota?.foto_mascota || cita.paciente?.foto || cita.paciente?.foto_mascota,
+        dueno: cita.cliente || cita.dueno,
+        total_atenciones: 1,
+        ultima_cita: cita.fecha_formateada || cita.fecha,
+        citas: [{
+          id_cita: cita.id_cita,
+          fecha: cita.fecha,
+          fecha_formateada: cita.fecha_formateada || cita.fecha,
+          hora: cita.hora,
+          servicio: cita.servicio?.nombre_servicio || cita.servicio?.nombre || cita.motivo || 'Consulta Médica General',
+          id_estado: cita.id_estado,
+          estado_nombre: 'Atendida',
+          observacion: cita.observacion,
+          medicamentos: cita.medicamentos,
+          veterinario: usuario.nombreCompleto || 'Médico Veterinario'
+        }]
+      }
+      setSelectedPaciente(fallbackPaciente)
+    }
+  }
+
+  const handleDownloadReceta = async (idCita) => {
+    const token = getStoredToken()
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cliente/documentos/receta-medica/${idCita}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) {
+        alert('No se pudo descargar la receta médica para esta cita.')
+        return
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Receta_Medica_PetFeliz_${idCita}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    } catch (err) {
+      console.error('Error al descargar la receta:', err)
+      alert('Error al descargar el archivo de la receta médica.')
+    }
+  }
 
   // Toast flotante
   const [toast, setToast] = useState(null)
@@ -380,7 +434,7 @@ export default function DashboardVeterinario() {
                         </button>
                       )}
                       {isAtendida && (
-                        <button type="button" className="vet-btn-obs" onClick={() => navigate(`/veterinario/atender/${cita.id_cita}`)}>
+                        <button type="button" className="vet-btn-obs" onClick={() => handleOpenExpediente(cita)}>
                           <i className="fa-solid fa-file-prescription"></i>
                           <span>Ver Expediente y Receta</span>
                         </button>
@@ -477,6 +531,216 @@ export default function DashboardVeterinario() {
             </div>
           )}
         </div>
+
+        {/* ── MODAL: EXPEDIENTE CLÍNICO DE LA MASCOTA ── */}
+        {selectedPaciente && (
+          <div className="vet-modal-backdrop" style={{ zIndex: 1100 }}>
+            <div className="vet-modal-box vet-modal-box--wide" style={{ maxWidth: '820px' }}>
+              <div className="vet-modal-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <img
+                    src={
+                      selectedPaciente.foto || selectedPaciente.foto_mascota ||
+                      (selectedPaciente.especie === 'Gato'
+                        ? 'https://res.cloudinary.com/dedroug6v/image/upload/v1782696391/foto_gato_1_nuieol.jpg'
+                        : 'https://res.cloudinary.com/dedroug6v/image/upload/v1783709702/golden_retriever_sonriendo_e1mrkw.jpg')
+                    }
+                    alt={selectedPaciente.nombre}
+                    style={{
+                      width: '60px',
+                      height: '60px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      aspectRatio: '1 / 1',
+                      flexShrink: 0,
+                      border: '3px solid #059669',
+                      boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)'
+                    }}
+                  />
+                  <div>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: '#0f172a', margin: 0 }}>
+                      Expediente Clínico de {selectedPaciente.nombre}
+                    </h3>
+                    <p className="vet-modal-subtitle" style={{ margin: '0.2rem 0 0 0', fontSize: '0.86rem', color: '#475569' }}>
+                      <strong>{selectedPaciente.especie}</strong> {selectedPaciente.raza ? `• ${selectedPaciente.raza}` : ''} | <strong>Tutor:</strong> {selectedPaciente.dueno?.nombre || 'Cliente EPS'}
+                    </p>
+                  </div>
+                </div>
+                <button type="button" className="vet-modal-close" onClick={() => setSelectedPaciente(null)}>
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              {/* Resumen del Paciente */}
+              <div style={{
+                background: '#f8fafc',
+                borderRadius: '14px',
+                padding: '1.1rem',
+                marginBottom: '1.5rem',
+                border: '1px solid #e2e8f0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '1rem'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Sexo</span>
+                  <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>{selectedPaciente.sexo || 'No especificado'}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Teléfono Tutor</span>
+                  <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>{selectedPaciente.dueno?.telefono || 'N/R'}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Alergias</span>
+                  <strong style={{
+                    fontSize: '0.88rem',
+                    color: selectedPaciente.alergias && selectedPaciente.alergias !== 'Ninguna registrada' ? '#dc2626' : '#059669'
+                  }}>
+                    {selectedPaciente.alergias || 'Ninguna registrada'}
+                  </strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Total Atenciones</span>
+                  <strong style={{ fontSize: '0.9rem', color: '#047857' }}>
+                    {selectedPaciente.citas ? selectedPaciente.citas.length : selectedPaciente.total_atenciones || 0} Consultas
+                  </strong>
+                </div>
+              </div>
+
+              {/* Timeline de Atenciones Previas */}
+              <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <i className="fa-solid fa-clock-rotate-left" style={{ color: '#059669' }}></i> Historial Clínico & Evolución de Consultas
+              </h4>
+
+              <div style={{ maxHeight: '420px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '0.35rem' }}>
+                {selectedPaciente.citas && selectedPaciente.citas.length > 0 ? (
+                  selectedPaciente.citas.map((citaItem, idx) => (
+                    <div key={idx} style={{
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '14px',
+                      padding: '1.1rem 1.25rem',
+                      boxShadow: '0 4px 12px rgba(15, 23, 42, 0.03)'
+                    }}>
+                      {/* Cabecera de la Consulta */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{
+                            background: '#ecfdf5',
+                            color: '#047857',
+                            border: '1px solid #a7f3d0',
+                            borderRadius: '8px',
+                            padding: '0.25rem 0.65rem',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem'
+                          }}>
+                            <i className="fa-regular fa-calendar"></i>
+                            {citaItem.fecha_formateada || (citaItem.fecha ? new Date(citaItem.fecha).toLocaleDateString('es-CO') : 'Fecha N/A')}
+                            <i className="fa-regular fa-clock" style={{ marginLeft: '4px' }}></i>
+                            {citaItem.hora || ''}
+                          </span>
+                          <strong style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.95rem', color: '#0f172a' }}>
+                            {citaItem.servicio || 'Consulta Médica General'}
+                          </strong>
+                        </div>
+                        <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '20px', padding: '0.2rem 0.65rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                          <i className="fa-solid fa-circle-check" style={{ marginRight: '4px' }}></i>
+                          {citaItem.estado_nombre || 'Atendida'}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.65rem', fontWeight: 600 }}>
+                        <i className="fa-solid fa-user-doctor" style={{ marginRight: '4px', color: '#059669' }}></i>
+                        Atendido por: {citaItem.veterinario || usuario.nombreCompleto || 'Médico Veterinario'}
+                      </div>
+
+                      {/* Diagnóstico / Observaciones */}
+                      <div style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '0.75rem 1rem',
+                        marginBottom: '0.75rem'
+                      }}>
+                        <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>
+                          Diagnóstico:
+                        </span>
+                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#1e293b', margin: 0, lineHeight: '1.5' }}>
+                          {citaItem.observacion || 'Atención general sin observaciones adicionales registradas.'}
+                        </p>
+                      </div>
+
+                      {/* Medicamentos Recetados */}
+                      {citaItem.medicamentos && citaItem.medicamentos.length > 0 ? (
+                        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '0.75rem 1rem', marginBottom: '0.75rem' }}>
+                          <span style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#1d4ed8', marginBottom: '0.4rem' }}>
+                            <i className="fa-solid fa-pills" style={{ marginRight: '5px' }}></i> Medicamentos Prescritos ({citaItem.medicamentos.length}):
+                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                            {citaItem.medicamentos.map((med, mIdx) => (
+                              <div key={mIdx} style={{ fontSize: '0.84rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.3rem' }}>
+                                <strong>
+                                  <i className="fa-solid fa-capsules" style={{ color: '#2563eb', marginRight: '6px' }}></i>
+                                  {med.nombre || med.medicamento || 'Medicamento'}
+                                </strong>
+                                <span style={{ background: '#dbeafe', padding: '2px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>
+                                  Dosis: {med.dosis || 'Según indicación'} {med.duracion ? `• ${med.duracion}` : ''}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic', marginBottom: '0.75rem' }}>
+                          <i className="fa-solid fa-info-circle" style={{ marginRight: '4px' }}></i> No se registraron medicamentos prescritos en esta consulta.
+                        </div>
+                      )}
+
+                      {/* Botón Descargar Receta PDF */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.4rem', borderTop: '1px dashed #e2e8f0' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadReceta(citaItem.id_cita)}
+                          style={{
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '8px',
+                            padding: '0.4rem 0.85rem',
+                            fontFamily: 'Inter, sans-serif',
+                            fontWeight: 600,
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <i className="fa-solid fa-file-pdf" style={{ color: '#2563eb' }}></i> Descargar Receta Médica PDF
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b' }}>
+                    <i className="fa-solid fa-file-medical" style={{ fontSize: '2rem', color: '#94a3b8', marginBottom: '0.5rem', display: 'block' }}></i>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>No existen registros previos de atención médica para este paciente.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="vet-modal-actions" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+                <button type="button" className="vet-modal-btn vet-modal-btn--secondary" onClick={() => setSelectedPaciente(null)}>
+                  Cerrar Expediente
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── MODAL ATENDER CITA / VER OBSERVACIONES ── */}
         {selectedCita && (

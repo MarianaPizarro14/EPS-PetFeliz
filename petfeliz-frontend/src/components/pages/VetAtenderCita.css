@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0;
   width: 100%;
   padding-bottom: 6.5rem; /* Espacio para que la barra fija no tape nada */
@@ -704,7 +704,7 @@
 }
 
 .hce-bar-content {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0;
   width: 100%;
   display: flex;

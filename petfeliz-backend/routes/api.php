@@ -95,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/perfil', [VeterinarioPortalController::class, 'perfilInfo']);
         Route::post('/perfil/update', [VeterinarioPortalController::class, 'updatePerfil']);
         Route::get('/citas/{id}', [VeterinarioPortalController::class, 'detalleCita']);
+        Route::put('/citas/{id}/datos', [VeterinarioPortalController::class, 'actualizarDatos']);
         Route::post('/citas/{id}/atender', [VeterinarioPortalController::class, 'atender']);
         Route::patch('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
         Route::post('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);

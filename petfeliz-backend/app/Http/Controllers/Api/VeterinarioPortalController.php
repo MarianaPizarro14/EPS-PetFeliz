@@ -8,6 +8,8 @@ use App\Models\Mascota;
 use App\Services\CloudinaryService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class VeterinarioPortalController extends Controller
 {
@@ -201,6 +203,16 @@ class VeterinarioPortalController extends Controller
             $medicamentosList = is_array($cita->medicamentos) ? $cita->medicamentos : (json_decode($cita->medicamentos, true) ?? []);
         }
 
+        $rawObservacion = $cita->observacion ?? '';
+        $notaCita = '';
+        $observacionMedica = $rawObservacion;
+
+        // Si la cita aún no ha sido finalizada o la observación contiene notas automáticas de pago/reserva:
+        if ($cita->id_estado != 4 && preg_match('/pago|wompi|verificado|confirmado|agendada|reserva/i', $rawObservacion)) {
+            $notaCita = $rawObservacion;
+            $observacionMedica = ''; // Iniciar vacío para que el veterinario redacte su diagnóstico real
+        }
+
         return response()->json([
             'cita' => [
                 'id_cita' => $cita->id_cita,
@@ -211,7 +223,8 @@ class VeterinarioPortalController extends Controller
                 'motivo' => $cita->motivo ?? ($servicio->nombre ?? 'Consulta Médica General'),
                 'id_estado' => $cita->id_estado,
                 'estado' => $cita->estado->nombre ?? 'Pendiente',
-                'observacion' => $cita->observacion ?? '',
+                'observacion' => $observacionMedica,
+                'nota_cita' => $notaCita,
                 'medicamentos' => $medicamentosList,
                 'paciente' => [
                     'id_mascota' => $mascota->id_mascota ?? null,
@@ -219,18 +232,20 @@ class VeterinarioPortalController extends Controller
                     'especie' => $mascota->especie ?? 'Canino',
                     'raza' => $mascota->raza ?? 'Criollo',
                     'sexo' => $mascota->sexo ?? 'Macho',
+                    'fecha_nacimiento' => $mascota->fecha_nacimiento ?? '',
                     'edad' => $edadCalculada,
-                    'peso' => $mascota->peso ? ($mascota->peso . ' kg') : 'N/R',
-                    'alergias' => $mascota->alergias ?? 'Ninguna registrada',
+                    'peso' => $mascota->peso !== null ? (float) $mascota->peso : null,
+                    'peso_formateado' => $mascota->peso ? ($mascota->peso . ' kg') : 'N/R',
+                    'alergias' => $mascota->alergias ?? '',
                     'vacunas' => $mascota->vacunas ?? 'Al día',
                     'foto' => $mascota->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
                 ],
                 'dueno' => [
                     'id_cliente' => $cliente->id_cliente ?? null,
                     'nombre' => $cliente->nombre ?? ($cliente->usuario->nombre ?? 'Cliente EPS'),
-                    'telefono' => $cliente->telefono ?? 'N/R',
-                    'email' => $cliente->usuario->email ?? ($cliente->email ?? 'N/R'),
-                    'cedula' => $cliente->cedula ?? 'N/R',
+                    'telefono' => $cliente->telefono ?? '',
+                    'email' => $cliente->usuario->email ?? ($cliente->email ?? ''),
+                    'cedula' => $cliente->cedula ?? '',
                 ],
                 'servicio' => [
                     'id_servicio' => $servicio->id_servicio ?? null,
@@ -242,7 +257,108 @@ class VeterinarioPortalController extends Controller
     }
 
     /**
+     * Actualizar los datos del paciente (mascota) y tutor (cliente/usuario) asociados a la cita.
+     */
+    public function actualizarDatos(Request $request, $id)
+    {
+        $user = $request->user();
+        $vet = $user->veterinario;
+
+        if (!$vet) {
+            return response()->json(['message' => 'Perfil veterinario no encontrado.'], 404);
+        }
+
+        $cita = Cita::with(['mascota', 'cliente.usuario'])
+            ->where('id_cita', $id)
+            ->where('id_veterinario', $vet->id_veterinario)
+            ->firstOrFail();
+
+        $cliente = $cita->cliente;
+        $usuarioCliente = $cliente ? $cliente->usuario : null;
+        $mascota = $cita->mascota;
+
+        if (!$cliente || !$mascota) {
+            return response()->json(['message' => 'No se encontraron los registros de mascota o tutor asociados.'], 404);
+        }
+
+        $request->validate([
+            'paciente.nombre' => 'required|string|max:100',
+            'paciente.especie' => 'required|string|max:50',
+            'paciente.raza' => 'nullable|string|max:100',
+            'paciente.sexo' => 'required|in:Macho,Hembra',
+            'paciente.fecha_nacimiento' => 'nullable|date',
+            'paciente.peso' => 'nullable|numeric|gt:0|max:250',
+            'paciente.alergias' => 'nullable|string|max:500',
+
+            'dueno.nombre' => 'required|string|max:150',
+            'dueno.telefono' => 'required|regex:/^[0-9]+$/|min:7|max:15',
+            'dueno.cedula' => [
+                'required',
+                'string',
+                'max:30',
+                Rule::unique('cliente', 'cedula')->ignore($cliente->id_cliente, 'id_cliente')
+            ],
+            'dueno.email' => [
+                'required',
+                'email',
+                'max:150',
+                $usuarioCliente ? Rule::unique('usuario', 'email')->ignore($usuarioCliente->id_usuario, 'id_usuario') : 'nullable'
+            ],
+        ], [
+            'paciente.nombre.required' => 'El nombre del paciente es obligatorio.',
+            'paciente.especie.required' => 'La especie es obligatoria.',
+            'paciente.sexo.required' => 'El sexo de la mascota es obligatorio.',
+            'paciente.sexo.in' => 'El sexo debe ser Macho o Hembra.',
+            'paciente.peso.numeric' => 'El peso debe ser un número válido.',
+            'paciente.peso.gt' => 'El peso debe ser mayor a 0 kg.',
+            'dueno.nombre.required' => 'El nombre del tutor es obligatorio.',
+            'dueno.telefono.required' => 'El teléfono de contacto es obligatorio.',
+            'dueno.telefono.regex' => 'El teléfono solo debe contener números.',
+            'dueno.cedula.required' => 'La cédula o documento es obligatorio.',
+            'dueno.cedula.unique' => 'Esta cédula ya se encuentra registrada por otro cliente.',
+            'dueno.email.required' => 'El correo electrónico es obligatorio.',
+            'dueno.email.email' => 'El formato del correo electrónico no es válido.',
+            'dueno.email.unique' => 'Este correo electrónico ya está registrado por otro usuario.',
+        ]);
+
+        DB::transaction(function () use ($request, $mascota, $cliente, $usuarioCliente) {
+            $pData = $request->input('paciente', []);
+            $mascota->nombre = trim($pData['nombre']);
+            $mascota->especie = trim($pData['especie']);
+            $mascota->raza = isset($pData['raza']) ? trim($pData['raza']) : $mascota->raza;
+            $mascota->sexo = $pData['sexo'];
+            if (array_key_exists('fecha_nacimiento', $pData)) {
+                $mascota->fecha_nacimiento = !empty($pData['fecha_nacimiento']) ? $pData['fecha_nacimiento'] : null;
+            }
+            if (array_key_exists('peso', $pData)) {
+                $mascota->peso = is_numeric($pData['peso']) ? (float) $pData['peso'] : null;
+            }
+            if (array_key_exists('alergias', $pData)) {
+                $mascota->alergias = !empty(trim($pData['alergias'])) ? trim($pData['alergias']) : 'Ninguna registrada';
+            }
+            $mascota->save();
+
+            $dData = $request->input('dueno', []);
+            $cliente->nombre = trim($dData['nombre']);
+            $cliente->telefono = trim($dData['telefono']);
+            $cliente->cedula = trim($dData['cedula']);
+            $cliente->save();
+
+            if ($usuarioCliente && !empty($dData['email'])) {
+                $usuarioCliente->email = strtolower(trim($dData['email']));
+                $usuarioCliente->save();
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Datos de la mascota y del tutor actualizados exitosamente.',
+        ], 200);
+    }
+
+    /**
      * Registrar la atención médica de una cita, observaciones clínicas y medicamentos recetados.
+     * Guarda todo en una sola transacción incluyendo datos actualizados de paciente y tutor si se proveen.
      */
     public function atender(Request $request, $id)
     {
@@ -255,34 +371,118 @@ class VeterinarioPortalController extends Controller
             ], 404);
         }
 
-        $cita = Cita::where('id_cita', $id)
+        $cita = Cita::with(['mascota', 'cliente.usuario'])
+            ->where('id_cita', $id)
             ->where('id_veterinario', $vet->id_veterinario)
             ->firstOrFail();
 
-        $request->validate([
+        $cliente = $cita->cliente;
+        $usuarioCliente = $cliente ? $cliente->usuario : null;
+        $mascota = $cita->mascota;
+
+        $validationRules = [
             'observacion' => 'nullable|string|max:2500',
             'medicamentos' => 'nullable|array',
             'medicamentos.*.nombre' => 'required_with:medicamentos|string|max:200',
             'medicamentos.*.dosis' => 'nullable|string|max:200',
             'medicamentos.*.indicaciones' => 'nullable|string|max:500',
             'id_estado' => 'nullable|integer|in:1,2,3,4',
+        ];
+
+        if ($request->has('paciente') && $mascota) {
+            $validationRules['paciente.nombre'] = 'required|string|max:100';
+            $validationRules['paciente.especie'] = 'required|string|max:50';
+            $validationRules['paciente.raza'] = 'nullable|string|max:100';
+            $validationRules['paciente.sexo'] = 'required|in:Macho,Hembra';
+            $validationRules['paciente.fecha_nacimiento'] = 'nullable|date';
+            $validationRules['paciente.peso'] = 'nullable|numeric|gt:0|max:250';
+            $validationRules['paciente.alergias'] = 'nullable|string|max:500';
+        }
+
+        if ($request->has('dueno') && $cliente) {
+            $validationRules['dueno.nombre'] = 'required|string|max:150';
+            $validationRules['dueno.telefono'] = 'required|regex:/^[0-9]+$/|min:7|max:15';
+            $validationRules['dueno.cedula'] = [
+                'required',
+                'string',
+                'max:30',
+                Rule::unique('cliente', 'cedula')->ignore($cliente->id_cliente, 'id_cliente')
+            ];
+            $validationRules['dueno.email'] = [
+                'required',
+                'email',
+                'max:150',
+                $usuarioCliente ? Rule::unique('usuario', 'email')->ignore($usuarioCliente->id_usuario, 'id_usuario') : 'nullable'
+            ];
+        }
+
+        $request->validate($validationRules, [
+            'paciente.nombre.required' => 'El nombre del paciente es obligatorio.',
+            'paciente.especie.required' => 'La especie es obligatoria.',
+            'paciente.sexo.required' => 'El sexo de la mascota es obligatorio.',
+            'paciente.sexo.in' => 'El sexo debe ser Macho o Hembra.',
+            'paciente.peso.numeric' => 'El peso debe ser un número válido.',
+            'paciente.peso.gt' => 'El peso debe ser mayor a 0 kg.',
+            'dueno.nombre.required' => 'El nombre del tutor es obligatorio.',
+            'dueno.telefono.required' => 'El teléfono de contacto es obligatorio.',
+            'dueno.telefono.regex' => 'El teléfono solo debe contener números.',
+            'dueno.cedula.required' => 'La cédula o documento es obligatorio.',
+            'dueno.cedula.unique' => 'Esta cédula ya se encuentra registrada por otro cliente.',
+            'dueno.email.required' => 'El correo electrónico es obligatorio.',
+            'dueno.email.email' => 'El formato del correo electrónico no es válido.',
+            'dueno.email.unique' => 'Este correo electrónico ya está registrado por otro usuario.',
         ]);
 
-        // Cambiar a estado 4 ("Completada" / Atendida) por defecto al registrar atención clínica
-        $cita->id_estado = $request->id_estado ?? 4;
+        DB::transaction(function () use ($request, $cita, $mascota, $cliente, $usuarioCliente) {
+            // 1. Actualizar paciente si se incluyeron datos
+            if ($request->has('paciente') && $mascota) {
+                $pData = $request->input('paciente', []);
+                $mascota->nombre = trim($pData['nombre']);
+                $mascota->especie = trim($pData['especie']);
+                if (isset($pData['raza'])) $mascota->raza = trim($pData['raza']);
+                if (isset($pData['sexo'])) $mascota->sexo = $pData['sexo'];
+                if (array_key_exists('fecha_nacimiento', $pData)) {
+                    $mascota->fecha_nacimiento = !empty($pData['fecha_nacimiento']) ? $pData['fecha_nacimiento'] : null;
+                }
+                if (array_key_exists('peso', $pData)) {
+                    $mascota->peso = is_numeric($pData['peso']) ? (float) $pData['peso'] : null;
+                }
+                if (array_key_exists('alergias', $pData)) {
+                    $mascota->alergias = !empty(trim($pData['alergias'])) ? trim($pData['alergias']) : 'Ninguna registrada';
+                }
+                $mascota->save();
+            }
 
-        if ($request->has('observacion')) {
-            $cita->observacion = trim(strip_tags($request->observacion));
-        }
+            // 2. Actualizar tutor si se incluyeron datos
+            if ($request->has('dueno') && $cliente) {
+                $dData = $request->input('dueno', []);
+                $cliente->nombre = trim($dData['nombre']);
+                $cliente->telefono = trim($dData['telefono']);
+                $cliente->cedula = trim($dData['cedula']);
+                $cliente->save();
 
-        if ($request->has('medicamentos')) {
-            $meds = array_values(array_filter($request->medicamentos, function ($m) {
-                return !empty($m['nombre']);
-            }));
-            $cita->medicamentos = $meds;
-        }
+                if ($usuarioCliente && !empty($dData['email'])) {
+                    $usuarioCliente->email = strtolower(trim($dData['email']));
+                    $usuarioCliente->save();
+                }
+            }
 
-        $cita->save();
+            // 3. Actualizar cita clínica y medicamentos
+            $cita->id_estado = $request->id_estado ?? 4;
+
+            if ($request->has('observacion')) {
+                $cita->observacion = trim(strip_tags($request->observacion));
+            }
+
+            if ($request->has('medicamentos')) {
+                $meds = array_values(array_filter($request->medicamentos, function ($m) {
+                    return !empty($m['nombre']);
+                }));
+                $cita->medicamentos = $meds;
+            }
+
+            $cita->save();
+        });
 
         $cita->load(['mascota', 'cliente.usuario', 'servicio', 'estado']);
 

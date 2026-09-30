@@ -6,7 +6,6 @@
 .hce-modern-bg {
   background: linear-gradient(145deg, #f0fdf4 0%, #f8fafc 45%, #f0f9ff 100%);
   min-height: 100vh;
-  padding-bottom: 6rem; /* Espacio para que la barra fija no tape nada */
 }
 
 .hce-page-wrap {
@@ -16,6 +15,7 @@
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  padding-bottom: 6.5rem; /* Espacio para que la barra fija no tape nada */
 }
 
 /* ── BREADCRUMB ── */
@@ -26,12 +26,12 @@
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #0f766e;
+  color: #1d4ed8;
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 0.4rem 0.85rem;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.4rem 0.9rem;
   border-radius: 20px;
-  border: 1px solid #ccfbf1;
+  border: 1px solid #bfdbfe;
   width: fit-content;
   transition: all 0.2s ease;
   backdrop-filter: blur(6px);
@@ -40,18 +40,18 @@
 
 .hce-modern-breadcrumb:hover {
   background: #ffffff;
-  color: #0d9488;
+  color: #1e40af;
   transform: translateX(-2px);
-  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.12);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
-/* ── HERO BANNER DEL PACIENTE ── */
+/* ── HERO BANNER DEL PACIENTE (AZUL PROFESIONAL) ── */
 .hce-hero-card {
-  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0284c7 100%);
   border-radius: 16px;
   padding: 1.5rem 1.75rem;
   color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.28), 0 8px 10px -6px rgba(5, 150, 105, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3), 0 8px 10px -6px rgba(2, 132, 199, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -121,23 +121,32 @@
 .hce-hero-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.55rem;
   align-items: center;
 }
 
 .hce-hero-chip {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  font-weight: 600;
-  padding: 0.25rem 0.7rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
   border-radius: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
+}
+
+.hce-hero-chip i {
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  opacity: 0.95;
 }
 
 .hce-hero-chip--allergy {
@@ -360,6 +369,14 @@
 .hce-form-select {
   height: 44px;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23334155'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 18px) center;
+  background-size: 14px 14px;
+  padding-right: 2.75rem;
 }
 
 /* Halos de enfoque por color de sección */

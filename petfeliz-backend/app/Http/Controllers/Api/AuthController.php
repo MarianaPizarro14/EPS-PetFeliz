@@ -288,17 +288,41 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $cliente = $user->cliente;
+        $vet = $user->veterinario;
+        $recep = $user->recepcionista;
 
-        $primerNombre = $cliente ? explode(' ', trim($cliente->nombre ?? 'Usuario'))[0] : 'Usuario';
+        $primerNombre = 'Usuario';
+        $nombreCompleto = '';
+        $foto = null;
+
+        if ($cliente) {
+            $primerNombre = explode(' ', trim($cliente->nombre ?? 'Usuario'))[0];
+            $nombreCompleto = $cliente->nombre;
+            $foto = $cliente->foto_perfil ?? null;
+        } elseif ($vet) {
+            $primerNombre = explode(' ', trim($vet->nombre ?? 'Dr. Veterinario'))[0];
+            $nombreCompleto = $vet->nombre;
+            $foto = $vet->foto_perfil ?? null;
+        } elseif ($recep) {
+            $primerNombre = explode(' ', trim($recep->nombre ?? 'Recepcionista'))[0];
+            $nombreCompleto = $recep->nombre;
+            $foto = $recep->foto_perfil ?? null;
+        } elseif ($user->rol === 'admin') {
+            $primerNombre = 'Administrador';
+            $nombreCompleto = 'Director Administrativo';
+            $foto = $cliente ? ($cliente->foto_perfil ?? null) : null;
+        }
 
         return response()->json([
             'id_usuario' => $user->id_usuario,
             'id_cliente' => $cliente ? $cliente->id_cliente : null,
+            'id_veterinario' => $vet ? $vet->id_veterinario : null,
+            'id_recepcionista' => $recep ? $recep->id_recepcionista : null,
             'email' => $user->email,
             'rol' => $user->rol ?? 'cliente',
             'nombre' => $primerNombre,
-            'nombreCompleto' => $cliente ? $cliente->nombre : '',
-            'telefono' => $cliente ? $cliente->telefono : '',
+            'nombreCompleto' => $nombreCompleto,
+            'telefono' => $cliente ? $cliente->telefono : ($vet ? $vet->telefono : ($recep ? $recep->telefono : '')),
             'direccion' => $cliente ? $cliente->direccion : '',
             'cedula' => $cliente ? ($cliente->cedula ?? '') : '',
             'fecha_nacimiento' => $cliente ? ($cliente->fecha_nacimiento ?? '') : '',
@@ -308,7 +332,8 @@ class AuthController extends Controller
             'contacto_emergencia_telefono' => $cliente ? ($cliente->contacto_emergencia_telefono ?? '') : '',
             'notificaciones_email' => $cliente ? (bool) ($cliente->notificaciones_email ?? true) : true,
             'recordatorios_citas' => $cliente ? (bool) ($cliente->recordatorios_citas ?? true) : true,
-            'foto' => $cliente ? ($cliente->foto_perfil ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg') : 'https://res.cloudinary.com/dedroug6v/image/upload/v1/usuarios/default.jpg',
+            'foto' => $foto,
+            'foto_perfil' => $foto,
             'password_temporal' => (bool) ($user->password_temporal ?? false),
         ]);
     }

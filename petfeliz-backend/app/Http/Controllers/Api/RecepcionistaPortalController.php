@@ -893,21 +893,11 @@ class RecepcionistaPortalController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:150',
             'telefono' => 'nullable|string|max:20',
-            'foto' => 'nullable',
-            'foto_perfil' => 'nullable',
         ]);
 
         $recep->nombre = trim($request->nombre);
         if ($request->has('telefono')) {
             $recep->telefono = trim($request->telefono ?? '');
-        }
-
-        if ($request->hasFile('foto')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
-            if ($fotoUrl) $recep->foto_perfil = $fotoUrl;
-        } elseif ($request->hasFile('foto_perfil')) {
-            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
-            if ($fotoUrl) $recep->foto_perfil = $fotoUrl;
         }
 
         $recep->save();

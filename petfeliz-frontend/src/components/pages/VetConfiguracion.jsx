@@ -649,7 +649,7 @@ export default function VetConfiguracion() {
               {profileSuccess && <div className="vet-modal-alert vet-modal-alert--success" style={{ marginBottom: '1.25rem' }}>{profileSuccess}</div>}
 
               <form onSubmit={handleSubmitProfile}>
-                {/* Foto de perfil limpia */}
+                {/* Foto de perfil de solo lectura */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.75rem', padding: '1.25rem 1.5rem', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
                   <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #059669', flexShrink: 0, position: 'relative', background: '#e2e8f0', boxShadow: '0 4px 10px rgba(0,0,0,0.06)' }}>
                     {photoPreview ? (
@@ -670,17 +670,13 @@ export default function VetConfiguracion() {
                   </div>
 
                   <div style={{ flex: 1, minWidth: '240px' }}>
-                    <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.98rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.2rem' }}>
+                    <strong style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.98rem', fontWeight: 600, color: '#0f172a', display: 'block', marginBottom: '0.4rem' }}>
                       Foto de Perfil Profesional
                     </strong>
-                    <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginBottom: '0.75rem' }}>
-                      Sube una foto clara en formato JPG, PNG o WEBP (máx. 5 MB). Al elegir una nueva foto podrás arrastrar el círculo de encuadre.
-                    </span>
-                    <label className="dh-btn-upload" style={{ display: 'inline-flex', padding: '0.55rem 1.1rem', cursor: 'pointer' }}>
-                      <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
-                      <i className="fa-solid fa-camera"></i>
-                      <span>{selectedFile ? 'Cambiar y encuadrar foto' : 'Elegir nueva imagen'}</span>
-                    </label>
+                    <div className="dash-alert dash-alert--info" style={{ background: '#f1f5f9', border: '1.5px dashed #cbd5e1', padding: '0.85rem 1.1rem', borderRadius: '12px', color: '#475569', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <i className="fa-solid fa-lock" style={{ color: '#0284c7', fontSize: '1.1rem', flexShrink: 0 }}></i>
+                      <span>La foto de perfil no se puede cambiar. Si deseas cambiarla, contacta al administrador de tu organización.</span>
+                    </div>
                   </div>
                 </div>
 

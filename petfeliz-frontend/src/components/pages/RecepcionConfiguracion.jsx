@@ -179,6 +179,24 @@ export default function RecepcionConfiguracion() {
             </h3>
 
             <form onSubmit={handleUpdateProfile}>
+              {/* Foto de perfil de solo lectura */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.25rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', overflow: 'hidden', border: '2.5px solid #2563eb', flexShrink: 0, background: '#e2e8f0' }}>
+                  {usuario.foto ? (
+                    <img src={usuario.foto} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 700 }}>
+                      {profileForm.nombre ? profileForm.nombre[0].toUpperCase() : 'R'}
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div className="dash-alert dash-alert--info" style={{ background: '#f1f5f9', border: '1px dashed #cbd5e1', padding: '0.65rem 0.85rem', borderRadius: '10px', color: '#475569', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-lock" style={{ color: '#2563eb', fontSize: '1rem', flexShrink: 0 }}></i>
+                    <span>La foto de perfil no se puede cambiar. Si deseas cambiarla, contacta al administrador de tu organización.</span>
+                  </div>
+                </div>
+              </div>
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                   Nombre Completo:

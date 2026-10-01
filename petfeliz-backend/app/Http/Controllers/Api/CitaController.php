@@ -114,6 +114,7 @@ class CitaController extends Controller
 
         $request->validate([
             'id_mascota' => 'required|integer',
+            'id_veterinario' => 'nullable|integer',
             'id_servicio' => 'nullable|integer',
             'motivo' => 'nullable|string|max:200',
             'fecha' => 'required|date',
@@ -129,20 +130,27 @@ class CitaController extends Controller
 
         $motivoFinal = $request->motivo ?: $servicioNombre;
 
-        $vetObj = \App\Models\Veterinario::find(1);
-        $idSedeFinal = $vetObj && $vetObj->id_sede ? $vetObj->id_sede : 1;
+        $vetId = $request->id_veterinario ?: 1;
+        $vetObj = \App\Models\Veterinario::find($vetId);
+
+        if (!$vetObj || !$vetObj->id_sede) {
+            return response()->json([
+                'message' => 'No fue posible determinar la sede asignada al médico veterinario para agendar esta cita.'
+            ], 422);
+        }
 
         $cita = Cita::create([
             'id_cliente' => $cliente->id_cliente,
             'id_mascota' => $request->id_mascota,
             'id_servicio' => $request->id_servicio,
-            'id_sede' => $idSedeFinal,
+            'id_sede' => $vetObj->id_sede,
             'motivo' => $motivoFinal,
             'fecha' => $request->fecha,
             'hora' => date('H:i:s', strtotime($request->hora)),
             'observacion' => $request->observacion,
-            'id_estado' => 2, // 2 = Confirmada por defecto
-            'id_veterinario' => 1,
+            'id_estado' => 1, // 1 = Pendiente
+            'estado_pago' => 'pendiente',
+            'id_veterinario' => $vetObj->id_veterinario,
         ]);
 
         return response()->json([

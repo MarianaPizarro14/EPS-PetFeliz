@@ -403,7 +403,12 @@ class AgendarCitaController extends Controller
         $metodoFinal = $monto == 0 ? 'Cobertura Plan EPS' : ($metodoMap[$rawMetodo] ?? ($metodoMap[$metodoUpper] ?? ucwords(strtolower(str_replace('_', ' ', $rawMetodo)))));
 
         $vetObj = Veterinario::find($reserva->id_veterinario);
-        $idSedeFinal = $vetObj && $vetObj->id_sede ? $vetObj->id_sede : 1;
+        if (!$vetObj || !$vetObj->id_sede) {
+            return response()->json([
+                'message' => 'No fue posible determinar la sede asignada al médico veterinario seleccionado.'
+            ], 422);
+        }
+        $idSedeFinal = $vetObj->id_sede;
 
         $cita = Cita::create([
             'id_cliente' => $cliente->id_cliente,

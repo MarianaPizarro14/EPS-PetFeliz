@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->rol === 'recepcionista';
     }
 
+    public function esRecepcionista(): bool
+    {
+        return $this->isRecepcionista();
+    }
+
     protected $hidden = [
         'contrasena_hash',
         'token_reset',

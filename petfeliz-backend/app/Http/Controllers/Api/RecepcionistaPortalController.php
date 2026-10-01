@@ -39,7 +39,7 @@ class RecepcionistaPortalController extends Controller
     {
         $idSedeRecep = $this->getSedeId($request);
         if (!$idSedeRecep) return true;
-        if (!$cita->id_sede) return true; // Citas antiguas sin sede asignada son accesibles para compatibilidad
+        if (!$cita->id_sede) return (int) $idSedeRecep === 1; // Citas antiguas sin sede (NULL) sólo accesibles en Laureles (id_sede = 1)
         return (int) $cita->id_sede === (int) $idSedeRecep;
     }
 
@@ -61,7 +61,8 @@ class RecepcionistaPortalController extends Controller
 
         if ($idSede) {
             $citasHoyQuery->where(function ($q) use ($idSede) {
-                $q->where('id_sede', $idSede)->orWhereNull('id_sede');
+                $q->where('id_sede', $idSede);
+                if ((int) $idSede === 1) $q->orWhereNull('id_sede');
             });
         }
 
@@ -121,7 +122,8 @@ class RecepcionistaPortalController extends Controller
 
         if ($idSede) {
             $pagoQuery->whereHas('cita', function ($cq) use ($idSede) {
-                $cq->where('id_sede', $idSede)->orWhereNull('id_sede');
+                $cq->where('id_sede', $idSede);
+                if ((int) $idSede === 1) $cq->orWhereNull('id_sede');
             });
         }
 
@@ -159,7 +161,8 @@ class RecepcionistaPortalController extends Controller
 
         if ($idSede) {
             $query->where(function ($q) use ($idSede) {
-                $q->where('id_sede', $idSede)->orWhereNull('id_sede');
+                $q->where('id_sede', $idSede);
+                if ((int) $idSede === 1) $q->orWhereNull('id_sede');
             });
         }
 
@@ -768,7 +771,8 @@ class RecepcionistaPortalController extends Controller
 
         if ($idSede) {
             $query->where(function ($q) use ($idSede) {
-                $q->where('id_sede', $idSede)->orWhereNull('id_sede');
+                $q->where('id_sede', $idSede);
+                if ((int) $idSede === 1) $q->orWhereNull('id_sede');
             });
         }
 
@@ -779,7 +783,8 @@ class RecepcionistaPortalController extends Controller
 
             if ($idSede) {
                 $citasHoyQuery->where(function ($cq) use ($idSede) {
-                    $cq->where('id_sede', $idSede)->orWhereNull('id_sede');
+                    $cq->where('id_sede', $idSede);
+                    if ((int) $idSede === 1) $cq->orWhereNull('id_sede');
                 });
             }
 
@@ -829,7 +834,10 @@ class RecepcionistaPortalController extends Controller
         $vet = $cita->veterinario;
 
         $pdfData = [
+            'cita' => $cita,
             'cita_id' => $cita->id_cita,
+            'fecha_emision' => Carbon::parse($cita->fecha)->format('d/m/Y'),
+            'hora_emision' => date('h:i A', strtotime($cita->hora)),
             'fecha' => Carbon::parse($cita->fecha)->format('d/m/Y'),
             'hora' => date('h:i A', strtotime($cita->hora)),
             'servicio_nombre' => $cita->servicio->nombre ?? 'Consulta Médica General',
@@ -843,6 +851,8 @@ class RecepcionistaPortalController extends Controller
             'tutor_nombre' => $cliente->nombre ?? 'Cliente',
             'tutor_cedula' => $cliente->cedula ?? 'N/R',
             'tutor_telefono' => $cliente->telefono ?? 'N/R',
+            'cliente_nombre' => $cliente->nombre ?? 'Cliente',
+            'cliente_doc' => $cliente->cedula ?? 'N/R',
             'veterinario_nombre' => $vet->nombre ?? 'Médico Veterinario',
             'veterinario_especialidad' => $vet->especialidad ?? 'Medicina General',
             'veterinario_tarjeta' => $vet->numero_tarjeta ?? 'TP-99999-COL',

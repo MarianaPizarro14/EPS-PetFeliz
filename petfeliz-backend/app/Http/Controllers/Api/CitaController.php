@@ -129,10 +129,14 @@ class CitaController extends Controller
 
         $motivoFinal = $request->motivo ?: $servicioNombre;
 
+        $vetObj = \App\Models\Veterinario::find(1);
+        $idSedeFinal = $vetObj && $vetObj->id_sede ? $vetObj->id_sede : 1;
+
         $cita = Cita::create([
             'id_cliente' => $cliente->id_cliente,
             'id_mascota' => $request->id_mascota,
             'id_servicio' => $request->id_servicio,
+            'id_sede' => $idSedeFinal,
             'motivo' => $motivoFinal,
             'fecha' => $request->fecha,
             'hora' => date('H:i:s', strtotime($request->hora)),

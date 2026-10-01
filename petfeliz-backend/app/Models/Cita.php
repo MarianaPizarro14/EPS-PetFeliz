@@ -18,6 +18,7 @@ class Cita extends Model
         'hora',
         'motivo',
         'id_servicio',
+        'id_sede',
         'id_estado',
         'observacion',
         'medicamentos',
@@ -61,6 +62,11 @@ class Cita extends Model
     public function estadoCita()
     {
         return $this->belongsTo(EstadoCita::class, 'id_estado', 'id_estado');
+    }
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'id_sede', 'id_sede');
     }
 }
 

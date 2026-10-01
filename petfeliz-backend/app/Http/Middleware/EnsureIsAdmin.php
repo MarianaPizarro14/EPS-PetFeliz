@@ -15,7 +15,10 @@ class EnsureIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $user = $request->user() ?? \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+        if ($user) {
+            $request->setUserResolver(fn () => $user);
+        }
 
         if (!$user || strtolower(trim($user->rol ?? '')) !== 'admin') {
             return response()->json([

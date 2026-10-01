@@ -15,9 +15,12 @@ class EnsureIsVeterinario
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $user = $request->user() ?? \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+        if ($user) {
+            $request->setUserResolver(fn () => $user);
+        }
 
-        if (!$user || $user->rol !== 'veterinario') {
+        if (!$user || strtolower(trim($user->rol ?? '')) !== 'veterinario') {
             return response()->json([
                 'message' => 'Acceso denegado. Se requieren permisos de profesional médico veterinario.'
             ], Response::HTTP_FORBIDDEN);

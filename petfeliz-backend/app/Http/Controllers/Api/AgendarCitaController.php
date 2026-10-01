@@ -402,10 +402,14 @@ class AgendarCitaController extends Controller
         $metodoUpper = strtoupper($rawMetodo);
         $metodoFinal = $monto == 0 ? 'Cobertura Plan EPS' : ($metodoMap[$rawMetodo] ?? ($metodoMap[$metodoUpper] ?? ucwords(strtolower(str_replace('_', ' ', $rawMetodo)))));
 
+        $vetObj = Veterinario::find($reserva->id_veterinario);
+        $idSedeFinal = $vetObj && $vetObj->id_sede ? $vetObj->id_sede : 1;
+
         $cita = Cita::create([
             'id_cliente' => $cliente->id_cliente,
             'id_mascota' => $request->id_mascota,
             'id_servicio' => $request->id_servicio,
+            'id_sede' => $idSedeFinal,
             'motivo' => $motivoFinal,
             'fecha' => $reserva->fecha,
             'hora' => $horaSql,

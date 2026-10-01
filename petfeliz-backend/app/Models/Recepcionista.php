@@ -15,6 +15,7 @@ class Recepcionista extends Model
 
     protected $fillable = [
         'id_usuario',
+        'id_sede',
         'nombre',
         'telefono',
         'foto_perfil',
@@ -23,5 +24,10 @@ class Recepcionista extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'id_sede', 'id_sede');
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ContactoController;
 use App\Http\Controllers\Api\WompiController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\VeterinarioPortalController;
+use App\Http\Controllers\Api\RecepcionistaPortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:5,1')->post('/register', [AuthController::class, 'register']);
@@ -100,6 +101,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/citas/{id}/atender', [VeterinarioPortalController::class, 'atender']);
         Route::patch('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
         Route::post('/cambiar-password', [VeterinarioPortalController::class, 'cambiarPassword']);
+    });
+
+    // Rutas del Portal de Recepción (requieren rol 'recepcionista')
+    Route::middleware('recepcionista')->prefix('recepcion')->group(function () {
+        Route::get('/dashboard', [RecepcionistaPortalController::class, 'dashboard']);
+        Route::get('/citas', [RecepcionistaPortalController::class, 'citas']);
+        Route::get('/citas/{id}', [RecepcionistaPortalController::class, 'detalleCita']);
+        Route::post('/citas/{id}/confirmar', [RecepcionistaPortalController::class, 'confirmarCita']);
+        Route::post('/citas/{id}/cancelar', [RecepcionistaPortalController::class, 'cancelarCita']);
+        Route::post('/citas/{id}/reprogramar', [RecepcionistaPortalController::class, 'reprogramarCita']);
+        Route::put('/citas/{id}/pago', [RecepcionistaPortalController::class, 'registrarPago']);
+        Route::get('/clientes', [RecepcionistaPortalController::class, 'clientes']);
+        Route::get('/clientes/{id}', [RecepcionistaPortalController::class, 'detalleCliente']);
+        Route::put('/clientes/{id}', [RecepcionistaPortalController::class, 'actualizarCliente']);
+        Route::put('/mascotas/{id}', [RecepcionistaPortalController::class, 'actualizarMascota']);
+        Route::get('/veterinarios', [RecepcionistaPortalController::class, 'veterinarios']);
+        Route::get('/citas/{id}/formula', [RecepcionistaPortalController::class, 'descargarFormulaPdf']);
+        Route::get('/perfil', [RecepcionistaPortalController::class, 'perfilInfo']);
+        Route::post('/perfil/update', [RecepcionistaPortalController::class, 'updatePerfil']);
+        Route::patch('/cambiar-password', [RecepcionistaPortalController::class, 'cambiarPassword']);
+        Route::post('/cambiar-password', [RecepcionistaPortalController::class, 'cambiarPassword']);
     });
 
     Route::apiResource('mascotas', MascotaController::class);

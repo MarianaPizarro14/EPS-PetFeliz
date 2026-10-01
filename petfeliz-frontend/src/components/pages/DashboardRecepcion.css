@@ -1,0 +1,215 @@
+/* src/components/pages/DashboardRecepcion.css */
+
+.rec-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.rec-stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rec-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.rec-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.rec-stat-icon--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.rec-stat-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.rec-stat-icon--rose {
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.rec-stat-icon--emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.rec-stat-val {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 0.2rem;
+}
+
+.rec-stat-lbl {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ── MODAL COBRO EN SEDE ── */
+.rec-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9990;
+  padding: 1rem;
+}
+
+.rec-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.25rem 2.5rem;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: recFadeIn 0.22s ease-out;
+}
+
+@keyframes recFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.rec-modal__title {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.4rem 0;
+}
+
+.rec-modal__subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+}
+
+.rec-pay-box {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.rec-pay-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  font-size: 0.92rem;
+  color: #334155;
+}
+
+.rec-pay-row--total {
+  border-top: 1px dashed #cbd5e1;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rec-cambio-box {
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.rec-cambio-box--insufficient {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.rec-cambio-lbl {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.rec-cambio-val {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #047857;
+}
+
+.rec-badge-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.rec-badge-sede {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.rec-badge-eps {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}

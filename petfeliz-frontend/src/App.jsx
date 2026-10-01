@@ -31,6 +31,7 @@ import ResetPassword from './components/pages/ResetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import ProtectedRouteAdmin from './components/ProtectedRouteAdmin'
 import ProtectedRouteVet from './components/ProtectedRouteVet'
+import ProtectedRouteRecepcion from './components/ProtectedRouteRecepcion'
 import AdminHistoriasCuidadores from './components/pages/AdminHistoriasCuidadores'
 import AdminDashboard from './components/pages/AdminDashboard'
 import AdminCitas from './components/pages/AdminCitas'
@@ -46,6 +47,12 @@ import VetCitas from './components/pages/VetCitas'
 import VetHistorialClinico from './components/pages/VetHistorialClinico'
 import VetConfiguracion from './components/pages/VetConfiguracion'
 import VetAtenderCita from './components/pages/VetAtenderCita'
+import DashboardRecepcion from './components/pages/DashboardRecepcion'
+import RecepcionCitas from './components/pages/RecepcionCitas'
+import RecepcionClientes from './components/pages/RecepcionClientes'
+import RecepcionVeterinarios from './components/pages/RecepcionVeterinarios'
+import RecepcionFormulas from './components/pages/RecepcionFormulas'
+import RecepcionConfiguracion from './components/pages/RecepcionConfiguracion'
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
 const CLIENT_PORTAL_ROUTES = [
@@ -58,6 +65,7 @@ function AppContent() {
   const { pathname } = useLocation()
   const isAuthPage = AUTH_ROUTES.includes(pathname)
   const isAppPage =
+    pathname.startsWith('/recepcion') ||
     pathname.startsWith('/veterinario') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/dashboard') ||
@@ -338,6 +346,62 @@ function AppContent() {
             <ProtectedRouteVet>
               <VetAtenderCita />
             </ProtectedRouteVet>
+          }
+        />
+        <Route
+          path="/recepcion/dashboard"
+          element={
+            <ProtectedRouteRecepcion>
+              <DashboardRecepcion />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion"
+          element={
+            <ProtectedRouteRecepcion>
+              <DashboardRecepcion />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion/citas"
+          element={
+            <ProtectedRouteRecepcion>
+              <RecepcionCitas />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion/clientes"
+          element={
+            <ProtectedRouteRecepcion>
+              <RecepcionClientes />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion/veterinarios"
+          element={
+            <ProtectedRouteRecepcion>
+              <RecepcionVeterinarios />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion/formulas"
+          element={
+            <ProtectedRouteRecepcion>
+              <RecepcionFormulas />
+            </ProtectedRouteRecepcion>
+          }
+        />
+        <Route
+          path="/recepcion/configuracion"
+          element={
+            <ProtectedRouteRecepcion>
+              <RecepcionConfiguracion />
+            </ProtectedRouteRecepcion>
           }
         />
       </Routes>

@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             ServicioSeeder::class,
             VeterinarioSeeder::class,
             AdminUserSeeder::class,
+            SedeSeeder::class,
+            RecepcionistaSeeder::class,
         ]);
     }
 }

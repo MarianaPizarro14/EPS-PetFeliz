@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Cliente;
 use App\Models\Veterinario;
+use App\Models\Recepcionista;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->rol === 'admin';
+    }
+
+    public function isRecepcionista(): bool
+    {
+        return $this->rol === 'recepcionista';
     }
 
     protected $hidden = [
@@ -59,5 +65,10 @@ class User extends Authenticatable
     public function veterinario()
     {
         return $this->hasOne(Veterinario::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function recepcionista()
+    {
+        return $this->hasOne(Recepcionista::class, 'id_usuario', 'id_usuario');
     }
 }

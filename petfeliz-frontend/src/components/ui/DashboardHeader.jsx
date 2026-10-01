@@ -31,6 +31,7 @@ const getFormattedRole = (rol) => {
   const r = (rol || '').toLowerCase()
   if (r === 'admin' || window.location.pathname.startsWith('/admin')) return 'Director Administrativo'
   if (r === 'veterinario' || window.location.pathname.startsWith('/vet')) return 'Médico Veterinario'
+  if (r === 'recepcionista' || window.location.pathname.startsWith('/recepcion')) return 'Recepcionista Sede'
   return 'Cliente PetFeliz'
 }
 

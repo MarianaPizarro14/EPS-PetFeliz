@@ -80,22 +80,27 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         $cliente = $user->cliente;
         $vet = $user->veterinario;
+        $recep = $user->recepcionista;
 
         $primerNombre = 'Usuario';
         if ($cliente) {
             $primerNombre = explode(' ', trim($cliente->nombre ?? 'Usuario'))[0];
         } elseif ($vet) {
             $primerNombre = explode(' ', trim($vet->nombre ?? 'Dr. Veterinario'))[0];
+        } elseif ($recep) {
+            $primerNombre = explode(' ', trim($recep->nombre ?? 'Recepcionista'))[0];
         } elseif ($user->rol === 'admin') {
             $primerNombre = 'Administrador';
         }
 
-        $nombreCompleto = $cliente ? $cliente->nombre : ($vet ? $vet->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : ''));
+        $nombreCompleto = $cliente ? $cliente->nombre : ($vet ? $vet->nombre : ($recep ? $recep->nombre : ($user->rol === 'admin' ? 'Director Administrativo' : '')));
         $foto = $cliente
             ? ($cliente->foto_perfil ?? null)
             : ($vet
                 ? ($vet->foto_perfil ?? null)
-                : null);
+                : ($recep
+                    ? ($recep->foto_perfil ?? null)
+                    : null));
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso.',
@@ -104,6 +109,7 @@ class AuthController extends Controller
                 'id_usuario' => $user->id_usuario,
                 'id_cliente' => $cliente ? $cliente->id_cliente : null,
                 'id_veterinario' => $vet ? $vet->id_veterinario : null,
+                'id_recepcionista' => $recep ? $recep->id_recepcionista : null,
                 'email' => $user->email,
                 'rol' => $user->rol ?? 'cliente',
                 'nombre' => $primerNombre,

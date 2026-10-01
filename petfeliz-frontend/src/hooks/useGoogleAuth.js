@@ -40,6 +40,10 @@ export function useGoogleAuth(setError) {
 
         if (data.user?.rol === 'admin') {
           navigate('/admin/dashboard')
+        } else if (data.user?.rol === 'veterinario') {
+          navigate('/veterinario/dashboard')
+        } else if (data.user?.rol === 'recepcionista') {
+          navigate('/recepcion/dashboard')
         } else {
           navigate('/dashboard-client')
         }

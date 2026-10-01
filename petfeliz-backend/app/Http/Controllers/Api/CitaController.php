@@ -113,8 +113,8 @@ class CitaController extends Controller
         }
 
         $request->validate([
-            'id_mascota' => 'required|integer',
-            'id_veterinario' => 'nullable|integer',
+            'id_mascota' => 'required|integer|exists:mascota,id_mascota',
+            'id_veterinario' => 'nullable|integer|exists:veterinario,id_veterinario',
             'id_servicio' => 'nullable|integer',
             'motivo' => 'nullable|string|max:200',
             'fecha' => 'required|date',

@@ -37,6 +37,7 @@ import AdminDashboard from './components/pages/AdminDashboard'
 import AdminCitas from './components/pages/AdminCitas'
 import AdminMascotas from './components/pages/AdminMascotas'
 import AdminVeterinarios from './components/pages/AdminVeterinarios'
+import AdminRecepcionistas from './components/pages/AdminRecepcionistas'
 import AdminServicios from './components/pages/AdminServicios'
 import AdminClientes from './components/pages/AdminClientes'
 import AdminPagos from './components/pages/AdminPagos'
@@ -145,6 +146,14 @@ function AppContent() {
           element={
             <ProtectedRouteAdmin>
               <AdminVeterinarios />
+            </ProtectedRouteAdmin>
+          }
+        />
+        <Route
+          path="/admin/recepcionistas"
+          element={
+            <ProtectedRouteAdmin>
+              <AdminRecepcionistas />
             </ProtectedRouteAdmin>
           }
         />

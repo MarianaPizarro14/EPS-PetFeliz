@@ -1872,6 +1872,288 @@ class AdminController extends Controller
             'foto_perfil' => $fotoUrl,
         ], 200);
     }
+
+    /**
+     * Listado completo de sedes registradas para selectores en administración.
+     */
+    public function sedesIndex()
+    {
+        $sedes = \App\Models\Sede::where('activo', 1)->get();
+        return response()->json(['sedes' => $sedes], 200);
+    }
+
+    /**
+     * Listado completo de recepcionistas para el panel de administración.
+     */
+    public function recepcionistasIndex(Request $request)
+    {
+        $recepcionistas = \App\Models\Recepcionista::with(['usuario', 'sede'])->get();
+
+        $formatted = $recepcionistas->map(function ($r) {
+            return [
+                'id_recepcionista' => $r->id_recepcionista,
+                'id_usuario' => $r->id_usuario,
+                'id_sede' => $r->id_sede,
+                'nombre' => $r->nombre,
+                'telefono' => $r->telefono ?? '',
+                'foto_perfil' => $r->foto_perfil ?? null,
+                'correo' => $r->usuario->email ?? '',
+                'activo' => (bool) ($r->usuario->activo ?? true),
+                'password_temporal' => (bool) ($r->usuario->password_temporal ?? false),
+                'sede_nombre' => $r->sede->nombre ?? 'Sin Sede Asignada',
+            ];
+        });
+
+        $total = $formatted->count();
+        $activos = $formatted->where('activo', true)->count();
+        $inactivos = $formatted->where('activo', false)->count();
+
+        return response()->json([
+            'recepcionistas' => $formatted->values(),
+            'stats' => [
+                'total' => $total,
+                'activos' => $activos,
+                'inactivos' => $inactivos,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Detalle individual de un recepcionista.
+     */
+    public function recepcionistasShow($id)
+    {
+        $r = \App\Models\Recepcionista::with(['usuario', 'sede'])->where('id_recepcionista', $id)->firstOrFail();
+
+        return response()->json([
+            'recepcionista' => [
+                'id_recepcionista' => $r->id_recepcionista,
+                'id_usuario' => $r->id_usuario,
+                'id_sede' => $r->id_sede,
+                'nombre' => $r->nombre,
+                'telefono' => $r->telefono ?? '',
+                'foto_perfil' => $r->foto_perfil ?? null,
+                'correo' => $r->usuario->email ?? '',
+                'activo' => (bool) ($r->usuario->activo ?? true),
+                'password_temporal' => (bool) ($r->usuario->password_temporal ?? false),
+                'sede_nombre' => $r->sede->nombre ?? 'Sin Sede Asignada',
+            ]
+        ], 200);
+    }
+
+    /**
+     * Crear un nuevo recepcionista desde el panel de administración.
+     */
+    public function recepcionistasStore(Request $request)
+    {
+        $emailClean = strtolower(trim($request->correo ?? ''));
+
+        if (!empty($emailClean)) {
+            $orphanUser = User::where('email', $emailClean)->first();
+            if ($orphanUser) {
+                $hasVet = Veterinario::where('id_usuario', $orphanUser->id_usuario)->exists();
+                $hasCliente = Cliente::where('id_usuario', $orphanUser->id_usuario)->exists();
+                $hasRecep = \App\Models\Recepcionista::where('id_usuario', $orphanUser->id_usuario)->exists();
+                if (!$hasVet && !$hasCliente && !$hasRecep) {
+                    $orphanUser->tokens()->delete();
+                    $orphanUser->delete();
+                }
+            }
+        }
+
+        $request->validate([
+            'nombre' => 'required|string|max:150',
+            'correo' => 'required|email|max:100|unique:usuario,email',
+            'id_sede' => 'required|exists:sede,id_sede',
+            'telefono' => 'nullable|string|max:30',
+            'foto' => 'nullable|file|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'foto_perfil' => 'nullable',
+        ], [
+            'nombre.required' => 'El nombre del recepcionista es obligatorio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico no es válido.',
+            'correo.unique' => 'Este correo electrónico ya se encuentra registrado.',
+            'id_sede.required' => 'Debes seleccionar una sede.',
+            'id_sede.exists' => 'La sede seleccionada no es válida.',
+        ]);
+
+        $fotoUrl = null;
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
+        } elseif ($request->hasFile('foto_perfil')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
+        } elseif ($request->filled('foto_perfil') && is_string($request->foto_perfil)) {
+            $rawUrl = trim($request->foto_perfil);
+            if (!empty($rawUrl)) {
+                if (!str_starts_with($rawUrl, 'http://') && !str_starts_with($rawUrl, 'https://')) {
+                    $rawUrl = 'https://' . $rawUrl;
+                }
+                $fotoUrl = $rawUrl;
+            }
+        }
+
+        $tempPassword = 'Recep#' . rand(1000, 9999);
+
+        $recep = DB::transaction(function () use ($request, $tempPassword, $emailClean, $fotoUrl) {
+            $user = User::create([
+                'email' => $emailClean,
+                'contrasena_hash' => Hash::make($tempPassword),
+                'rol' => 'recepcionista',
+                'activo' => 1,
+                'password_temporal' => true,
+            ]);
+
+            return \App\Models\Recepcionista::create([
+                'id_usuario' => $user->id_usuario,
+                'id_sede' => $request->id_sede,
+                'nombre' => trim($request->nombre),
+                'telefono' => $request->telefono ? trim($request->telefono) : null,
+                'foto_perfil' => $fotoUrl,
+            ]);
+        });
+
+        $recep->load(['usuario', 'sede']);
+
+        return response()->json([
+            'message' => 'Recepcionista creado con éxito.',
+            'contrasena_temporal' => $tempPassword,
+            'recepcionista' => [
+                'id_recepcionista' => $recep->id_recepcionista,
+                'id_usuario' => $recep->id_usuario,
+                'id_sede' => $recep->id_sede,
+                'nombre' => $recep->nombre,
+                'telefono' => $recep->telefono ?? '',
+                'foto_perfil' => $recep->foto_perfil ?? null,
+                'correo' => $recep->usuario->email ?? '',
+                'sede_nombre' => $recep->sede->nombre ?? '',
+            ],
+        ], 201);
+    }
+
+    /**
+     * Actualizar recepcionista desde el panel de administración.
+     */
+    public function recepcionistasUpdate(Request $request, $id)
+    {
+        $recep = \App\Models\Recepcionista::with('usuario')->where('id_recepcionista', $id)->firstOrFail();
+        $userId = $recep->id_usuario;
+
+        $request->validate([
+            'nombre' => 'sometimes|required|string|max:150',
+            'correo' => 'sometimes|required|email|max:100|unique:usuario,email,' . $userId . ',id_usuario',
+            'id_sede' => 'sometimes|required|exists:sede,id_sede',
+            'telefono' => 'nullable|string|max:30',
+            'foto' => 'nullable|file|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'foto_perfil' => 'nullable',
+        ]);
+
+        $fotoUrl = null;
+        $hasFotoParam = false;
+
+        if ($request->hasFile('foto')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto'), 'petfeliz/equipo');
+            $hasFotoParam = true;
+        } elseif ($request->hasFile('foto_perfil')) {
+            $fotoUrl = CloudinaryService::upload($request->file('foto_perfil'), 'petfeliz/equipo');
+            $hasFotoParam = true;
+        } elseif ($request->has('foto_perfil')) {
+            $hasFotoParam = true;
+            $rawUrl = is_string($request->foto_perfil) ? trim($request->foto_perfil) : '';
+            if (!empty($rawUrl)) {
+                if (!str_starts_with($rawUrl, 'http://') && !str_starts_with($rawUrl, 'https://')) {
+                    $rawUrl = 'https://' . $rawUrl;
+                }
+                $fotoUrl = $rawUrl;
+            }
+        }
+
+        DB::transaction(function () use ($request, $recep, $hasFotoParam, $fotoUrl) {
+            $rData = [];
+            if ($request->has('nombre')) $rData['nombre'] = trim($request->nombre);
+            if ($request->has('id_sede')) $rData['id_sede'] = $request->id_sede;
+            if ($request->has('telefono')) $rData['telefono'] = $request->telefono ? trim($request->telefono) : null;
+            if ($hasFotoParam) $rData['foto_perfil'] = $fotoUrl;
+
+            if (!empty($rData)) {
+                $recep->update($rData);
+            }
+
+            if ($request->has('correo') && $recep->usuario) {
+                $recep->usuario->update(['email' => strtolower(trim($request->correo))]);
+            }
+        });
+
+        $recep->refresh();
+        $recep->load(['usuario', 'sede']);
+
+        return response()->json([
+            'message' => 'Información del recepcionista actualizada con éxito.',
+            'recepcionista' => [
+                'id_recepcionista' => $recep->id_recepcionista,
+                'id_usuario' => $recep->id_usuario,
+                'id_sede' => $recep->id_sede,
+                'nombre' => $recep->nombre,
+                'telefono' => $recep->telefono ?? '',
+                'foto_perfil' => $recep->foto_perfil ?? null,
+                'correo' => $recep->usuario->email ?? '',
+                'sede_nombre' => $recep->sede->nombre ?? '',
+            ],
+        ], 200);
+    }
+
+    /**
+     * Alternar estado activo/inactivo de un recepcionista.
+     */
+    public function recepcionistasToggleActivo($id)
+    {
+        $recep = \App\Models\Recepcionista::with('usuario')->where('id_recepcionista', $id)->firstOrFail();
+        $user = $recep->usuario;
+
+        if ($user) {
+            $user->activo = !$user->activo;
+            $user->save();
+            $estadoStr = $user->activo ? 'activada' : 'desactivada';
+        } else {
+            $estadoStr = 'actualizada';
+        }
+
+        return response()->json([
+            'message' => "Cuenta de recepcionista {$estadoStr} exitosamente.",
+            'activo' => $user ? (bool) $user->activo : true,
+        ], 200);
+    }
+
+    /**
+     * Restablecer contraseña temporal de un recepcionista.
+     */
+    public function recepcionistasResetPassword(Request $request, $id)
+    {
+        $recep = \App\Models\Recepcionista::with('usuario')->where('id_recepcionista', $id)->firstOrFail();
+        $user = $recep->usuario;
+
+        if (!$user) {
+            return response()->json(['message' => 'No se encontró una cuenta de usuario activa.'], 404);
+        }
+
+        $nuevaContrasena = 'Recep#' . rand(10000, 99999);
+        $user->contrasena_hash = Hash::make($nuevaContrasena);
+        $user->password_temporal = true;
+        $user->save();
+        $user->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña temporal generada con éxito.',
+            'nueva_contrasena' => $nuevaContrasena,
+            'contrasena_temporal' => $nuevaContrasena,
+            'password_temporal' => true,
+            'recepcionista' => [
+                'id_recepcionista' => $recep->id_recepcionista,
+                'nombre' => $recep->nombre,
+                'correo' => $user->email,
+            ],
+        ], 200);
+    }
 }
 
 

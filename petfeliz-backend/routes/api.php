@@ -64,6 +64,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/veterinarios/{id}/generar-password-temporal', [AdminController::class, 'generarPasswordTemporal']);
         Route::delete('/admin/veterinarios/{id}', [AdminController::class, 'veterinariosDestroy']);
 
+        // Rutas de Administración de Recepcionistas y Sedes
+        Route::get('/admin/sedes', [AdminController::class, 'sedesIndex']);
+        Route::get('/admin/recepcionistas', [AdminController::class, 'recepcionistasIndex']);
+        Route::get('/admin/recepcionistas/{id}', [AdminController::class, 'recepcionistasShow']);
+        Route::post('/admin/recepcionistas', [AdminController::class, 'recepcionistasStore']);
+        Route::put('/admin/recepcionistas/{id}', [AdminController::class, 'recepcionistasUpdate']);
+        Route::patch('/admin/recepcionistas/{id}/toggle-activo', [AdminController::class, 'recepcionistasToggleActivo']);
+        Route::post('/admin/recepcionistas/{id}/toggle-activo', [AdminController::class, 'recepcionistasToggleActivo']);
+        Route::patch('/admin/recepcionistas/{id}/reset-password', [AdminController::class, 'recepcionistasResetPassword']);
+        Route::post('/admin/recepcionistas/{id}/reset-password', [AdminController::class, 'recepcionistasResetPassword']);
+
         // Rutas de Administración de Servicios
         Route::get('/admin/servicios', [AdminController::class, 'serviciosIndex']);
         Route::get('/admin/servicios/{id}', [AdminController::class, 'serviciosShow']);

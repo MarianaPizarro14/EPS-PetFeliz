@@ -8,6 +8,7 @@ const adminMenuItems = [
   { to: '/admin/dashboard', aliases: [], label: 'Panel', icon: 'fa-solid fa-border-all' },
   { to: '/admin/citas', aliases: [], label: 'Citas', icon: 'fa-regular fa-calendar-days' },
   { to: '/admin/veterinarios', aliases: [], label: 'Veterinarios', icon: 'fa-solid fa-user-doctor' },
+  { to: '/admin/recepcionistas', aliases: [], label: 'Recepcionistas', icon: 'fa-solid fa-id-card' },
   { to: '/admin/servicios', aliases: [], label: 'Servicios', icon: 'fa-solid fa-stethoscope' },
   { to: '/admin/clientes', aliases: [], label: 'Clientes', icon: 'fa-solid fa-users' },
   { to: '/admin/mascotas', aliases: [], label: 'Mascotas', icon: 'fa-solid fa-paw' },

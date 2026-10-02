@@ -161,9 +161,6 @@ function MisCitas() {
       if (resVets.ok) {
         const vData = await resVets.json()
         setVeterinarios(vData)
-        if (vData.length > 0 && !agendarForm.id_veterinario) {
-          setAgendarForm((prev) => ({ ...prev, id_veterinario: vData[0].id_veterinario || vData[0].id }))
-        }
       }
 
       // 4. Citas
@@ -549,15 +546,12 @@ function MisCitas() {
                     value={agendarForm.id_veterinario}
                     onChange={(e) => setAgendarForm({ ...agendarForm, id_veterinario: e.target.value })}
                   >
-                    {veterinarios.length === 0 ? (
-                      <option value="">No hay veterinarios disponibles</option>
-                    ) : (
-                      veterinarios.map((v) => (
-                        <option key={v.id_veterinario || v.id} value={v.id_veterinario || v.id}>
-                          {v.nombre} ({v.especialidad || 'Medicina General'})
-                        </option>
-                      ))
-                    )}
+                    <option value="" disabled>Selecciona un médico veterinario</option>
+                    {veterinarios.map((v) => (
+                      <option key={v.id_veterinario || v.id} value={v.id_veterinario || v.id}>
+                        {v.nombre} ({v.especialidad || 'Medicina General'})
+                      </option>
+                    ))}
                   </select>
                 </div>
 

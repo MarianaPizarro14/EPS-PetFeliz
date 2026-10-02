@@ -17,6 +17,7 @@ function MisCitas() {
   const [usuario, setUsuario] = useState({ nombre: '', foto: '' })
   const [mascotas, setMascotas] = useState([])
   const [servicios, setServicios] = useState([])
+  const [veterinarios, setVeterinarios] = useState([])
   const [citas, setCitas] = useState({ proximas: [], pasadas: [], canceladas: [] })
 
   const [loading, setLoading] = useState(true)
@@ -84,6 +85,7 @@ function MisCitas() {
   const [agendarForm, setAgendarForm] = useState({
     id_mascota: '',
     id_servicio: '',
+    id_veterinario: '',
     fecha: '',
     hora: '10:00 AM',
     observacion: '',
@@ -109,7 +111,7 @@ function MisCitas() {
     '05:00 PM',
   ]
 
-  // Cargar datos iniciales (Perfil, Citas, Mascotas y Servicios)
+  // Cargar datos iniciales (Perfil, Citas, Mascotas, Servicios y Veterinarios)
   const loadData = async () => {
     const token = getStoredToken()
     if (!token) {
@@ -152,6 +154,18 @@ function MisCitas() {
         }
       }
 
+      // 3b. Veterinarios (para agendar cita)
+      const resVets = await fetch(`${import.meta.env.VITE_API_URL}/agendar/veterinarios`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      })
+      if (resVets.ok) {
+        const vData = await resVets.json()
+        setVeterinarios(vData)
+        if (vData.length > 0 && !agendarForm.id_veterinario) {
+          setAgendarForm((prev) => ({ ...prev, id_veterinario: vData[0].id_veterinario || vData[0].id }))
+        }
+      }
+
       // 4. Citas
       const resCitas = await fetch(`${import.meta.env.VITE_API_URL}/citas`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
@@ -183,6 +197,10 @@ function MisCitas() {
 
     if (!agendarForm.id_mascota) {
       setModalError('Debes seleccionar una mascota.')
+      return
+    }
+    if (!agendarForm.id_veterinario) {
+      setModalError('Debes seleccionar un médico veterinario.')
       return
     }
     if (!agendarForm.fecha) {
@@ -521,6 +539,25 @@ function MisCitas() {
                         {s.nombre} {s.precio_base ? `- $${parseInt(s.precio_base).toLocaleString()}` : ''}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="dh-form-field">
+                  <label>Médico Veterinario *</label>
+                  <select
+                    required
+                    value={agendarForm.id_veterinario}
+                    onChange={(e) => setAgendarForm({ ...agendarForm, id_veterinario: e.target.value })}
+                  >
+                    {veterinarios.length === 0 ? (
+                      <option value="">No hay veterinarios disponibles</option>
+                    ) : (
+                      veterinarios.map((v) => (
+                        <option key={v.id_veterinario || v.id} value={v.id_veterinario || v.id}>
+                          {v.nombre} ({v.especialidad || 'Medicina General'})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 

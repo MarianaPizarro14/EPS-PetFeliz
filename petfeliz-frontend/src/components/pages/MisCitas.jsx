@@ -225,6 +225,12 @@ function MisCitas() {
       }
 
       setShowAgendarModal(false)
+      setAgendarForm((prev) => ({
+        ...prev,
+        id_veterinario: '',
+        fecha: '',
+        observacion: '',
+      }))
       loadData()
     } catch (err) {
       console.error('Error al agendar cita:', err)
@@ -546,7 +552,9 @@ function MisCitas() {
                     value={agendarForm.id_veterinario}
                     onChange={(e) => setAgendarForm({ ...agendarForm, id_veterinario: e.target.value })}
                   >
-                    <option value="" disabled>Selecciona un médico veterinario</option>
+                    <option value="" disabled>
+                      {veterinarios.length === 0 ? 'No hay veterinarios disponibles' : 'Selecciona un médico veterinario'}
+                    </option>
                     {veterinarios.map((v) => (
                       <option key={v.id_veterinario || v.id} value={v.id_veterinario || v.id}>
                         {v.nombre} ({v.especialidad || 'Medicina General'})

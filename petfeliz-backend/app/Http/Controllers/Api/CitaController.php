@@ -114,7 +114,7 @@ class CitaController extends Controller
 
         $request->validate([
             'id_mascota' => 'required|integer|exists:mascota,id_mascota',
-            'id_veterinario' => 'nullable|integer|exists:veterinario,id_veterinario',
+            'id_veterinario' => 'required|integer|exists:veterinario,id_veterinario',
             'id_servicio' => 'nullable|integer',
             'motivo' => 'nullable|string|max:200',
             'fecha' => 'required|date',
@@ -130,7 +130,7 @@ class CitaController extends Controller
 
         $motivoFinal = $request->motivo ?: $servicioNombre;
 
-        $vetId = $request->id_veterinario ?: 1;
+        $vetId = $request->id_veterinario;
         $vetObj = \App\Models\Veterinario::find($vetId);
 
         if (!$vetObj || !$vetObj->id_sede) {

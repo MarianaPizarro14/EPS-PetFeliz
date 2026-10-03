@@ -401,12 +401,34 @@ export default function AdminClientes() {
                         </div>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.88rem' }}>{c.email}</span>
-                          <span className="admin-table__owner-phone">
-                            <i className="fa-solid fa-phone" style={{ marginRight: '4px', fontSize: '0.7rem' }}></i>
-                            {c.telefono}
-                          </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          {c.email && c.email !== 'Sin correo' ? (
+                            <a
+                              href={`mailto:${c.email}`}
+                              style={{ fontWeight: 600, color: '#2563eb', fontSize: '0.88rem', textDecoration: 'none' }}
+                              title={`Enviar correo electrónico a ${c.email}`}
+                            >
+                              {c.email}
+                            </a>
+                          ) : (
+                            <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.88rem' }}>Sin correo</span>
+                          )}
+                          {c.telefono && c.telefono !== 'Sin teléfono' ? (
+                            <a
+                              href={`tel:${c.telefono}`}
+                              className="admin-table__owner-phone"
+                              style={{ textDecoration: 'none', color: '#64748b', display: 'inline-flex', alignItems: 'center' }}
+                              title={`Llamar a ${c.telefono}`}
+                            >
+                              <i className="fa-solid fa-phone" style={{ marginRight: '4px', fontSize: '0.7rem', color: '#0284c7' }}></i>
+                              {c.telefono}
+                            </a>
+                          ) : (
+                            <span className="admin-table__owner-phone">
+                              <i className="fa-solid fa-phone" style={{ marginRight: '4px', fontSize: '0.7rem' }}></i>
+                              Sin teléfono
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>

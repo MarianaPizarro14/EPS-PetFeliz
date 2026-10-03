@@ -902,16 +902,41 @@ export default function AdminVeterinarios() {
                         </span>
                       </td>
                       <td>
-                        <span className="adm-contact-phone">
-                          <i className="fa-solid fa-phone" style={{ color: '#0284c7', marginRight: '6px' }}></i>
-                          {vet.telefono || 'Sin teléfono'}
-                        </span>
+                        {vet.telefono ? (
+                          <a
+                            href={`tel:${vet.telefono}`}
+                            className="adm-contact-phone"
+                            style={{ textDecoration: 'none', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}
+                            title={`Llamar a ${vet.telefono}`}
+                          >
+                            <i className="fa-solid fa-phone" style={{ color: '#0284c7' }}></i>
+                            <span>{vet.telefono}</span>
+                          </a>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin teléfono</span>
+                        )}
                       </td>
                       <td>
-                        <span className="adm-contact-email">
-                          <i className="fa-regular fa-envelope" style={{ color: '#64748b', marginRight: '6px' }}></i>
-                          {vet.correo || 'Sin correo'}
-                        </span>
+                        {vet.correo ? (
+                          <a
+                            href={`mailto:${vet.correo}`}
+                            className="adm-contact-email"
+                            style={{
+                              textDecoration: 'none',
+                              color: '#2563eb',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 500,
+                            }}
+                            title={`Enviar correo electrónico a ${vet.correo}`}
+                          >
+                            <i className="fa-regular fa-envelope" style={{ color: '#2563eb' }}></i>
+                            <span>{vet.correo}</span>
+                          </a>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin correo</span>
+                        )}
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <div className="action-buttons-group">

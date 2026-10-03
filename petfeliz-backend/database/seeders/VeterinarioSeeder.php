@@ -45,11 +45,12 @@ class VeterinarioSeeder extends Seeder
             ['id' => 28, 'nombre' => 'Dra. Laura Martínez', 'foto' => 'https://res.cloudinary.com/dedroug6v/image/upload/v1788216413/pexels-eric-moura-859101902-32788234_flbyor.jpg'],
         ];
 
+        $envPassword = env('SEED_VET_PASSWORD');
+        $tempPassword = !empty($envPassword) ? $envPassword : Str::random(16);
+
         foreach ($vets as $vet) {
             $userId = 1000 + $vet['id'];
             $email = 'vet_' . $vet['id'] . '@petfeliz.com';
-
-            $tempPassword = 'Vet#' . str_pad($vet['id'], 4, '0', STR_PAD_LEFT);
 
             // Crear o actualizar usuario
             $existingUser = DB::table('usuario')->where('id_usuario', $userId)->orWhere('email', $email)->first();

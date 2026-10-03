@@ -21,9 +21,19 @@ class RecepcionistaSeeder extends Seeder
         $sedeBello = Sede::where('nombre', 'LIKE', '%Bello%')->first();
         $sedeItagui = Sede::where('nombre', 'LIKE', '%Itag%')->first();
 
-        $idLaureles = $sedeLaureles ? $sedeLaureles->id_sede : 1;
-        $idBello = $sedeBello ? $sedeBello->id_sede : 2;
-        $idItagui = $sedeItagui ? $sedeItagui->id_sede : 3;
+        if (!$sedeLaureles) {
+            throw new \RuntimeException("RecepcionistaSeeder error: No se encontró la sede 'Laureles' en la base de datos.");
+        }
+        if (!$sedeBello) {
+            throw new \RuntimeException("RecepcionistaSeeder error: No se encontró la sede 'Bello' en la base de datos.");
+        }
+        if (!$sedeItagui) {
+            throw new \RuntimeException("RecepcionistaSeeder error: No se encontró la sede 'Itagüí' en la base de datos.");
+        }
+
+        $idLaureles = $sedeLaureles->id_sede;
+        $idBello = $sedeBello->id_sede;
+        $idItagui = $sedeItagui->id_sede;
 
         // 2. Definición de los 6 recepcionistas (2 por sede)
         $recepcionistas = [

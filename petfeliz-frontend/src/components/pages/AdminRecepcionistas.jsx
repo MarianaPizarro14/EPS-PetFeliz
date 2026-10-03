@@ -42,7 +42,8 @@ export default function AdminRecepcionistas() {
     }, 4000)
   }
 
-  // Modales
+  // Drawers y Modales
+  const [selectedFicha, setSelectedFicha] = useState(null)
   const [showModalForm, setShowModalForm] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -64,6 +65,7 @@ export default function AdminRecepcionistas() {
   const [resetRecep, setResetRecep] = useState(null)
   const [showModalReset, setShowModalReset] = useState(false)
   const [submittingReset, setSubmittingReset] = useState(false)
+  const [resetError, setResetError] = useState('')
   const [resetSuccessData, setResetSuccessData] = useState(null)
   const [copiedToast, setCopiedToast] = useState(false)
 
@@ -72,7 +74,9 @@ export default function AdminRecepcionistas() {
     const token = getStoredToken()
     if (!token) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/sedes`, {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+      const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      const res = await fetch(`${cleanUrl}/admin/sedes`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       })
       if (res.ok) {
@@ -96,7 +100,9 @@ export default function AdminRecepcionistas() {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/recepcionistas`, {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+      const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      const res = await fetch(`${cleanUrl}/admin/recepcionistas`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       })
 
@@ -162,7 +168,7 @@ export default function AdminRecepcionistas() {
       foto_perfil: r.foto_perfil || '',
     })
     setSelectedFile(null)
-    setPhotoPreview(r.foto_perfil || '')
+    setPhotoPreview(isValidAvatarUrl(r.foto_perfil) ? r.foto_perfil : '')
     setFormError('')
     setShowModalForm(true)
   }
@@ -192,34 +198,56 @@ export default function AdminRecepcionistas() {
     setFormError('')
 
     const token = getStoredToken()
-    const formData = new FormData()
+    if (!token) return
 
-    formData.append('nombre', formRecep.nombre.trim())
-    formData.append('correo', formRecep.correo.trim())
-    formData.append('telefono', formRecep.telefono.trim())
-    formData.append('id_sede', formRecep.id_sede)
-
-    if (selectedFile) {
-      formData.append('foto', selectedFile)
-    }
-
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+    const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
     const endpoint = isEditing
-      ? `${import.meta.env.VITE_API_URL}/admin/recepcionistas/${editingId}`
-      : `${import.meta.env.VITE_API_URL}/admin/recepcionistas`
+      ? `${cleanUrl}/admin/recepcionistas/${editingId}`
+      : `${cleanUrl}/admin/recepcionistas`
 
-    if (isEditing) {
-      formData.append('_method', 'PUT')
-    }
+    let res
 
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-        body: formData,
-      })
+      if (selectedFile) {
+        const formData = new FormData()
+        formData.append('nombre', formRecep.nombre.trim())
+        formData.append('correo', formRecep.correo.trim())
+        formData.append('telefono', formRecep.telefono.trim())
+        formData.append('id_sede', formRecep.id_sede)
+        formData.append('foto', selectedFile)
+
+        if (isEditing) {
+          formData.append('_method', 'PUT')
+        }
+
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+          body: formData,
+        })
+      } else {
+        const payload = {
+          nombre: formRecep.nombre.trim(),
+          correo: formRecep.correo.trim(),
+          telefono: formRecep.telefono.trim(),
+          id_sede: formRecep.id_sede,
+          foto_perfil: formRecep.foto_perfil || '',
+        }
+
+        res = await fetch(endpoint, {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+      }
 
       const data = await res.json()
 
@@ -231,7 +259,7 @@ export default function AdminRecepcionistas() {
       triggerToast(
         isEditing
           ? '¡Datos de recepcionista actualizados correctamente!'
-          : `¡Recepcionista registrado! Clave temporal: ${data.contrasena_temporal || ''}`,
+          : `¡Recepcionista registrado exitosamente! Clave: ${data.contrasena_temporal || data.nueva_contrasena || ''}`,
         'success'
       )
       setShowModalForm(false)
@@ -248,7 +276,9 @@ export default function AdminRecepcionistas() {
   const handleToggleActivo = async (r) => {
     const token = getStoredToken()
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/recepcionistas/${r.id_recepcionista}/toggle-activo`, {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+      const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      const res = await fetch(`${cleanUrl}/admin/recepcionistas/${r.id_recepcionista}/toggle-activo`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       })
@@ -262,24 +292,62 @@ export default function AdminRecepcionistas() {
     }
   }
 
+  // Abrir modal de reset contraseña
+  const handleOpenResetModal = (recep) => {
+    setResetRecep(recep)
+    setResetError('')
+    setShowModalReset(true)
+  }
+
   // Reset Password
-  const handleConfirmReset = async (r) => {
+  const handleConfirmReset = async (e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    if (!resetRecep) return
+
     const token = getStoredToken()
-    setSubmittingReset(true)
-    setResetSuccessData(null)
+    if (!token) {
+      setResetError('No se encontró el token de sesión. Por favor inicie sesión de nuevo.')
+      return
+    }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/recepcionistas/${r.id_recepcionista}/reset-password`, {
+      setSubmittingReset(true)
+      setResetError('')
+
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+      const cleanUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      const targetUrl = `${cleanUrl}/admin/recepcionistas/${resetRecep.id_recepcionista}/reset-password`
+
+      const res = await fetch(targetUrl, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
       })
+
       const data = await res.json()
-      if (res.ok && data.success) {
-        setResetSuccessData(data)
-        triggerToast('¡Contraseña temporal restablecida exitosamente!', 'success')
+
+      if (res.ok && (data.success || data.nueva_contrasena || data.contrasena_temporal)) {
+        setShowModalReset(false)
+        setResetSuccessData({
+          nombre: data.recepcionista?.nombre || resetRecep.nombre,
+          correo: data.recepcionista?.correo || resetRecep.correo,
+          contrasena: data.nueva_contrasena || data.contrasena_temporal,
+        })
+        triggerToast(`Contraseña temporal de ${resetRecep.nombre} generada con éxito.`, 'success')
+        fetchRecepcionistas()
+      } else {
+        setResetError(data.message || 'No se pudo generar la contraseña temporal.')
       }
-    } catch (e) {
-      console.error(e)
+    } catch (err) {
+      console.error('Error al generar contraseña temporal:', err)
+      setResetError('Error de conexión con el servidor.')
     } finally {
       setSubmittingReset(false)
     }
@@ -427,19 +495,19 @@ export default function AdminRecepcionistas() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>RECEPCIONISTA</th>
-                    <th>SEDE ASIGNADA</th>
-                    <th>TELÉFONO</th>
-                    <th>CORREO ELECTRÓNICO</th>
-                    <th>ESTADO</th>
-                    <th style={{ textAlign: 'center' }}>ACCIONES</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>RECEPCIONISTA</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>SEDE ASIGNADA</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>TELÉFONO</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>CORREO ELECTRÓNICO</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>ESTADO</th>
+                    <th style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>ACCIONES</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRecepcionistas.map((r) => (
                     <tr key={r.id_recepcionista}>
-                      <td>
-                        <div className="adm-vet-avatar-cell">
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <div className="adm-vet-avatar-cell" style={{ whiteSpace: 'nowrap' }}>
                           <UserAvatar
                             user={r}
                             photoUrl={r.foto_perfil}
@@ -450,13 +518,13 @@ export default function AdminRecepcionistas() {
                             fontSize="1.15rem"
                           />
                           <div className="adm-vet-name-box">
-                            <span className="adm-vet-name">{r.nombre}</span>
-                            <span className="adm-vet-id">ID #{r.id_recepcionista} • Recepción</span>
+                            <span className="adm-vet-name" style={{ whiteSpace: 'nowrap' }}>{r.nombre}</span>
+                            <span className="adm-vet-id" style={{ whiteSpace: 'nowrap' }}>ID #{r.id_recepcionista} • Recepción</span>
                           </div>
                         </div>
                       </td>
 
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
                         <span
                           className="adm-tp-text"
                           style={{
@@ -470,6 +538,7 @@ export default function AdminRecepcionistas() {
                             gap: '6px',
                             fontWeight: 600,
                             fontSize: '0.85rem',
+                            whiteSpace: 'nowrap',
                           }}
                         >
                           <i className="fa-solid fa-location-dot" style={{ color: '#059669' }}></i>
@@ -477,23 +546,23 @@ export default function AdminRecepcionistas() {
                         </span>
                       </td>
 
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
                         {r.telefono ? (
                           <a
                             href={`tel:${r.telefono}`}
                             className="adm-contact-phone"
-                            style={{ textDecoration: 'none', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}
+                            style={{ textDecoration: 'none', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500, whiteSpace: 'nowrap' }}
                             title={`Llamar a ${r.telefono}`}
                           >
                             <i className="fa-solid fa-phone" style={{ color: '#0284c7' }}></i>
                             <span>{r.telefono}</span>
                           </a>
                         ) : (
-                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin teléfono</span>
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Sin teléfono</span>
                         )}
                       </td>
 
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
                         {r.correo ? (
                           <a
                             href={`mailto:${r.correo}`}
@@ -505,6 +574,7 @@ export default function AdminRecepcionistas() {
                               alignItems: 'center',
                               gap: '6px',
                               fontWeight: 500,
+                              whiteSpace: 'nowrap',
                             }}
                             title={`Enviar correo electrónico a ${r.correo}`}
                           >
@@ -512,12 +582,12 @@ export default function AdminRecepcionistas() {
                             <span>{r.correo}</span>
                           </a>
                         ) : (
-                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin correo</span>
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Sin correo</span>
                         )}
                       </td>
 
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
                           <span
                             className={`adm-badge ${r.activo ? 'adm-badge--success' : 'adm-badge--danger'}`}
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
@@ -545,8 +615,17 @@ export default function AdminRecepcionistas() {
                         </div>
                       </td>
 
-                      <td style={{ textAlign: 'center' }}>
-                        <div className="action-buttons-group">
+                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <div className="action-buttons-group" style={{ justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            className="act-btn act-btn--view"
+                            onClick={() => setSelectedFicha(r)}
+                            title="Ver ficha del recepcionista"
+                          >
+                            <i className="fa-solid fa-eye"></i>
+                            <span>Ver</span>
+                          </button>
                           <button
                             type="button"
                             className="act-btn act-btn--edit"
@@ -559,11 +638,7 @@ export default function AdminRecepcionistas() {
                           <button
                             type="button"
                             className="act-btn act-btn--view"
-                            onClick={() => {
-                              setResetRecep(r)
-                              setShowModalReset(true)
-                              setResetSuccessData(null)
-                            }}
+                            onClick={() => handleOpenResetModal(r)}
                             title="Restablecer contraseña temporal"
                             style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a' }}
                           >
@@ -590,99 +665,282 @@ export default function AdminRecepcionistas() {
           )}
         </div>
 
-        {/* ── MODAL CREAR / EDITAR RECEPCIONISTA ── */}
-        {showModalForm && (
-          <div className="adm-modal-backdrop">
-            <div className="adm-modal-box" style={{ maxWidth: '520px' }}>
-              <div className="adm-modal-header">
-                <h3>{isEditing ? 'Editar Recepcionista' : 'Registrar Nuevo Recepcionista'}</h3>
-                <button type="button" className="adm-modal-close" onClick={() => setShowModalForm(false)}>
+        {/* ── DRAWER LATERAL: FICHA DEL RECEPCIONISTA (VER) ── */}
+        {selectedFicha && (
+          <div className="adm-drawer-overlay" onClick={() => setSelectedFicha(null)}>
+            <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="adm-vet-hero" style={{ background: 'linear-gradient(135deg, #065f46 0%, #059669 100%)', padding: '2rem 1.5rem', color: '#fff', position: 'relative' }}>
+                <div className="adm-vet-hero__avatar-wrap" style={{ display: 'inline-block', position: 'relative', marginBottom: '0.85rem' }}>
+                  <UserAvatar
+                    user={selectedFicha}
+                    photoUrl={selectedFicha.foto_perfil}
+                    name={selectedFicha.nombre}
+                    id={selectedFicha.id_recepcionista}
+                    icon="fa-solid fa-headset"
+                    size="76px"
+                    fontSize="2rem"
+                    style={{
+                      border: '3px solid rgba(255,255,255,0.95)',
+                      boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
+                    }}
+                  />
+                </div>
+                <div className="adm-vet-hero__info">
+                  <div className="adm-vet-hero__tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.2)', padding: '0.25rem 0.65rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+                    <i className="fa-solid fa-headset"></i>
+                    <span>Personal de Recepción</span>
+                  </div>
+                  <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.4rem', margin: '0 0 0.4rem 0' }}>{selectedFicha.nombre}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ background: 'rgba(0,0,0,0.25)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>
+                      ID #{selectedFicha.id_recepcionista}
+                    </span>
+                    <span style={{ background: 'rgba(255,255,255,0.25)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600 }}>
+                      <i className="fa-solid fa-location-dot" style={{ marginRight: '4px' }}></i> Sede {selectedFicha.sede_nombre}
+                    </span>
+                  </div>
+                </div>
+                <button className="adm-drawer-close adm-drawer-close--white" onClick={() => setSelectedFicha(null)} title="Cerrar Ficha" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className="fa-solid fa-xmark"></i>
                 </button>
               </div>
 
-              {formError && <div className="adm-modal-alert adm-modal-alert--error">{formError}</div>}
-
-              <form onSubmit={handleSubmitForm}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                    Nombre Completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={formRecep.nombre}
-                    onChange={(e) => setFormRecep({ ...formRecep, nombre: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                    Correo Electrónico *
-                  </label>
-                  <input
-                    type="email"
-                    value={formRecep.correo}
-                    onChange={(e) => setFormRecep({ ...formRecep, correo: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                    Sede Asignada *
-                  </label>
-                  <select
-                    value={formRecep.id_sede}
-                    onChange={(e) => setFormRecep({ ...formRecep, id_sede: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}
-                    required
-                  >
-                    {sedes.map((s) => (
-                      <option key={s.id_sede} value={s.id_sede}>
-                        {s.nombre} {s.es_principal ? '(Principal)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                    Teléfono
-                  </label>
-                  <input
-                    type="text"
-                    value={formRecep.telefono}
-                    onChange={(e) => setFormRecep({ ...formRecep, telefono: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}
-                  />
-                </div>
-
-                {/* Subida de foto administrada por Admin */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                    Foto de Perfil (Gestionada por Admin)
-                  </label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    {photoPreview && (
-                      <img src={photoPreview} alt="Preview" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
-                    )}
-                    <label className="dh-btn-upload" style={{ cursor: 'pointer', padding: '0.5rem 1rem' }}>
-                      <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
-                      <i className="fa-solid fa-camera"></i>
-                      <span>{selectedFile ? 'Cambiar foto' : 'Subir foto'}</span>
-                    </label>
+              <div className="adm-drawer-body" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+                <div className="adm-vet-status-banner" style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '12px', padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.5rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>
+                    <i className="fa-solid fa-circle-check"></i>
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', color: '#065f46', fontSize: '0.9rem' }}>Cuenta {selectedFicha.activo ? 'Activa y Habilitada' : 'Inhabilitada'}</strong>
+                    <span style={{ color: '#047857', fontSize: '0.8rem' }}>Asignado oficialmente a la Sede {selectedFicha.sede_nombre}</span>
                   </div>
                 </div>
 
-                <div className="adm-modal-footer">
-                  <button type="button" className="adm-btn-secondary" onClick={() => setShowModalForm(false)}>
+                <div className="adm-drawer-section" style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.85rem 0', paddingBottom: '0.4rem', borderBottom: '1px solid #e2e8f0' }}>
+                    <i className="fa-solid fa-address-card" style={{ color: '#059669' }}></i>
+                    Información de Contacto
+                  </h4>
+
+                  <div className="adm-info-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="adm-info-row" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.95rem' }}>
+                        <i className="fa-solid fa-envelope"></i>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Correo Electrónico</span>
+                        <a href={`mailto:${selectedFicha.correo}`} style={{ color: '#2563eb', fontWeight: 600, fontSize: '0.88rem', textDecoration: 'none' }}>
+                          {selectedFicha.correo}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="adm-info-row" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#f0fdf4', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.95rem' }}>
+                        <i className="fa-solid fa-phone"></i>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Teléfono</span>
+                        {selectedFicha.telefono ? (
+                          <a href={`tel:${selectedFicha.telefono}`} style={{ color: '#0f172a', fontWeight: 600, fontSize: '0.88rem', textDecoration: 'none' }}>
+                            {selectedFicha.telefono}
+                          </a>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin teléfono registrado</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="adm-drawer-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.6rem', background: '#f8fafc' }}>
+                <button
+                  className="adm-btn-secondary"
+                  onClick={() => {
+                    const targetRecep = selectedFicha
+                    setSelectedFicha(null)
+                    handleOpenResetModal(targetRecep)
+                  }}
+                  style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1rem' }}
+                >
+                  <i className="fa-solid fa-key" style={{ color: '#d97706' }}></i>
+                  Contraseña Temporal
+                </button>
+                <button
+                  className="adm-btn-primary"
+                  onClick={() => {
+                    const targetRecep = selectedFicha
+                    setSelectedFicha(null)
+                    handleOpenEditModal(targetRecep)
+                  }}
+                  style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1rem', background: '#059669', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  <i className="fa-solid fa-pen-to-square"></i>
+                  Editar Datos
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── DRAWER LATERAL: CREAR / EDITAR RECEPCIONISTA ── */}
+        {showModalForm && (
+          <div className="adm-drawer-overlay" onClick={() => setShowModalForm(false)}>
+            <div className="adm-drawer-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="adm-drawer-header">
+                <div className="adm-drawer-header__title-group">
+                  <div className="adm-drawer-header__icon" style={{ background: '#ecfdf5', color: '#059669', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+                    <i className={`fa-solid ${isEditing ? 'fa-pen-to-square' : 'fa-user-plus'}`}></i>
+                  </div>
+                  <div>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '1.15rem', color: '#0f172a', margin: 0 }}>
+                      {isEditing ? 'Editar Recepcionista' : 'Registrar Nuevo Recepcionista'}
+                    </h3>
+                    <span className="adm-drawer-header__sub" style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      {isEditing ? 'Actualiza la información de la cuenta y sede asignada' : 'Ingresa los datos para dar de alta al recepcionista en la sede'}
+                    </span>
+                  </div>
+                </div>
+                <button className="adm-drawer-close" onClick={() => setShowModalForm(false)} title="Cerrar">
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                <div className="adm-drawer-body" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+                  {formError && (
+                    <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.2rem', padding: '0.75rem 1rem', borderRadius: '10px', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                      <i className="fa-solid fa-circle-exclamation"></i>
+                      <span>{formError}</span>
+                    </div>
+                  )}
+
+                  <div className="adm-form-section" style={{ marginBottom: '1.5rem' }}>
+                    <h5 className="adm-form-section-title" style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: '0.88rem', color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem' }}>
+                      Información Básica
+                    </h5>
+
+                    <div className="adm-form-group" style={{ marginBottom: '1.2rem' }}>
+                      <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', marginBottom: '0.35rem' }}>
+                        Nombre Completo *
+                      </label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-user input-icon"></i>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Ej. Luisa Fernanda Restrepo"
+                          value={formRecep.nombre}
+                          onChange={(e) => setFormRecep({ ...formRecep, nombre: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: '1.2rem' }}>
+                      <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', marginBottom: '0.35rem' }}>
+                        Correo Electrónico (Acceso al Portal) *
+                      </label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-envelope input-icon"></i>
+                        <input
+                          type="email"
+                          required
+                          placeholder="Ej. recepcion.itagui.1@petfeliz.com"
+                          value={formRecep.correo}
+                          onChange={(e) => setFormRecep({ ...formRecep, correo: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: '1.2rem' }}>
+                      <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', marginBottom: '0.35rem' }}>
+                        Sede Asignada *
+                      </label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-location-dot input-icon"></i>
+                        <select
+                          value={formRecep.id_sede}
+                          onChange={(e) => setFormRecep({ ...formRecep, id_sede: e.target.value })}
+                          required
+                          style={{ width: '100%', padding: '0.65rem 0.85rem 0.65rem 2.5rem', borderRadius: '10px', border: '1px solid #cbd5e1', fontFamily: 'Inter, sans-serif', fontSize: '0.88rem', color: '#0f172a', background: '#fff' }}
+                        >
+                          {sedes.map((s) => (
+                            <option key={s.id_sede} value={s.id_sede}>
+                              Sede {s.nombre} {s.es_principal ? '(Sede Principal)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: '1.2rem' }}>
+                      <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.84rem', color: '#334155', marginBottom: '0.35rem' }}>
+                        Teléfono de Contacto
+                      </label>
+                      <div className="adm-input-wrap">
+                        <i className="fa-solid fa-phone input-icon"></i>
+                        <input
+                          type="tel"
+                          placeholder="Ej. 3104567812"
+                          value={formRecep.telefono}
+                          onChange={(e) => setFormRecep({ ...formRecep, telefono: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="adm-form-section">
+                    <h5 className="adm-form-section-title" style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: '0.88rem', color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem' }}>
+                      Foto de Perfil
+                    </h5>
+
+                    <div className="adm-form-group">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', margin: '0.4rem 0 0.75rem 0' }}>
+                        {photoPreview ? (
+                          <img
+                            src={photoPreview}
+                            alt="Vista previa"
+                            onError={(e) => { e.target.style.display = 'none' }}
+                            style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #059669', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
+                          />
+                        ) : (
+                          <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', border: '2px dashed #a7f3d0' }}>
+                            <i className="fa-solid fa-headset"></i>
+                          </div>
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <label className="act-btn act-btn--view" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.45rem 0.85rem', fontSize: '0.82rem', fontWeight: 600, background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#334155' }}>
+                            <i className="fa-solid fa-cloud-arrow-up" style={{ color: '#059669' }}></i>
+                            <span>{selectedFile ? 'Cambiar archivo' : 'Subir foto desde dispositivo'}</span>
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/jpg"
+                              style={{ display: 'none' }}
+                              onChange={handleFileChange}
+                            />
+                          </label>
+                          {selectedFile && <span style={{ fontSize: '0.78rem', color: '#059669', display: 'block', marginTop: '0.25rem', fontWeight: 600 }}>✓ {selectedFile.name}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="adm-drawer-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', background: '#f8fafc' }}>
+                  <button type="button" className="adm-btn-secondary" onClick={() => setShowModalForm(false)} style={{ padding: '0.65rem 1.25rem' }}>
                     Cancelar
                   </button>
-                  <button type="submit" className="adm-btn-primary" disabled={submittingForm}>
-                    {submittingForm ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Registrar Recepcionista'}
+                  <button type="submit" className="adm-btn-primary" disabled={submittingForm} style={{ padding: '0.65rem 1.5rem', background: '#059669', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+                    {submittingForm ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i> Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-check" style={{ marginRight: '6px' }}></i> {isEditing ? 'Guardar Cambios' : 'Registrar Recepcionista'}
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
@@ -690,65 +948,138 @@ export default function AdminRecepcionistas() {
           </div>
         )}
 
-        {/* ── MODAL RESTABLECER CLAVE TEMPORAL ── */}
+        {/* ── MODAL CENTRADO: GENERAR CONTRASEÑA TEMPORAL ── */}
         {showModalReset && resetRecep && (
-          <div className="adm-modal-backdrop">
-            <div className="adm-modal-box" style={{ maxWidth: '460px' }}>
-              <div className="adm-modal-header">
-                <h3>Restablecer Contraseña</h3>
-                <button type="button" className="adm-modal-close" onClick={() => setShowModalReset(false)}>
+          <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setShowModalReset(false)}>
+            <div className="adm-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#d97706' }}>
+                  <i className="fa-solid fa-key" style={{ fontSize: '1.2rem' }}></i>
+                  <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Generar Contraseña Temporal</h3>
+                </div>
+                <button className="adm-modal-close" onClick={() => setShowModalReset(false)} title="Cerrar">
                   <i className="fa-solid fa-xmark"></i>
                 </button>
               </div>
 
-              {!resetSuccessData ? (
-                <div>
-                  <p style={{ fontSize: '0.92rem', color: '#475569', marginBottom: '1.5rem' }}>
-                    ¿Deseas generar una nueva contraseña temporal para <strong>{resetRecep.nombre}</strong> ({resetRecep.correo})?
-                    El usuario deberá cambiarla obligatoriamente en su próximo inicio de sesión.
+              <form onSubmit={handleConfirmReset}>
+                <div className="adm-modal-body" style={{ padding: '1.5rem' }}>
+                  <p style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+                    Vas a generar una nueva contraseña temporal para <strong>{resetRecep.nombre}</strong> ({resetRecep.correo}).
                   </p>
-                  <div className="adm-modal-footer">
-                    <button type="button" className="adm-btn-secondary" onClick={() => setShowModalReset(false)}>
-                      Cancelar
-                    </button>
-                    <button type="button" className="adm-btn-primary" disabled={submittingReset} onClick={() => handleConfirmReset(resetRecep)}>
-                      {submittingReset ? 'Generando...' : 'Generar Clave Temporal'}
-                    </button>
+
+                  {resetError && (
+                    <div className="dash-alert dash-alert--danger" style={{ marginBottom: '1.2rem' }}>
+                      <i className="fa-solid fa-circle-exclamation"></i>
+                      <span>{resetError}</span>
+                    </div>
+                  )}
+
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>
+                      <i className="fa-solid fa-wand-magic-sparkles" style={{ color: '#059669', marginRight: '6px' }}></i>
+                      Se generará automáticamente una clave temporal segura. Podrás copiarla de inmediato para entregársela al recepcionista.
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', fontSize: '1.5rem' }}>
-                    <i className="fa-solid fa-key"></i>
-                  </div>
-                  <h4 style={{ color: '#0f172a', margin: '0 0 0.5rem 0' }}>¡Contraseña Temporal Creada!</h4>
-                  <p style={{ fontSize: '0.88rem', color: '#64748b' }}>Comparte esta clave única con el recepcionista:</p>
 
-                  <div style={{ background: '#f8fafc', border: '1.5px dashed #059669', padding: '1rem', borderRadius: '12px', margin: '1rem 0', fontFamily: 'monospace', fontSize: '1.25rem', color: '#059669', fontWeight: 700 }}>
-                    {resetSuccessData.nueva_contrasena}
-                  </div>
-
+                <div className="adm-modal-footer" style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                  <button type="button" className="adm-btn-secondary" onClick={() => setShowModalReset(false)}>
+                    Cancelar
+                  </button>
                   <button
                     type="button"
-                    className="adm-btn-secondary"
-                    onClick={() => {
-                      navigator.clipboard.writeText(resetSuccessData.nueva_contrasena)
-                      setCopiedToast(true)
-                      setTimeout(() => setCopiedToast(false), 3000)
-                    }}
-                    style={{ marginBottom: '1.25rem' }}
+                    className="adm-btn-primary"
+                    onClick={(e) => handleConfirmReset(e)}
+                    disabled={submittingReset}
+                    style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.65rem 1.25rem', fontWeight: 600, cursor: 'pointer' }}
                   >
-                    <i className="fa-solid fa-copy"></i>
-                    <span>{copiedToast ? '¡Copiada al portapapeles!' : 'Copiar Contraseña'}</span>
+                    {submittingReset ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i> Generando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i> Generar Contraseña Temporal
+                      </>
+                    )}
                   </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
-                  <div className="adm-modal-footer">
-                    <button type="button" className="adm-btn-primary" onClick={() => setShowModalReset(false)}>
-                      Entendido y Cerrar
-                    </button>
+        {/* ── MODAL CENTRADO: NUEVA CONTRASEÑA RESTABLECIDA CON ÉXITO ── */}
+        {resetSuccessData && (
+          <div className="adm-modal-overlay adm-modal-overlay--center" onClick={() => setResetSuccessData(null)}>
+            <div className="adm-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div className="adm-modal-header" style={{ borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#059669' }}>
+                  <i className="fa-solid fa-circle-check" style={{ fontSize: '1.2rem' }}></i>
+                  <h3 style={{ margin: 0, fontFamily: 'Sora, sans-serif', fontWeight: 700 }}>Contraseña Restablecida</h3>
+                </div>
+                <button className="adm-modal-close" onClick={() => setResetSuccessData(null)} title="Cerrar">
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <div className="adm-modal-body" style={{ padding: '1.5rem' }}>
+                <div className="dash-alert dash-alert--success" style={{ marginBottom: '1.25rem', padding: '0.75rem 1rem', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '10px', color: '#065f46', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem' }}>
+                  <i className="fa-solid fa-circle-check"></i>
+                  <span>¡La clave de <strong>{resetSuccessData.nombre}</strong> ha sido actualizada exitosamente!</span>
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: '1.1rem', borderRadius: '12px', border: '1px solid #cbd5e1', marginBottom: '1rem' }}>
+                  <div style={{ marginBottom: '0.8rem' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                      Usuario / Correo
+                    </span>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
+                      {resetSuccessData.correo}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+                      Nueva Contraseña Temporal
+                    </span>
+                    <span style={{ fontFamily: 'monospace', fontSize: '1.2rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '0.36rem 0.75rem', borderRadius: '6px', border: '1px solid #a7f3d0', display: 'inline-block' }}>
+                      {resetSuccessData.contrasena}
+                    </span>
                   </div>
                 </div>
-              )}
+
+                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                  <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginTop: '2px', fontSize: '0.95rem' }}></i>
+                  <span style={{ fontSize: '0.82rem', color: '#92400e', lineHeight: '1.4' }}>
+                    <strong>Importante:</strong> Entrega esta nueva contraseña al recepcionista. Las sesiones anteriores abiertas han sido cerradas por seguridad.
+                  </span>
+                </div>
+              </div>
+
+              <div className="adm-modal-footer" style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  className="adm-btn-secondary"
+                  onClick={() => setResetSuccessData(null)}
+                >
+                  Cerrar
+                </button>
+                <button
+                  type="button"
+                  className="adm-btn-primary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(resetSuccessData.contrasena)
+                    setCopiedToast(true)
+                    setTimeout(() => setCopiedToast(false), 3000)
+                  }}
+                  style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.65rem 1.25rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <i className="fa-solid fa-copy"></i>
+                  <span>{copiedToast ? '¡Copiada al portapapeles!' : 'Copiar Credencial'}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

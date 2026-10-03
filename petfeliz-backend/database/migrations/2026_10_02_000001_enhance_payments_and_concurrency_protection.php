@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -45,23 +46,42 @@ return new class extends Migration
         });
 
         // 3. Proteger la tabla cita contra citas duplicadas activas para el mismo veterinario, fecha y hora
-        Schema::table('cita', function (Blueprint $table) {
-            if (!Schema::hasColumn('cita', 'slot_activo')) {
-                $driver = DB::getDriverName();
-                if ($driver === 'sqlite') {
-                    $table->string('slot_activo', 150)
-                        ->nullable()
-                        ->storedAs("CASE WHEN id_estado != 3 THEN (id_veterinario || '_' || fecha || '_' || hora) ELSE NULL END")
-                        ->unique();
+        if (Schema::hasTable('cita') && !Schema::hasColumn('cita', 'slot_activo')) {
+            try {
+                $duplicados = DB::table('cita')
+                    ->select('id_veterinario', 'fecha', 'hora', DB::raw('COUNT(*) as total'), DB::raw('GROUP_CONCAT(id_cita) as ids_citas'))
+                    ->where('id_estado', '!=', 3)
+                    ->groupBy('id_veterinario', 'fecha', 'hora')
+                    ->having('total', '>', 1)
+                    ->get();
+
+                if ($duplicados->isNotEmpty()) {
+                    $detalles = [];
+                    foreach ($duplicados as $d) {
+                        $detalles[] = "Vet: {$d->id_veterinario}, Fecha: {$d->fecha} {$d->hora} -> Citas IDs: [{$d->ids_citas}]";
+                    }
+                    Log::error("Migración 2026_10_02: Se encontraron citas activas duplicadas preexistentes. Se omite el índice único 'slot_activo' para no interrumpir el despliegue. Detalles: " . implode(' | ', $detalles));
                 } else {
-                    // MySQL 5.7+ / 8.0+
-                    $table->string('slot_activo', 150)
-                        ->nullable()
-                        ->storedAs("IF(id_estado != 3, CONCAT(id_veterinario, '_', fecha, '_', hora), NULL)")
-                        ->unique();
+                    Schema::table('cita', function (Blueprint $table) {
+                        $driver = DB::getDriverName();
+                        if ($driver === 'sqlite') {
+                            $table->string('slot_activo', 150)
+                                ->nullable()
+                                ->storedAs("CASE WHEN id_estado != 3 THEN (id_veterinario || '_' || fecha || '_' || hora) ELSE NULL END")
+                                ->unique();
+                        } else {
+                            // MySQL 5.7+ / 8.0+
+                            $table->string('slot_activo', 150)
+                                ->nullable()
+                                ->storedAs("IF(id_estado != 3, CONCAT(id_veterinario, '_', fecha, '_', hora), NULL)")
+                                ->unique();
+                        }
+                    });
                 }
+            } catch (\Throwable $e) {
+                Log::error("Migración 2026_10_02: Error al evaluar duplicados o crear slot_activo: " . $e->getMessage());
             }
-        });
+        }
 
         // 4. Asegurar que la columna estado en pagos soporte 'requiere_revision'
         if (Schema::hasTable('pagos') && Schema::hasColumn('pagos', 'estado')) {

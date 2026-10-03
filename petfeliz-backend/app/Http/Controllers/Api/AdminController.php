@@ -402,7 +402,12 @@ class AdminController extends Controller
     {
         $mascotas = Mascota::with(['cliente', 'citas.servicio'])->orderBy('id_mascota', 'desc')->get();
 
-        $clientes = Cliente::orderBy('nombre', 'asc')->get(['id_cliente', 'nombre', 'telefono', 'cedula']);
+        $clientes = Cliente::where(function ($q) {
+            $q->whereDoesntHave('usuario')
+              ->orWhereHas('usuario', function ($uq) {
+                  $uq->where('rol', 'cliente')->orWhereNull('rol');
+              });
+        })->orderBy('nombre', 'asc')->get(['id_cliente', 'nombre', 'telefono', 'cedula']);
 
         $formatted = $mascotas->map(function ($mascota) {
             $edadTexto = 'Edad N/A';
@@ -1160,6 +1165,12 @@ class AdminController extends Controller
     public function clientesIndex(Request $request)
     {
         $clientes = Cliente::with(['usuario', 'mascotas', 'citas.servicio'])
+            ->where(function ($q) {
+                $q->whereDoesntHave('usuario')
+                  ->orWhereHas('usuario', function ($uq) {
+                      $uq->where('rol', 'cliente')->orWhereNull('rol');
+                  });
+            })
             ->orderBy('id_cliente', 'desc')
             ->get();
 
@@ -1221,6 +1232,12 @@ class AdminController extends Controller
     public function clientesShow($id)
     {
         $c = Cliente::with(['usuario', 'mascotas.citas', 'citas.servicio', 'citas.veterinario', 'citas.estado'])
+            ->where(function ($q) {
+                $q->whereDoesntHave('usuario')
+                  ->orWhereHas('usuario', function ($uq) {
+                      $uq->where('rol', 'cliente')->orWhereNull('rol');
+                  });
+            })
             ->where('id_cliente', $id)
             ->firstOrFail();
 

@@ -592,7 +592,13 @@ class RecepcionistaPortalController extends Controller
     public function clientes(Request $request)
     {
         $idSede = $this->getSedeId($request);
-        $query = Cliente::with(['usuario', 'mascotas']);
+        $query = Cliente::with(['usuario', 'mascotas'])
+            ->where(function ($q) {
+                $q->whereDoesntHave('usuario')
+                  ->orWhereHas('usuario', function ($uq) {
+                      $uq->where('rol', 'cliente')->orWhereNull('rol');
+                  });
+            });
 
         if ($idSede) {
             $query->whereHas('citas', function ($cq) use ($idSede) {

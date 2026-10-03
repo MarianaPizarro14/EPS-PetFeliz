@@ -42,6 +42,8 @@ class SedeSeeder extends Seeder
             ]
         );
 
-        $this->command->info('Sedes creadas/actualizadas exitosamente: Laureles (Principal), Bello e Itagüí.');
+        if ($this->command) {
+            $this->command->info('Sedes creadas/actualizadas exitosamente: Laureles (Principal), Bello e Itagüí.');
+        }
     }
 }

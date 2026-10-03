@@ -164,7 +164,7 @@ export default function ZonaCuidadoresBanner() {
                 <>
                   <div className="zcc-modal-header">
                     <div className="zcc-modal-badge">
-                      <FontAwesomeIcon icon="fa-solid fa-paw" /> EPS PetFeliz
+                      EPS PetFeliz
                     </div>
                     <h3 id="share-modal-title">Comparte tu historia</h3>
                     <p>Cuéntanos la experiencia vivida con tu mascota. Las mejores vivencias serán publicadas en nuestro portal y redes.</p>

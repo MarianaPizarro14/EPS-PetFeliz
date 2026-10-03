@@ -7,7 +7,6 @@ function Navbar() {
     <header className="navbar">
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo">
-          <i className="fa-solid fa-paw" style={{ marginRight: '0.45rem', color: '#10b981' }}></i>
           EPS PetFeliz
         </Link>
 

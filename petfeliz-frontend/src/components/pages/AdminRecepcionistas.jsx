@@ -314,40 +314,60 @@ export default function AdminRecepcionistas() {
         />
 
         {/* Métricas */}
-        <div className="adm-stats-grid" style={{ marginTop: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-          <div className="adm-stat-card">
-            <div className="adm-stat-card__icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
-              <i className="fa-solid fa-id-card"></i>
+        <div className="admin-dash-grid">
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Total Recepcionistas</span>
+              <h3>{loading ? '...' : stats.total}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive">
+                <i className="fa-solid fa-id-card"></i>
+                <span>Personal de Sedes</span>
+              </div>
             </div>
-            <div className="adm-stat-card__info">
-              <span className="adm-stat-card__label">Total Recepcionistas</span>
-              <strong className="adm-stat-card__value">{stats.total}</strong>
+            <div className="admin-stat-card__icon admin-stat-card__icon--blue">
+              <i className="fa-solid fa-users"></i>
             </div>
           </div>
 
-          <div className="adm-stat-card">
-            <div className="adm-stat-card__icon" style={{ background: '#ecfdf5', color: '#059669' }}>
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Cuentas Activas</span>
+              <h3>{loading ? '...' : stats.activos}</h3>
+              <div className="admin-trend-badge admin-trend-badge--positive">
+                <i className="fa-solid fa-user-check"></i>
+                <span>Acceso Habilitado</span>
+              </div>
+            </div>
+            <div className="admin-stat-card__icon admin-stat-card__icon--green">
               <i className="fa-solid fa-user-check"></i>
             </div>
-            <div className="adm-stat-card__info">
-              <span className="adm-stat-card__label">Cuentas Activas</span>
-              <strong className="adm-stat-card__value">{stats.activos}</strong>
-            </div>
           </div>
 
-          <div className="adm-stat-card">
-            <div className="adm-stat-card__icon" style={{ background: '#fef2f2', color: '#dc2626' }}>
-              <i className="fa-solid fa-user-xmark"></i>
+          <div className="admin-stat-card">
+            <div className="admin-stat-card__info">
+              <span>Inactivas / Inhabilitadas</span>
+              <h3>{loading ? '...' : stats.inactivos}</h3>
+              <div className="admin-trend-badge admin-trend-badge--neutral">
+                <i className="fa-solid fa-user-xmark"></i>
+                <span>Sin Acceso</span>
+              </div>
             </div>
-            <div className="adm-stat-card__info">
-              <span className="adm-stat-card__label">Inactivas / Inhabilitadas</span>
-              <strong className="adm-stat-card__value">{stats.inactivos}</strong>
+            <div className="admin-stat-card__icon admin-stat-card__icon--amber">
+              <i className="fa-solid fa-user-xmark"></i>
             </div>
           </div>
         </div>
 
         {/* Listado */}
-        <div style={{ marginTop: '2rem', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+        <div className="admin-card">
+          <div className="admin-card__header">
+            <div className="admin-card__title">
+              <div className="admin-card__title-icon" style={{ background: '#f0f9ff', color: '#0369a1' }}>
+                <i className="fa-solid fa-users"></i>
+              </div>
+              <h3>Listado de Personal de Recepción</h3>
+            </div>
+          </div>
           {loading ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
               <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '2rem', color: '#2563eb', marginBottom: '1rem' }}></i>

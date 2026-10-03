@@ -620,63 +620,71 @@ ul { list-style: none; }
 .testimonial__card {
     background: radial-gradient(circle at top right, #006d41be 0%, #2D3133 50%);
     border-radius: 40px;
-    padding: clamp(2rem, 4vw, 3rem);
+    padding: clamp(2.5rem, 5vw, 3.5rem);
     max-width: 1000px;
     margin-inline: auto;
 }
 
 .testimonial__quote-mark {
     font-family: var(--font-head);
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    color: var(--green-accent);
+    color: #00f59b;
+    text-shadow: 0 0 12px rgba(0, 245, 155, 0.45);
     line-height: 1;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.05em;
 }
 
 .testimonial__text {
-    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-size: clamp(1.15rem, 2.5vw, 1.45rem);
     color: #ffffff;
     line-height: 1.75;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     font-weight: 600;
     text-align: left;
-    max-width: 550px;
-    letter-spacing: 0.03em;
+    max-width: 650px;
+    letter-spacing: 0.02em;
 }
 
 .testimonial__author {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
+    margin-top: clamp(2.25rem, 4vw, 3.25rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .testimonial__avatar-img {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    max-width: 48px;
-    max-height: 48px;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    max-width: 52px;
+    max-height: 52px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    border: 2px solid var(--green-accent);
+    border: 2px solid #00f59b;
+    box-shadow: 0 0 10px rgba(0, 245, 155, 0.35);
 }
 
 .testimonial__name {
     font-family: var(--font-head);
     font-weight: 700;
-    color: var(--white);
-    font-size: .9rem;
+    color: #ffffff;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
 }
 
 .testimonial__role {
-    font-size: .78rem;
+    font-size: .82rem;
     font-weight: 600;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: var(--green-accent);
-    margin-top: .15rem;
+    color: #00f59b;
+    margin-top: .25rem;
+    text-shadow: 0 0 8px rgba(0, 245, 155, 0.3);
 }
 
 /* CTA BANNER */

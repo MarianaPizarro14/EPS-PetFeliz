@@ -1,15 +1,17 @@
 function Testimonial({
-  quote = '"Con PetFeliz ahora todo es más fácil. Puedo agendar citas, ver las recetas de Max y pagar en line sin complicaciones. Me siento mucho más tranquila sabiendo que todo está organizado."',
+  quote = 'Con PetFeliz ahora todo es más fácil. Puedo agendar citas, ver las recetas de Max y pagar en línea sin complicaciones. Me siento mucho más tranquila sabiendo que todo está organizado.',
   name  = 'Manuela Giraldo',
   role  = 'Dueña de Max (Border Collie) · Laureles, Medellín',
   avatar = 'https://res.cloudinary.com/dedroug6v/image/upload/v1784696251/border-collie_u2libh.jpg',
 }) {
+  const cleanQuote = quote ? quote.replace(/^["“”']+|["“”']+$/g, '') : ''
+
   return (
     <section className="testimonial">
       <div className="container">
         <div className="testimonial__card">
           <div className="testimonial__quote-mark">99</div>
-          <p className="testimonial__text">"{quote}"</p>
+          <p className="testimonial__text">"{cleanQuote}"</p>
           <div className="testimonial__author">
             <img
               src={avatar}

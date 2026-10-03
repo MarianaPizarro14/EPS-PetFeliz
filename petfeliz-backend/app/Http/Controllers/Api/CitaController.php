@@ -115,12 +115,23 @@ class CitaController extends Controller
         $request->validate([
             'id_mascota' => 'required|integer|exists:mascota,id_mascota',
             'id_veterinario' => 'required|integer|exists:veterinario,id_veterinario',
-            'id_servicio' => 'nullable|integer',
+            'id_servicio' => 'nullable|integer|exists:servicio,id_servicio',
             'motivo' => 'nullable|string|max:200',
-            'fecha' => 'required|date',
+            'fecha' => 'required|date|after_or_equal:today',
             'hora' => 'required|string',
             'observacion' => 'nullable|string|max:500',
         ]);
+
+        // IDOR Check: Validar que la mascota pertenezca al cliente autenticado
+        $mascota = Mascota::where('id_mascota', $request->id_mascota)
+            ->where('id_cliente', $cliente->id_cliente)
+            ->first();
+
+        if (!$mascota) {
+            return response()->json([
+                'message' => 'No autorizado. La mascota no pertenece al cliente autenticado.',
+            ], 403);
+        }
 
         $servicioNombre = 'Consulta General';
         if ($request->id_servicio) {
@@ -139,24 +150,48 @@ class CitaController extends Controller
             ], 422);
         }
 
-        $cita = Cita::create([
-            'id_cliente' => $cliente->id_cliente,
-            'id_mascota' => $request->id_mascota,
-            'id_servicio' => $request->id_servicio,
-            'id_sede' => $vetObj->id_sede,
-            'motivo' => $motivoFinal,
-            'fecha' => $request->fecha,
-            'hora' => date('H:i:s', strtotime($request->hora)),
-            'observacion' => $request->observacion,
-            'id_estado' => 1, // 1 = Pendiente
-            'estado_pago' => 'pendiente',
-            'id_veterinario' => $vetObj->id_veterinario,
-        ]);
+        $horaSql = date('H:i:s', strtotime($request->hora));
 
-        return response()->json([
-            'message' => 'Cita agendada correctamente.',
-            'cita' => $cita,
-        ], 201);
+        return \Illuminate\Support\Facades\DB::transaction(function () use (
+            $request,
+            $cliente,
+            $vetObj,
+            $motivoFinal,
+            $horaSql
+        ) {
+            // Verificar choque de horarios con bloqueo pesimista
+            $citaExistente = Cita::where('id_veterinario', $vetObj->id_veterinario)
+                ->where('fecha', $request->fecha)
+                ->where('hora', $horaSql)
+                ->where('id_estado', '!=', 3)
+                ->lockForUpdate()
+                ->exists();
+
+            if ($citaExistente) {
+                return response()->json([
+                    'message' => 'El horario seleccionado ya ha sido reservado por otro usuario. Por favor elige otro horario.',
+                ], 409);
+            }
+
+            $cita = Cita::create([
+                'id_cliente' => $cliente->id_cliente,
+                'id_mascota' => $request->id_mascota,
+                'id_servicio' => $request->id_servicio,
+                'id_sede' => $vetObj->id_sede,
+                'motivo' => $motivoFinal,
+                'fecha' => $request->fecha,
+                'hora' => $horaSql,
+                'observacion' => $request->observacion,
+                'id_estado' => 1, // 1 = Pendiente
+                'estado_pago' => 'pendiente',
+                'id_veterinario' => $vetObj->id_veterinario,
+            ]);
+
+            return response()->json([
+                'message' => 'Cita agendada correctamente.',
+                'cita' => $cita,
+            ], 201);
+        });
     }
 
     /**
@@ -246,74 +281,6 @@ class CitaController extends Controller
     public function servicios()
     {
         $servicios = Servicio::where('activo', 1)->get();
-        if ($servicios->isEmpty()) {
-            $defaultServicios = [
-                [
-                    'id_servicio' => 1,
-                    'nombre' => 'Consulta General',
-                    'descripcion' => 'Evaluación integral del estado de salud de tu mascota con diagnóstico y plan de tratamiento personalizado.',
-                    'precio_base' => 70000,
-                    'precio_afiliado' => 0,
-                    'incluido_en_plan' => true,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 2,
-                    'nombre' => 'Vacunación',
-                    'descripcion' => 'Esquema completo de vacunas para perros y gatos según edad, raza y estilo de vida.',
-                    'precio_base' => 75000,
-                    'precio_afiliado' => 20000,
-                    'incluido_en_plan' => true,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 3,
-                    'nombre' => 'Desparasitación',
-                    'descripcion' => 'Tratamiento interno y externo contra parásitos adaptado al peso, edad y hábitos de tu mascota.',
-                    'precio_base' => 55000,
-                    'precio_afiliado' => 20000,
-                    'incluido_en_plan' => true,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 4,
-                    'nombre' => 'Urgencias',
-                    'descripcion' => 'Atención médica veterinaria prioritaria y de emergencia 24/7 para estabilización e intervenciones requeridas.',
-                    'precio_base' => 120000,
-                    'precio_afiliado' => 50000,
-                    'incluido_en_plan' => false,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 5,
-                    'nombre' => 'Laboratorio Clínico',
-                    'descripcion' => 'Análisis de sangre, orina, coprológicos y profilaxis para diagnóstico preciso de patologías.',
-                    'precio_base' => 110000,
-                    'precio_afiliado' => 45000,
-                    'incluido_en_plan' => false,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 6,
-                    'nombre' => 'Odontología',
-                    'descripcion' => 'Profilaxis dental profesional, extracciones y tratamiento de enfermedades periodontales.',
-                    'precio_base' => 180000,
-                    'precio_afiliado' => 80000,
-                    'incluido_en_plan' => false,
-                    'activo' => true,
-                ],
-                [
-                    'id_servicio' => 7,
-                    'nombre' => 'Cirugía',
-                    'descripcion' => 'Procedimientos quirúrgicos generales y especializados con anestesia inhalada y monitoreo constante.',
-                    'precio_base' => 450000,
-                    'precio_afiliado' => 200000,
-                    'incluido_en_plan' => false,
-                    'activo' => true,
-                ],
-            ];
-            return response()->json($defaultServicios, 200);
-        }
         return response()->json($servicios, 200);
     }
 

@@ -85,22 +85,22 @@ class AdminController extends Controller
         
         $citasHoyTrendVal = $totalCitasAyerCount > 0 
             ? round((($totalCitasHoyCount - $totalCitasAyerCount) / $totalCitasAyerCount) * 100, 1) 
-            : ($totalCitasHoyCount > 0 ? 100 : 0);
-        $citasHoyTrendText = $citasHoyTrendVal >= 0 ? "+{$citasHoyTrendVal}% respecto a ayer" : "{$citasHoyTrendVal}% respecto a ayer";
+            : null;
+        $citasHoyTrendText = $citasHoyTrendVal !== null ? ($citasHoyTrendVal >= 0 ? "+{$citasHoyTrendVal}% vs ayer" : "{$citasHoyTrendVal}% vs ayer") : null;
 
         $citasPendientesCount = Cita::where('id_estado', 1)->count();
         $citasPendientesAyer = Cita::where('id_estado', 1)->whereDate('created_at', '<', $todayStr)->count();
         $pendientesTrendVal = $citasPendientesAyer > 0 
             ? round((($citasPendientesCount - $citasPendientesAyer) / $citasPendientesAyer) * 100, 1)
-            : 0;
-        $pendientesTrendText = $pendientesTrendVal <= 0 ? "{$pendientesTrendVal}% vs ayer (óptimo)" : "+{$pendientesTrendVal}% por atender";
+            : null;
+        $pendientesTrendText = $pendientesTrendVal !== null ? ($pendientesTrendVal <= 0 ? "{$pendientesTrendVal}% vs ayer" : "+{$pendientesTrendVal}% vs ayer") : null;
 
         $revisionesHoyCount = Cita::whereDate('fecha', $todayStr)->where('id_estado', 2)->count();
         $revisionesAyerCount = Cita::whereDate('fecha', $yesterdayStr)->where('id_estado', 2)->count();
         $revisionesTrendVal = $revisionesAyerCount > 0
             ? round((($revisionesHoyCount - $revisionesAyerCount) / $revisionesAyerCount) * 100, 1)
-            : ($revisionesHoyCount > 0 ? 100 : 0);
-        $revisionesTrendText = $revisionesTrendVal >= 0 ? "+{$revisionesTrendVal}% atenciones hoy" : "{$revisionesTrendVal}% hoy";
+            : null;
+        $revisionesTrendText = $revisionesTrendVal !== null ? ($revisionesTrendVal >= 0 ? "+{$revisionesTrendVal}% vs ayer" : "{$revisionesTrendVal}% vs ayer") : null;
 
         // 2. Tendencia de Citas en los Últimos 14 Días
         $tendenciaCitas = [];
@@ -113,7 +113,7 @@ class AdminController extends Controller
             $tendenciaCitas[] = [
                 'fecha' => $label,
                 'iso' => $dayDate->toDateString(),
-                'total' => $count > 0 ? $count : rand(1, 4), // Fallback visual leve si BD está nueva
+                'total' => $count,
             ];
         }
 
@@ -133,7 +133,7 @@ class AdminController extends Controller
             ->groupBy('nombre_servicio')
             ->get();
 
-        $totalCitasGlobal = Cita::count() ?: 1;
+        $totalCitasGlobal = Cita::count() ?: 0;
 
         $distribucionServicios = collect($serviciosCatalogo)->map(function ($cat) use ($citasPorServicioRaw, $totalCitasGlobal) {
             $matchedCount = 0;
@@ -164,12 +164,7 @@ class AdminController extends Controller
                 }
             }
 
-            // Fallback si la BD no tiene clasificadas citas aún en este servicio pero es la consulta principal
-            if ($cat['servicio'] === 'Consulta Veterinaria General' && $matchedCount === 0 && $citasPorServicioRaw->isNotEmpty()) {
-                $matchedCount = $citasPorServicioRaw->sum('total');
-            }
-
-            $pct = round(($matchedCount / $totalCitasGlobal) * 100, 1);
+            $pct = $totalCitasGlobal > 0 ? round(($matchedCount / $totalCitasGlobal) * 100, 1) : 0;
 
             return [
                 'servicio' => $cat['servicio'],
@@ -198,35 +193,6 @@ class AdminController extends Controller
                 'fecha' => $p->created_at ? $p->created_at->format('d/m/Y h:i A') : date('d/m/Y h:i A'),
             ];
         });
-
-        if ($transaccionesRecientes->isEmpty()) {
-            $transaccionesRecientes = collect([
-                [
-                    'id_pago' => 101,
-                    'cliente' => 'Mariana Pizarro',
-                    'email' => 'mariana@petfeliz.com',
-                    'monto' => 45000,
-                    'monto_formateado' => '$45.000',
-                    'metodo_pago' => 'Wompi - Tarjeta',
-                    'tipo_cobertura' => 'COPAGO',
-                    'estado' => 'confirmado',
-                    'referencia' => 'WOMPI-984123',
-                    'fecha' => date('d/m/Y h:i A'),
-                ],
-                [
-                    'id_pago' => 100,
-                    'cliente' => 'Carlos Mendoza',
-                    'email' => 'carlos@gmail.com',
-                    'monto' => 85000,
-                    'monto_formateado' => '$85.000',
-                    'metodo_pago' => 'Transferencia Bancafé',
-                    'tipo_cobertura' => 'PARTICULAR',
-                    'estado' => 'confirmado',
-                    'referencia' => 'TRF-458190',
-                    'fecha' => date('d/m/Y h:i A', strtotime('-2 hours')),
-                ],
-            ]);
-        }
 
         $historialCompletoPagos = $pagosAll->map(function ($p) {
             return [
@@ -281,80 +247,76 @@ class AdminController extends Controller
                 ],
                 'estado' => $c->estado->nombre ?? ($c->id_estado == 4 ? 'Completada' : ($c->id_estado == 2 ? 'Confirmada' : 'Pendiente')),
                 'id_estado' => $c->id_estado,
-                'observacion' => $c->observacion ?? 'Atención agendada en línea.',
+                'observacion' => $c->observacion ?? '',
             ];
         });
 
-        // 6. Recordatorios de hoy
-        $recordatorios = [
-            [
-                'id' => 1,
-                'tipo' => 'urgente',
-                'titulo' => 'Revisión Quirófano Sede Laureles',
-                'detalle' => 'Verificar stock de insumos e instrumental médico.',
-                'hora' => '08:30 AM',
-            ],
-            [
-                'id' => 2,
-                'tipo' => 'info',
-                'titulo' => 'Verificación Afiliados en Mora',
-                'detalle' => 'Citas con tarifa particular aplicadas correctamente.',
-                'hora' => '10:00 AM',
-            ],
-            [
-                'id' => 3,
-                'tipo' => 'exito',
-                'titulo' => 'Auditoría de Certificados Sanitarios',
-                'detalle' => 'Emisión de certificados de inmunización al día.',
-                'hora' => '02:00 PM',
-            ],
-        ];
+        // 6. Recordatorios reales basados en citas pendientes de hoy
+        $citasPendientesHoy = Cita::with(['mascota', 'veterinario'])
+            ->whereDate('fecha', $todayStr)
+            ->where('id_estado', 1)
+            ->take(3)
+            ->get();
 
-        // 7. Actividad Reciente
-        $actividadReciente = [
-            [
-                'id' => 1,
+        $recordatorios = $citasPendientesHoy->map(function ($c) {
+            return [
+                'id' => $c->id_cita,
+                'tipo' => 'urgente',
+                'titulo' => 'Cita pendiente por confirmar',
+                'detalle' => "Paciente {$c->mascota?->nombre} con Dr(a). {$c->veterinario?->nombre}",
+                'hora' => date('h:i A', strtotime($c->hora)),
+            ];
+        })->values()->toArray();
+
+        // 7. Actividad Reciente real del sistema
+        $ultimasCitas = Cita::with(['mascota', 'cliente'])->orderBy('created_at', 'desc')->take(3)->get();
+        $ultimosPagos = Pago::with(['cliente'])->orderBy('created_at', 'desc')->take(3)->get();
+
+        $actividades = collect();
+        foreach ($ultimasCitas as $c) {
+            $actividades->push([
+                'id' => 'cita-' . $c->id_cita,
                 'icono' => 'fa-regular fa-calendar-check',
                 'color' => 'green',
                 'titulo' => 'Cita Médica Agendada',
-                'descripcion' => 'Consulta de control reservada para hoy',
-                'tiempo' => 'Hace 10 min',
-            ],
-            [
-                'id' => 2,
+                'descripcion' => "Para " . ($c->mascota?->nombre ?? 'Mascota') . " (" . ($c->motivo ?? 'Consulta') . ")",
+                'tiempo' => $c->created_at ? $c->created_at->diffForHumans() : 'Reciente',
+                'created_at' => $c->created_at ?? now(),
+            ]);
+        }
+        foreach ($ultimosPagos as $p) {
+            $actividades->push([
+                'id' => 'pago-' . $p->id_pago,
                 'icono' => 'fa-solid fa-receipt',
                 'color' => 'blue',
-                'titulo' => 'Pago Confirmado vía Wompi',
-                'descripcion' => 'Transacción de copago procesada con éxito',
-                'tiempo' => 'Hace 35 min',
-            ],
-            [
-                'id' => 3,
-                'icono' => 'fa-solid fa-paw',
-                'color' => 'amber',
-                'titulo' => 'Nuevo Expediente de Mascota',
-                'descripcion' => 'Mascota dada de alta en la plataforma',
-                'tiempo' => 'Hace 1 hora',
-            ],
-        ];
+                'titulo' => 'Pago Registrado',
+                'descripcion' => "Pago de $" . number_format($p->monto, 0, ',', '.') . " (" . ($p->metodo_pago ?? 'Wompi') . ")",
+                'tiempo' => $p->created_at ? $p->created_at->diffForHumans() : 'Reciente',
+                'created_at' => $p->created_at ?? now(),
+            ]);
+        }
+        $actividadReciente = $actividades->sortByDesc('created_at')->values()->take(5)->map(function ($item) {
+            unset($item['created_at']);
+            return $item;
+        })->toArray();
 
         return response()->json([
             'stats' => [
-                'total_citas_hoy' => $totalCitasHoyCount > 0 ? $totalCitasHoyCount : count($proximosPacientes),
+                'total_citas_hoy' => $totalCitasHoyCount,
                 'citas_hoy_trend' => $citasHoyTrendText,
-                'citas_hoy_trend_positive' => $citasHoyTrendVal >= 0,
-                'citas_pendientes' => $citasPendientesCount > 0 ? $citasPendientesCount : 2,
+                'citas_hoy_trend_positive' => $citasHoyTrendVal !== null ? ($citasHoyTrendVal >= 0) : null,
+                'citas_pendientes' => $citasPendientesCount,
                 'pendientes_trend' => $pendientesTrendText,
-                'pendientes_trend_positive' => $pendientesTrendVal <= 0,
-                'revisiones_hoy' => $revisionesHoyCount > 0 ? $revisionesHoyCount : 5,
+                'pendientes_trend_positive' => $pendientesTrendVal !== null ? ($pendientesTrendVal <= 0) : null,
+                'revisiones_hoy' => $revisionesHoyCount,
                 'revisiones_trend' => $revisionesTrendText,
-                'revisiones_trend_positive' => $revisionesTrendVal >= 0,
+                'revisiones_trend_positive' => $revisionesTrendVal !== null ? ($revisionesTrendVal >= 0) : null,
             ],
             'tendencia_citas' => $tendenciaCitas,
             'distribucion_servicios' => $distribucionServicios,
-            'transacciones_recientes' => $transaccionesRecientes,
-            'historial_completo_pagos' => $historialCompletoPagos,
-            'proximos_pacientes' => $proximosPacientes,
+            'transacciones_recientes' => $transaccionesRecientes->values(),
+            'historial_completo_pagos' => $historialCompletoPagos->values(),
+            'proximos_pacientes' => $proximosPacientes->values(),
             'recordatorios_hoy' => $recordatorios,
             'actividad_reciente' => $actividadReciente,
         ], 200);
@@ -416,136 +378,6 @@ class AdminController extends Controller
                 'medicamentos' => is_array($c->medicamentos) ? $c->medicamentos : (json_decode($c->medicamentos, true) ?? []),
             ];
         });
-
-        // Si la BD está vacía, proveer datos mock realistas para testing
-        if ($citas->isEmpty()) {
-            $citas = collect([
-                [
-                    'id_cita' => 101,
-                    'hora' => '08:30 AM',
-                    'hora_raw' => '08:30:00',
-                    'fecha' => Carbon::today()->toDateString(),
-                    'fecha_formateada' => Carbon::today()->format('d/m/Y'),
-                    'paciente' => [
-                        'id_mascota' => 1,
-                        'nombre' => 'Bruno',
-                        'especie' => 'Canino',
-                        'raza' => 'Golden Retriever',
-                        'foto' => 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'dueno' => [
-                        'id_cliente' => 1,
-                        'nombre' => 'Mariana Pizarro',
-                        'telefono' => '300 456 7890',
-                        'email' => 'mariana@petfeliz.com',
-                        'cedula' => '1.020.345.678',
-                    ],
-                    'servicio' => 'Vacunación Pentavalente',
-                    'veterinario' => [
-                        'id_veterinario' => 1,
-                        'nombre' => 'Dra. Camila Torres',
-                        'especialidad' => 'Medicina Preventiva',
-                        'foto' => 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'estado' => 'Pendiente',
-                    'id_estado' => 1,
-                    'observacion' => 'Refuerzo de vacuna anual pendiente.',
-                ],
-                [
-                    'id_cita' => 102,
-                    'hora' => '10:00 AM',
-                    'hora_raw' => '10:00:00',
-                    'fecha' => Carbon::today()->toDateString(),
-                    'fecha_formateada' => Carbon::today()->format('d/m/Y'),
-                    'paciente' => [
-                        'id_mascota' => 2,
-                        'nombre' => 'Luna',
-                        'especie' => 'Felino',
-                        'raza' => 'Siamés',
-                        'foto' => 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'dueno' => [
-                        'id_cliente' => 2,
-                        'nombre' => 'Carlos Mendoza',
-                        'telefono' => '311 987 6543',
-                        'email' => 'carlos@gmail.com',
-                        'cedula' => '1.032.890.123',
-                    ],
-                    'servicio' => 'Control Odontológico',
-                    'veterinario' => [
-                        'id_veterinario' => 2,
-                        'nombre' => 'Dr. Felipe Restrepo',
-                        'especialidad' => 'Cirugía Veterinaria',
-                        'foto' => null,
-                    ],
-                    'estado' => 'Confirmada',
-                    'id_estado' => 2,
-                    'observacion' => 'Profilaxis programada.',
-                ],
-                [
-                    'id_cita' => 103,
-                    'hora' => '02:15 PM',
-                    'hora_raw' => '14:15:00',
-                    'fecha' => Carbon::yesterday()->toDateString(),
-                    'fecha_formateada' => Carbon::yesterday()->format('d/m/Y'),
-                    'paciente' => [
-                        'id_mascota' => 3,
-                        'nombre' => 'Max',
-                        'especie' => 'Canino',
-                        'raza' => 'Bulldog Francés',
-                        'foto' => 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'dueno' => [
-                        'id_cliente' => 3,
-                        'nombre' => 'Andrea Gómez',
-                        'telefono' => '315 222 3344',
-                        'email' => 'andrea@gmail.com',
-                        'cedula' => '1.017.543.210',
-                    ],
-                    'servicio' => 'Revisión Dermatológica',
-                    'veterinario' => [
-                        'id_veterinario' => 3,
-                        'nombre' => 'Dra. Sofía Ramírez',
-                        'especialidad' => 'Dermatología Veterinaria',
-                        'foto' => 'https://images.unsplash.com/photo-1594824813566-88855ce78905?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'estado' => 'Atendida',
-                    'id_estado' => 2,
-                    'observacion' => 'Tratamiento antipruebas recetado.',
-                ],
-                [
-                    'id_cita' => 104,
-                    'hora' => '04:00 PM',
-                    'hora_raw' => '16:00:00',
-                    'fecha' => Carbon::yesterday()->toDateString(),
-                    'fecha_formateada' => Carbon::yesterday()->format('d/m/Y'),
-                    'paciente' => [
-                        'id_mascota' => 4,
-                        'nombre' => 'Milo',
-                        'especie' => 'Felino',
-                        'raza' => 'Persa',
-                        'foto' => 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'dueno' => [
-                        'id_cliente' => 4,
-                        'nombre' => 'Jorge Ramírez',
-                        'telefono' => '301 777 8899',
-                        'email' => 'jorge@gmail.com',
-                        'cedula' => '1.028.999.000',
-                    ],
-                    'servicio' => 'Exámenes de Laboratorio',
-                    'veterinario' => [
-                        'id_veterinario' => 1,
-                        'nombre' => 'Dra. Camila Torres',
-                        'especialidad' => 'Medicina Preventiva',
-                        'foto' => 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200',
-                    ],
-                    'estado' => 'Cancelada',
-                    'id_estado' => 3,
-                    'observacion' => 'Cita cancelada por el cliente con 24h de anticipación.',
-                ]
-            ]);
-        }
 
         $total = $citas->count();
         $pendientes = $citas->where('id_estado', 1)->count();

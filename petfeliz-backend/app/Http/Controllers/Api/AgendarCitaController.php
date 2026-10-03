@@ -78,8 +78,8 @@ class AgendarCitaController extends Controller
         $idVet = $request->id_veterinario;
         $fecha = $request->fecha;
 
-        // Limpiar reservas temporales expiradas
-        ReservaTemporal::where('expires_at', '<', now())->delete();
+        // Limpiar reservas temporales (conservando aquellas con referencia de pago hasta 24h)
+        ReservaTemporal::limpiarExpiradas();
 
         // Slots base diarios
         $todosLosSlots = [
@@ -101,6 +101,7 @@ class AgendarCitaController extends Controller
         $reservasOcupadas = ReservaTemporal::where('id_veterinario', $idVet)
             ->where('fecha', $fecha)
             ->where('expires_at', '>', now())
+            ->where('es_usada', false)
             ->pluck('hora')
             ->toArray();
 
@@ -135,8 +136,8 @@ class AgendarCitaController extends Controller
         $start = Carbon::createFromDate($anio, $mes, 1)->startOfDay();
         $end = $start->copy()->endOfMonth()->endOfDay();
 
-        // Limpiar reservas temporales expiradas
-        ReservaTemporal::where('expires_at', '<', now())->delete();
+        // Limpiar reservas temporales
+        ReservaTemporal::limpiarExpiradas();
 
         // Citas confirmadas / activas del médico en el mes
         $citas = Cita::where('id_veterinario', $idVet)
@@ -148,6 +149,7 @@ class AgendarCitaController extends Controller
         $reservas = ReservaTemporal::where('id_veterinario', $idVet)
             ->whereBetween('fecha', [$start->toDateString(), $end->toDateString()])
             ->where('expires_at', '>', now())
+            ->where('es_usada', false)
             ->get(['fecha', 'hora']);
 
         $ocupadosPorFecha = [];
@@ -193,67 +195,100 @@ class AgendarCitaController extends Controller
     public function reservarSlot(Request $request)
     {
         $request->validate([
-            'id_veterinario' => 'required|integer',
-            'fecha' => 'required|date',
+            'id_veterinario' => 'required|integer|exists:veterinario,id_veterinario',
+            'fecha' => 'required|date|after_or_equal:today',
             'hora' => 'required|string',
+            'id_servicio' => 'nullable|integer|exists:servicio,id_servicio',
+            'id_mascota' => 'nullable|integer|exists:mascota,id_mascota',
+            'id_sede' => 'nullable|integer|exists:sede,id_sede',
+            'motivo' => 'nullable|string|max:255',
+            'referencia_pago' => 'nullable|string|max:100',
         ]);
 
         $user = $request->user();
+        $cliente = $user ? $user->cliente : null;
+
+        // Validar que si se envía mascota, pertenezca al usuario
+        if ($request->filled('id_mascota') && $cliente) {
+            $mascotaValida = \App\Models\Mascota::where('id_mascota', $request->id_mascota)
+                ->where('id_cliente', $cliente->id_cliente)
+                ->exists();
+            if (!$mascotaValida) {
+                return response()->json([
+                    'message' => 'No autorizado. La mascota no pertenece al cliente autenticado.',
+                ], 403);
+            }
+        }
+
         $idVet = $request->id_veterinario;
         $fecha = $request->fecha;
         $hora = $request->hora;
-
-        // Limpiar expiradas
-        ReservaTemporal::where('expires_at', '<', now())->delete();
-
-        // 1. Verificar si ya existe cita confirmada en cita table
         $horaSql = date('H:i:s', strtotime($hora));
-        $citaExistente = Cita::where('id_veterinario', $idVet)
-            ->where('fecha', $fecha)
-            ->where('hora', $horaSql)
-            ->where('id_estado', '!=', 3)
-            ->exists();
 
-        if ($citaExistente) {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $user, $cliente, $idVet, $fecha, $hora, $horaSql) {
+            // Limpiar expiradas
+            ReservaTemporal::limpiarExpiradas();
+
+            // 1. Verificar con bloqueo pesimista si ya existe cita confirmada/activa en cita table
+            $citaExistente = Cita::where('id_veterinario', $idVet)
+                ->where('fecha', $fecha)
+                ->where('hora', $horaSql)
+                ->where('id_estado', '!=', 3)
+                ->lockForUpdate()
+                ->exists();
+
+            if ($citaExistente) {
+                return response()->json([
+                    'message' => 'El horario seleccionado ya ha sido reservado por otro usuario. Por favor elige otro horario.',
+                ], 409);
+            }
+
+            // 2. Verificar con bloqueo si existe reserva temporal vigente de otro usuario
+            $reservaExistente = ReservaTemporal::where('id_veterinario', $idVet)
+                ->where('fecha', $fecha)
+                ->where('hora', $hora)
+                ->where('expires_at', '>', now())
+                ->where('id_usuario', '!=', $user->id_usuario)
+                ->where('es_usada', false)
+                ->lockForUpdate()
+                ->exists();
+
+            if ($reservaExistente) {
+                return response()->json([
+                    'message' => 'El horario seleccionado se encuentra en proceso de pago por otro usuario. Por favor elige otro horario.',
+                ], 409);
+            }
+
+            // Eliminar reservas anteriores sin referencia del mismo usuario
+            ReservaTemporal::where('id_usuario', $user->id_usuario)
+                ->whereNull('referencia_pago')
+                ->where('es_usada', false)
+                ->delete();
+
+            $token = Str::random(40);
+            $expiresAt = now()->addMinutes(10);
+
+            $reserva = ReservaTemporal::create([
+                'id_veterinario' => $idVet,
+                'fecha' => $fecha,
+                'hora' => $hora,
+                'id_usuario' => $user->id_usuario,
+                'id_cliente' => $cliente ? $cliente->id_cliente : null,
+                'id_servicio' => $request->id_servicio,
+                'id_mascota' => $request->id_mascota,
+                'id_sede' => $request->id_sede,
+                'motivo' => $request->motivo,
+                'referencia_pago' => $request->referencia_pago,
+                'token_reserva' => $token,
+                'expires_at' => $expiresAt,
+            ]);
+
             return response()->json([
-                'message' => 'El horario seleccionado ya ha sido reservado por otro usuario. Por favor elige otro horario.',
-            ], 409);
-        }
-
-        // 2. Verificar si existe reserva temporal vigente de otro usuario
-        $reservaExistente = ReservaTemporal::where('id_veterinario', $idVet)
-            ->where('fecha', $fecha)
-            ->where('hora', $hora)
-            ->where('expires_at', '>', now())
-            ->where('id_usuario', '!=', $user->id_usuario)
-            ->exists();
-
-        if ($reservaExistente) {
-            return response()->json([
-                'message' => 'El horario seleccionado se encuentra en proceso de pago por otro usuario. Por favor elige otro horario.',
-            ], 409);
-        }
-
-        // Eliminar reservas anteriores del mismo usuario para esta sesión
-        ReservaTemporal::where('id_usuario', $user->id_usuario)->delete();
-
-        $token = Str::random(40);
-        $expiresAt = now()->addMinutes(10);
-
-        $reserva = ReservaTemporal::create([
-            'id_veterinario' => $idVet,
-            'fecha' => $fecha,
-            'hora' => $hora,
-            'id_usuario' => $user->id_usuario,
-            'token_reserva' => $token,
-            'expires_at' => $expiresAt,
-        ]);
-
-        return response()->json([
-            'message' => 'Horario bloqueado temporalmente por 10 minutos.',
-            'token_reserva' => $token,
-            'expires_at' => $expiresAt->toIso8601String(),
-        ], 200);
+                'message' => 'Horario bloqueado temporalmente por 10 minutos.',
+                'token_reserva' => $token,
+                'expires_at' => $expiresAt->toIso8601String(),
+            ], 200);
+        });
     }
 
     /**
@@ -262,8 +297,13 @@ class AgendarCitaController extends Controller
     public function liberarReserva(Request $request)
     {
         $token = $request->token_reserva;
-        if ($token) {
-            ReservaTemporal::where('token_reserva', $token)->delete();
+        $user = $request->user();
+
+        if ($token && $user) {
+            ReservaTemporal::where('token_reserva', $token)
+                ->where('id_usuario', $user->id_usuario)
+                ->where('es_usada', false)
+                ->delete();
         }
 
         return response()->json(['message' => 'Reserva liberada.'], 200);
@@ -283,238 +323,13 @@ class AgendarCitaController extends Controller
 
         $request->validate([
             'token_reserva' => 'required|string',
-            'id_mascota' => 'required|integer',
-            'id_servicio' => 'required|integer',
+            'id_mascota' => 'required|integer|exists:mascota,id_mascota',
+            'id_servicio' => 'required|integer|exists:servicio,id_servicio',
             'metodo_pago' => 'nullable|string',
         ]);
 
-        // Limpiar expiradas
-        ReservaTemporal::where('expires_at', '<', now())->delete();
+        $resultado = \App\Services\PaymentAppointmentService::procesarConfirmacion($request->all(), $user);
 
-        $reserva = ReservaTemporal::where('token_reserva', $request->token_reserva)->first();
-
-        if (!$reserva) {
-            return response()->json([
-                'message' => 'El tiempo de reserva ha expirado o el horario ya no está disponible. Por favor selecciona nuevamente tu cita.',
-            ], 410);
-        }
-
-        // Doble verificación a nivel de base de datos
-        $horaSql = date('H:i:s', strtotime($reserva->hora));
-        $citaExistente = Cita::where('id_veterinario', $reserva->id_veterinario)
-            ->where('fecha', $reserva->fecha)
-            ->where('hora', $horaSql)
-            ->where('id_estado', '!=', 3)
-            ->exists();
-
-        if ($citaExistente) {
-            $reserva->delete();
-            return response()->json([
-                'message' => 'Disculpas, este horario acaba de ser ocupado. Por favor selecciona otro horario.',
-            ], 409);
-        }
-
-        // 1. Recalcular precio en servidor (Única fuente de verdad)
-        $servicio = Servicio::find($request->id_servicio);
-        $motivoFinal = $servicio ? $servicio->nombre : 'Consulta General';
-
-        $calculoPrecio = $servicio ? $servicio->calcularPrecio($cliente) : ['monto' => 70000.0, 'tipo_cobertura' => 'particular'];
-        $monto = (float) $calculoPrecio['monto'];
-        $tipoCobertura = $calculoPrecio['tipo_cobertura'];
-
-        $wompiTxId = $request->id_transaccion_wompi ?? $request->referencia_wompi;
-        $rawMetodo = 'CARD';
-
-        // 2. Si el cobro es mayor a $0, VERIFICACIÓN ESTRICTA EN API DE WOMPI
-        if ($monto > 0) {
-            if (empty($wompiTxId)) {
-                return response()->json([
-                    'message' => 'Se requiere el ID de la transacción de Wompi para confirmar el pago.',
-                ], 422);
-            }
-
-            // Unicidad: Prevenir Replay Attacks
-            if (\App\Models\Pago::where('wompi_transaction_id', $wompiTxId)->exists()) {
-                return response()->json([
-                    'message' => 'Esta transacción de Wompi ya fue procesada anteriormente.',
-                ], 409);
-            }
-
-            // Consulta REST directa a API Wompi
-            $txData = \App\Services\WompiService::consultarTransaccion($wompiTxId);
-
-            if (!$txData) {
-                return response()->json([
-                    'message' => 'No se pudo verificar la transacción con la API de Wompi. Por favor intenta de nuevo.',
-                ], 502);
-            }
-
-            // Criterio 1: Estado Aprobado
-            $status = $txData['status'] ?? 'UNKNOWN';
-            if ($status === 'PENDING') {
-                return response()->json([
-                    'message' => 'Tu transacción se encuentra PENDIENTE de autorización por tu entidad bancaria. Recibirás una notificación cuando sea aprobada.',
-                ], 202);
-            }
-
-            if ($status !== 'APPROVED') {
-                return response()->json([
-                    'message' => "La transacción no fue aprobada por Wompi (Estado: {$status}).",
-                ], 422);
-            }
-
-            // Criterio 2: Coincidencia de Monto en Centavos
-            $montoCentavosEsperado = (int) round($monto * 100);
-            $montoCentavosWompi = (int) ($txData['amount_in_cents'] ?? 0);
-            if ($montoCentavosWompi !== $montoCentavosEsperado) {
-                return response()->json([
-                    'message' => "El monto pagado en Wompi (\$" . number_format($montoCentavosWompi / 100, 0, ',', '.') . ") no coincide con la tarifa requerida (\$" . number_format($monto, 0, ',', '.') . ").",
-                ], 422);
-            }
-
-            // Criterio 3: Moneda COP
-            if (strtoupper($txData['currency'] ?? '') !== 'COP') {
-                return response()->json([
-                    'message' => 'La moneda de la transacción debe ser COP.',
-                ], 422);
-            }
-
-            // Extraer método real devuelto por Wompi
-            $rawMetodo = $txData['payment_method_type'] ?? ($txData['payment_method']['type'] ?? 'CARD');
-        } else {
-            $rawMetodo = 'eps';
-        }
-
-        $metodoMap = [
-            'CARD' => 'Tarjeta de Crédito / Débito',
-            'CARD_DEBIT' => 'Tarjeta Débito',
-            'NEQUI' => 'Nequi',
-            'PSE' => 'PSE (Wompi)',
-            'BANCOLOMBIA_TRANSFER' => 'Bancolombia (Transferencia)',
-            'BANCOLOMBIA_COLLECT' => 'Corresponsal Bancolombia',
-            'BANCOLOMBIA_QR' => 'QR Bancolombia',
-            'DAVIPLATA' => 'Daviplata',
-            'card' => 'Tarjeta de Crédito / Débito',
-            'nequi' => 'Nequi',
-            'eps' => 'Cobertura Plan EPS',
-            'wompi' => 'Wompi',
-        ];
-        $metodoUpper = strtoupper($rawMetodo);
-        $metodoFinal = $monto == 0 ? 'Cobertura Plan EPS' : ($metodoMap[$rawMetodo] ?? ($metodoMap[$metodoUpper] ?? ucwords(strtolower(str_replace('_', ' ', $rawMetodo)))));
-
-        $vetObj = Veterinario::find($reserva->id_veterinario);
-        if (!$vetObj || !$vetObj->id_sede) {
-            return response()->json([
-                'message' => 'No fue posible determinar la sede asignada al médico veterinario seleccionado.'
-            ], 422);
-        }
-        $idSedeFinal = $vetObj->id_sede;
-
-        $cita = Cita::create([
-            'id_cliente' => $cliente->id_cliente,
-            'id_mascota' => $request->id_mascota,
-            'id_servicio' => $request->id_servicio,
-            'id_sede' => $idSedeFinal,
-            'motivo' => $motivoFinal,
-            'fecha' => $reserva->fecha,
-            'hora' => $horaSql,
-            'observacion' => $request->observacion ?? null,
-            'metodo_pago' => $metodoFinal ?? 'Pago en línea',
-            'estado_pago' => 'pagado',
-            'monto_pago' => $monto,
-            'id_estado' => 2, // 2 = Confirmada
-            'id_veterinario' => $reserva->id_veterinario,
-        ]);
-
-        $refTransaccion = $wompiTxId ? "WOMPI-{$wompiTxId}" : ('TX-' . strtoupper(Str::random(8)) . '-' . time());
-
-        $pago = Pago::create([
-            'id_cita' => $cita->id_cita,
-            'id_cliente' => $cliente->id_cliente,
-            'monto' => $monto,
-            'tipo_cobertura' => $tipoCobertura,
-            'metodo_pago' => $metodoFinal,
-            'estado' => 'confirmado',
-            'referencia_transaccion' => $refTransaccion,
-            'wompi_transaction_id' => $monto > 0 ? $wompiTxId : null,
-        ]);
-
-        // Eliminar la reserva temporal al confirmar
-        $reserva->delete();
-
-        $vet = Veterinario::find($cita->id_veterinario);
-        $pet = \App\Models\Mascota::find($cita->id_mascota);
-        $petNombre = $pet ? $pet->nombre : 'tu mascota';
-        $vetNombre = $vet ? $vet->nombre : 'Médico Asignado';
-
-        // Disparar notificaciones dinámicas en tiempo real (Campanita Web + Correos Electrónicos)
-        $emailEnviado1 = \App\Services\NotificationService::notificar(
-            $cliente,
-            'Pago Exitoso Registrado',
-            "Se confirmó tu pago por $" . number_format($monto, 0, ',', '.') . " COP (Ref: {$pago->referencia_transaccion}) para el servicio {$motivoFinal}.",
-            'fa-solid fa-credit-card',
-            'pago',
-            new \App\Mail\ConfirmacionPagoMail($cliente, [
-                'referencia' => $pago->referencia_transaccion,
-                'monto' => $monto,
-                'servicio' => $motivoFinal,
-                'metodo' => $metodoFinal,
-            ])
-        );
-
-        $emailEnviado2 = \App\Services\NotificationService::notificar(
-            $cliente,
-            'Comprobante Digital Disponible',
-            "Se ha generado el comprobante electrónico para la atención de {$petNombre}.",
-            'fa-solid fa-file-invoice-dollar',
-            'factura',
-            new \App\Mail\NuevaFacturaMail($cliente, [
-                'id_pago' => $pago->id_pago,
-                'referencia' => $pago->referencia_transaccion,
-                'monto' => $monto,
-                'servicio' => $motivoFinal,
-            ])
-        );
-
-        \App\Services\NotificationService::notificar(
-            $cliente,
-            '¡Cita Agendada Exitosamente!',
-            "Tu cita para {$petNombre} ha sido programada para el {$cita->fecha} a las {$cita->hora} con Dr(a). {$vetNombre}.",
-            'fa-regular fa-calendar-check',
-            'cita'
-        );
-
-        \App\Services\NotificationService::notificarAdmin(
-            'Nueva Cita Confirmada',
-            "El cliente {$cliente->nombre} agendó {$motivoFinal} para {$petNombre} el {$cita->fecha} a las {$cita->hora}.",
-            'fa-solid fa-calendar-check',
-            'cita'
-        );
-
-        return response()->json([
-            'message' => '¡Cita confirmada y pagada con éxito!',
-            'email_enviado' => ($emailEnviado1 || $emailEnviado2),
-            'cita' => [
-                'id' => $cita->id_cita,
-                'fecha' => $cita->fecha,
-                'hora' => $cita->hora,
-                'servicioNombre' => $motivoFinal,
-                'precio' => $monto,
-                'monto' => $monto,
-                'tipo_cobertura' => $tipoCobertura,
-                'estado' => 'Confirmada',
-                'mascota' => $pet ? [
-                    'id' => $pet->id_mascota,
-                    'nombre' => $pet->nombre,
-                    'especie' => $pet->especie,
-                    'foto' => $pet->foto_mascota ?? 'https://res.cloudinary.com/dedroug6v/image/upload/v1/mascotas/default_pet.jpg',
-                ] : null,
-                'veterinario' => $vet ? [
-                    'id' => $vet->id_veterinario,
-                    'nombre' => $vet->nombre,
-                    'foto' => $vet->foto_perfil,
-                ] : null,
-            ],
-        ], 201);
+        return response()->json($resultado, $resultado['code'] ?? 200);
     }
 }

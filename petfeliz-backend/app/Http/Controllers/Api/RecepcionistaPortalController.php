@@ -445,13 +445,21 @@ class RecepcionistaPortalController extends Controller
         ]);
 
         $vetId = $request->id_veterinario ?? $cita->id_veterinario;
+        $idSede = $this->getSedeId($request);
+
+        if ($request->filled('id_veterinario') && $idSede) {
+            $nuevoVet = Veterinario::find($request->id_veterinario);
+            if ($nuevoVet && $nuevoVet->id_sede && (int)$nuevoVet->id_sede !== (int)$idSede && (int)$idSede !== 1) {
+                return response()->json(['message' => 'Acceso denegado. El médico veterinario pertenece a otra sede.'], 403);
+            }
+        }
 
         if ($vetId) {
             $choque = Cita::where('id_veterinario', $vetId)
                 ->where('fecha', $request->nueva_fecha)
-                ->where('hora', $request->nueva_hora)
+                ->where('hora', date('H:i:s', strtotime($request->nueva_hora)))
                 ->where('id_cita', '!=', $cita->id_cita)
-                ->whereIn('id_estado', [1, 2])
+                ->where('id_estado', '!=', 3)
                 ->exists();
 
             if ($choque) {
@@ -460,7 +468,7 @@ class RecepcionistaPortalController extends Controller
         }
 
         $cita->fecha = $request->nueva_fecha;
-        $cita->hora = $request->nueva_hora;
+        $cita->hora = date('H:i:s', strtotime($request->nueva_hora));
         if ($request->filled('id_veterinario')) {
             $cita->id_veterinario = $request->id_veterinario;
         }
@@ -638,7 +646,15 @@ class RecepcionistaPortalController extends Controller
      */
     public function detalleCliente(Request $request, $id)
     {
+        $idSede = $this->getSedeId($request);
         $cliente = Cliente::with(['usuario', 'mascotas.citas.servicio', 'citas.veterinario', 'citas.servicio'])->findOrFail($id);
+
+        if ($idSede && (int) $idSede !== 1) {
+            $tieneCitasEnSede = $cliente->citas()->where('id_sede', (int) $idSede)->exists();
+            if (!$tieneCitasEnSede) {
+                return response()->json(['message' => 'Acceso denegado. El cliente no tiene atenciones registradas en tu sede.'], 403);
+            }
+        }
 
         return response()->json([
             'cliente' => [
@@ -678,7 +694,15 @@ class RecepcionistaPortalController extends Controller
      */
     public function actualizarCliente(Request $request, $id)
     {
+        $idSede = $this->getSedeId($request);
         $cliente = Cliente::findOrFail($id);
+
+        if ($idSede && (int) $idSede !== 1) {
+            $tieneCitasEnSede = $cliente->citas()->where('id_sede', (int) $idSede)->exists();
+            if (!$tieneCitasEnSede) {
+                return response()->json(['message' => 'Acceso denegado. No puedes editar datos de un cliente de otra sede.'], 403);
+            }
+        }
 
         $request->validate([
             'nombre' => 'required|string|max:150',
@@ -724,7 +748,15 @@ class RecepcionistaPortalController extends Controller
      */
     public function actualizarMascota(Request $request, $id)
     {
+        $idSede = $this->getSedeId($request);
         $mascota = Mascota::findOrFail($id);
+
+        if ($idSede && (int) $idSede !== 1) {
+            $tieneCitasEnSede = $mascota->citas()->where('id_sede', (int) $idSede)->exists();
+            if (!$tieneCitasEnSede) {
+                return response()->json(['message' => 'Acceso denegado. No puedes editar datos de un paciente de otra sede.'], 403);
+            }
+        }
 
         $request->validate([
             'nombre' => 'required|string|max:100',

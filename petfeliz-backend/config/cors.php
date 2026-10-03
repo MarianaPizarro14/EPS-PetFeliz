@@ -1,7 +1,7 @@
 <?php
 
-$frontendUrlEnv = env('FRONTEND_URL', 'http://localhost:5173,http://127.0.0.1:5173');
-$configuredOrigins = array_filter(array_map('trim', explode(',', $frontendUrlEnv)));
+$corsAllowedEnv = env('CORS_ALLOWED_ORIGINS', env('FRONTEND_URL', 'http://localhost:5173,http://127.0.0.1:5173,https://www.epspetfeliz.site,https://epspetfeliz.site'));
+$configuredOrigins = array_filter(array_map('trim', explode(',', $corsAllowedEnv)));
 
 return [
 

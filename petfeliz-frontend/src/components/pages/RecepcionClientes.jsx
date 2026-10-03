@@ -79,7 +79,12 @@ export default function RecepcionClientes() {
 
       if (res.ok) {
         const data = await res.json()
-        setClientes(data.clientes || [])
+        const rawClientes = data.clientes || []
+        const filteredClientes = rawClientes.filter((c) => {
+          const email = (c.email || '').toLowerCase()
+          return !email.includes('admin@petfeliz') && !email.startsWith('recepcion.') && !email.startsWith('vet_')
+        })
+        setClientes(filteredClientes)
       } else {
         setErrorGlobal('No se pudo cargar el directorio de clientes.')
       }

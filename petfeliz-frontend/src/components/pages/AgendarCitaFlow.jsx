@@ -292,6 +292,28 @@ function AgendarCitaFlow() {
     fetchDisponibilidadMes()
   }, [selectedVet, currentMonth, currentYear])
 
+  // Liberar reserva temporal y volver al Paso 1
+  const handleCancelarReserva = async () => {
+    if (tokenReserva) {
+      const token = getStoredToken()
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/agendar/liberar-reserva`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ token_reserva: tokenReserva }),
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    setTokenReserva(null)
+    setStep(1)
+  }
+
   // Contador regresivo para la reserva de 10 minutos (Paso 2)
   useEffect(() => {
     let timer = null
@@ -338,9 +360,13 @@ function AgendarCitaFlow() {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          id_veterinario: selectedVet.id,
+          id_veterinario: selectedVet.id || selectedVet.id_veterinario,
           fecha: selectedDate,
           hora: selectedTime,
+          id_mascota: selectedPet?.id || selectedPet?.id_mascota,
+          id_servicio: selectedService?.id_servicio,
+          motivo: selectedService?.nombre || 'Consulta General',
+          observacion: observacion || null,
         }),
       })
 
@@ -361,27 +387,7 @@ function AgendarCitaFlow() {
     }
   }
 
-  // Liberar reserva temporal y volver al Paso 1
-  const handleCancelarReserva = async () => {
-    if (tokenReserva) {
-      const token = getStoredToken()
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/agendar/liberar-reserva`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ token_reserva: tokenReserva }),
-        })
-      } catch (err) {
-        console.error(err)
-      }
-    }
-    setTokenReserva(null)
-    setStep(1)
-  }
+
 
   // Helper para cargar de manera asíncrona el script oficial de Wompi Widget Checkout
   const loadWompiScript = () => {
@@ -466,6 +472,11 @@ function AgendarCitaFlow() {
     if (e && e.preventDefault) e.preventDefault()
     setErrorMsg('')
 
+    if (!tokenReserva) {
+      setErrorMsg('No tienes una reserva de horario activa. Por favor regresa al paso 1 y selecciona tu horario.')
+      return
+    }
+
     const montoCalculado = getPrecioCitaCalculado(selectedService)
 
     // Integración con Wompi para cobro > $0
@@ -473,7 +484,7 @@ function AgendarCitaFlow() {
       const token = getStoredToken()
       try {
         setSubmitting(true)
-        const refUnica = `RES-${tokenReserva || Date.now()}`
+        const refUnica = `RES-${tokenReserva}`
 
         // 1. Obtener firma criptográfica SHA256 desde el Backend (Laravel)
         const resFirma = await fetch(`${import.meta.env.VITE_API_URL}/wompi/generar-firma`, {
@@ -485,7 +496,7 @@ function AgendarCitaFlow() {
           },
           body: JSON.stringify({
             referencia: refUnica,
-            monto: montoCalculado,
+            token_reserva: tokenReserva,
             id_servicio: selectedService?.id_servicio,
           }),
         })

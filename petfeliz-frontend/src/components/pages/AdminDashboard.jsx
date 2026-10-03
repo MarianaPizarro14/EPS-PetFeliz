@@ -91,7 +91,7 @@ const exportToFormattedExcel = (data, filename = 'Historial_Pagos_EPS_PetFeliz.x
       const cliente = item.Cliente ?? item.cliente ?? item['Cliente / Usuario'] ?? 'Cliente EPS'
 
       const rawMonto = item.Monto_COP ?? item.monto_formateado ?? item.monto ?? item['Monto (COP)'] ?? item['Monto'] ?? 0
-      let montoFmt = ''
+      let montoFmt
       if (typeof rawMonto === 'number') {
         montoFmt = `$ ${rawMonto.toLocaleString('es-CO')} COP`
       } else if (String(rawMonto).startsWith('$')) {
@@ -351,20 +351,22 @@ export default function AdminDashboard() {
             <div className="admin-stat-card__info">
               <span>Total Citas Hoy</span>
               <h3>{loading ? '...' : dashboardData.stats.total_citas_hoy}</h3>
-              <div
-                className={`admin-trend-badge ${
-                  dashboardData.stats.citas_hoy_trend_positive
-                    ? 'admin-trend-badge--positive'
-                    : 'admin-trend-badge--negative'
-                }`}
-              >
-                <i
-                  className={`fa-solid ${
-                    dashboardData.stats.citas_hoy_trend_positive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'
+              {dashboardData.stats.citas_hoy_trend && (
+                <div
+                  className={`admin-trend-badge ${
+                    dashboardData.stats.citas_hoy_trend_positive
+                      ? 'admin-trend-badge--positive'
+                      : 'admin-trend-badge--negative'
                   }`}
-                ></i>
-                <span>{dashboardData.stats.citas_hoy_trend || '+12.5% este mes'}</span>
-              </div>
+                >
+                  <i
+                    className={`fa-solid ${
+                      dashboardData.stats.citas_hoy_trend_positive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'
+                    }`}
+                  ></i>
+                  <span>{dashboardData.stats.citas_hoy_trend}</span>
+                </div>
+              )}
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--green">
               <i className="fa-solid fa-calendar-check"></i>
@@ -376,20 +378,22 @@ export default function AdminDashboard() {
             <div className="admin-stat-card__info">
               <span>Citas Pendientes</span>
               <h3>{loading ? '...' : dashboardData.stats.citas_pendientes}</h3>
-              <div
-                className={`admin-trend-badge ${
-                  dashboardData.stats.pendientes_trend_positive
-                    ? 'admin-trend-badge--positive'
-                    : 'admin-trend-badge--negative'
-                }`}
-              >
-                <i
-                  className={`fa-solid ${
-                    dashboardData.stats.pendientes_trend_positive ? 'fa-circle-check' : 'fa-clock'
+              {dashboardData.stats.pendientes_trend && (
+                <div
+                  className={`admin-trend-badge ${
+                    dashboardData.stats.pendientes_trend_positive
+                      ? 'admin-trend-badge--positive'
+                      : 'admin-trend-badge--negative'
                   }`}
-                ></i>
-                <span>{dashboardData.stats.pendientes_trend || '42 por atender'}</span>
-              </div>
+                >
+                  <i
+                    className={`fa-solid ${
+                      dashboardData.stats.pendientes_trend_positive ? 'fa-circle-check' : 'fa-clock'
+                    }`}
+                  ></i>
+                  <span>{dashboardData.stats.pendientes_trend}</span>
+                </div>
+              )}
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--blue">
               <i className="fa-solid fa-clock"></i>
@@ -401,16 +405,18 @@ export default function AdminDashboard() {
             <div className="admin-stat-card__info">
               <span>Revisiones / Atendidas</span>
               <h3>{loading ? '...' : dashboardData.stats.revisiones_hoy}</h3>
-              <div
-                className={`admin-trend-badge ${
-                  dashboardData.stats.revisiones_trend_positive
-                    ? 'admin-trend-badge--positive'
-                    : 'admin-trend-badge--negative'
-                }`}
-              >
-                <i className="fa-solid fa-user-doctor"></i>
-                <span>{dashboardData.stats.revisiones_trend || '+5 hoy'}</span>
-              </div>
+              {dashboardData.stats.revisiones_trend && (
+                <div
+                  className={`admin-trend-badge ${
+                    dashboardData.stats.revisiones_trend_positive
+                      ? 'admin-trend-badge--positive'
+                      : 'admin-trend-badge--negative'
+                  }`}
+                >
+                  <i className="fa-solid fa-user-doctor"></i>
+                  <span>{dashboardData.stats.revisiones_trend}</span>
+                </div>
+              )}
             </div>
             <div className="admin-stat-card__icon admin-stat-card__icon--amber">
               <i className="fa-solid fa-stethoscope"></i>
@@ -464,7 +470,7 @@ export default function AdminDashboard() {
                     }
 
                     // Determinación de color por tonos de la paleta institucional de PetFeliz
-                    let barColor = '#a7f3d0' // verde tenue claro institucional
+                    let barColor
                     let barShadow = 'none'
 
                     if (isToday) {
@@ -529,6 +535,10 @@ export default function AdminDashboard() {
               <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
                 <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.4rem' }}></i>
               </div>
+            ) : dashboardData.distribucion_servicios.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <p>No hay servicios para mostrar.</p>
+              </div>
             ) : (
               <div className="admin-service-dist-list">
                 {dashboardData.distribucion_servicios.map((s, idx) => (
@@ -569,7 +579,7 @@ export default function AdminDashboard() {
               type="button"
               className="admin-btn-csv"
               onClick={handleExportCSV}
-              title="Descarga la plantilla estilizada en Excel (si Excel te muestra un aviso de confirmación, presiona 'Sí' para cargar los colores y formato)"
+              title="Descarga la plantilla estilizada en Excel"
             >
               <i className="fa-solid fa-file-excel"></i>
               <span>Exportar Reporte Excel</span>
@@ -583,7 +593,7 @@ export default function AdminDashboard() {
           ) : transaccionesFiltradas.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
               <i className="fa-solid fa-inbox" style={{ fontSize: '1.6rem', marginBottom: '0.4rem', color: '#94a3b8' }}></i>
-              <p>No se encontraron transacciones con el criterio de búsqueda "{searchTerm}".</p>
+              <p>Aún no hay transacciones o pagos registrados{searchTerm ? ` con el criterio "${searchTerm}"` : ''}.</p>
             </div>
           ) : (
             <div className="admin-table-wrap">
@@ -650,23 +660,29 @@ export default function AdminDashboard() {
               </span>
             </div>
 
-            <div className="admin-reminder-list">
-              {dashboardData.recordatorios_hoy.map((r) => (
-                <div key={r.id} className={`admin-reminder-card admin-reminder-card--${r.tipo}`}>
-                  <div className="admin-reminder-card__top">
-                    <span className="admin-reminder-card__tag">
-                      <i className={`fa-solid ${r.tipo === 'urgente' ? 'fa-triangle-exclamation' : r.tipo === 'exito' ? 'fa-circle-check' : 'fa-circle-info'}`}></i>
-                      {r.tipo === 'urgente' ? 'Urgente' : r.tipo === 'exito' ? 'Auditoría' : 'Verificación'}
-                    </span>
-                    <span className="admin-reminder-card__time">
-                      <i className="fa-regular fa-clock"></i> {r.hora}
-                    </span>
+            {dashboardData.recordatorios_hoy.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b' }}>
+                <p>No hay recordatorios pendientes para hoy.</p>
+              </div>
+            ) : (
+              <div className="admin-reminder-list">
+                {dashboardData.recordatorios_hoy.map((r) => (
+                  <div key={r.id} className={`admin-reminder-card admin-reminder-card--${r.tipo}`}>
+                    <div className="admin-reminder-card__top">
+                      <span className="admin-reminder-card__tag">
+                        <i className={`fa-solid ${r.tipo === 'urgente' ? 'fa-triangle-exclamation' : r.tipo === 'exito' ? 'fa-circle-check' : 'fa-circle-info'}`}></i>
+                        {r.tipo === 'urgente' ? 'Urgente' : r.tipo === 'exito' ? 'Auditoría' : 'Verificación'}
+                      </span>
+                      <span className="admin-reminder-card__time">
+                        <i className="fa-regular fa-clock"></i> {r.hora}
+                      </span>
+                    </div>
+                    <h4 className="admin-reminder-card__title">{r.titulo}</h4>
+                    <p className="admin-reminder-card__detail">{r.detalle}</p>
                   </div>
-                  <h4 className="admin-reminder-card__title">{r.titulo}</h4>
-                  <p className="admin-reminder-card__detail">{r.detalle}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Bloque 2: Actividad Reciente */}
@@ -683,24 +699,30 @@ export default function AdminDashboard() {
               </span>
             </div>
 
-            <div className="admin-timeline">
-              {dashboardData.actividad_reciente.map((act) => (
-                <div key={act.id} className="admin-timeline-item">
-                  <div className={`admin-timeline-node admin-timeline-node--${act.color}`}>
-                    <i className={act.icono}></i>
-                  </div>
-                  <div className="admin-timeline-content">
-                    <div className="admin-timeline-header">
-                      <h5 className="admin-timeline-title">{act.titulo}</h5>
-                      <span className="admin-timeline-time">
-                        <i className="fa-regular fa-clock"></i> {act.tiempo}
-                      </span>
+            {dashboardData.actividad_reciente.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b' }}>
+                <p>No hay actividad reciente registrada.</p>
+              </div>
+            ) : (
+              <div className="admin-timeline">
+                {dashboardData.actividad_reciente.map((act) => (
+                  <div key={act.id} className="admin-timeline-item">
+                    <div className={`admin-timeline-node admin-timeline-node--${act.color}`}>
+                      <i className={act.icono}></i>
                     </div>
-                    <p className="admin-timeline-desc">{act.descripcion}</p>
+                    <div className="admin-timeline-content">
+                      <div className="admin-timeline-header">
+                        <h5 className="admin-timeline-title">{act.titulo}</h5>
+                        <span className="admin-timeline-time">
+                          <i className="fa-regular fa-clock"></i> {act.tiempo}
+                        </span>
+                      </div>
+                      <p className="admin-timeline-desc">{act.descripcion}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

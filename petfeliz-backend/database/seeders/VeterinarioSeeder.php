@@ -53,24 +53,32 @@ class VeterinarioSeeder extends Seeder
 
             // Crear o actualizar usuario
             $existingUser = DB::table('usuario')->where('id_usuario', $userId)->orWhere('email', $email)->first();
+            $hasRolCol = \Illuminate\Support\Facades\Schema::hasColumn('usuario', 'rol');
+
             if (!$existingUser) {
-                DB::table('usuario')->insert([
+                $userData = [
                     'id_usuario' => $userId,
                     'email' => $email,
                     'contrasena_hash' => Hash::make($tempPassword),
-                    'rol' => 'veterinario',
                     'activo' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
+                if ($hasRolCol) {
+                    $userData['rol'] = 'veterinario';
+                }
+                DB::table('usuario')->insert($userData);
             } else {
                 $userId = $existingUser->id_usuario;
-                DB::table('usuario')->where('id_usuario', $userId)->update([
+                $updateData = [
                     'contrasena_hash' => Hash::make($tempPassword),
-                    'rol' => 'veterinario',
                     'activo' => true,
                     'updated_at' => now(),
-                ]);
+                ];
+                if ($hasRolCol) {
+                    $updateData['rol'] = 'veterinario';
+                }
+                DB::table('usuario')->where('id_usuario', $userId)->update($updateData);
             }
 
             // Crear o actualizar veterinario con id_veterinario exacto

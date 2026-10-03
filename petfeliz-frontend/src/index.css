@@ -243,16 +243,18 @@ ul { list-style: none; }
 
 .hero {
     background:
-        radial-gradient(ellipse at top right, #63D7FE 0%, transparent 40%),
-        radial-gradient(ellipse at bottom left, #95F7BB 0%, transparent 50%),
+        radial-gradient(ellipse at top right, #63D7FE 0%, transparent 45%),
+        radial-gradient(ellipse at bottom left, #95F7BB 0%, transparent 55%),
         #ffffff;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     overflow: hidden;
     position: relative;
-    /* FIX: min-height fija para que el hero mida lo mismo sin importar
-       cuantas lineas ocupe el texto de cada slide */
-    min-height: 560px;
+    min-height: 600px;
+    padding-top: clamp(2rem, 4vw, 3rem);
+    padding-bottom: clamp(3rem, 5vw, 4.5rem);
 }
 
 .hero__inner {
@@ -260,7 +262,8 @@ ul { list-style: none; }
     grid-template-columns: 1.2fr 0.8fr;
     align-items: center;
     gap: 3rem;
-    padding-block: clamp(1.5rem, 4vw, 3rem);
+    padding-top: clamp(0.5rem, 2vw, 1.5rem);
+    padding-bottom: 0.5rem;
     width: 100%;
 }
 
@@ -413,25 +416,31 @@ ul { list-style: none; }
 .hero__dots {
     display: flex;
     justify-content: center;
-    gap: .5rem;
-    margin-top: 1.5rem;
+    align-items: center;
+    gap: .6rem;
+    margin-top: 2.25rem;
+    padding-bottom: 0.5rem;
 }
 
 .hero__dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     border: none;
-    background: #d0d0d0;
+    background: #cbd5e1;
     cursor: pointer;
     padding: 0;
-    transition: background .25s, width .25s;
+    transition: background .25s, width .25s, transform .25s;
+}
+
+.hero__dot:hover {
+    background: #94a3b8;
 }
 
 .hero__dot.active {
     background: #006D41;
-    width: 24px;
-    border-radius: 4px;
+    width: 26px;
+    border-radius: 6px;
 }
 
 /* SERVICES */

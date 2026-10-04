@@ -1,19 +1,19 @@
-/* src/components/pages/AdminDashboard.css */
-
 .admin-dash-grid {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
   gap: 1.25rem !important;
   margin-bottom: 1.25rem !important;
   width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .admin-dash-grid-4 {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
   gap: 1.25rem !important;
   margin-bottom: 1.25rem !important;
   width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .admin-stat-card {
@@ -96,7 +96,7 @@
 
 @media (max-width: 1024px) {
   .admin-dash-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
   }
   .admin-dash-grid-4 {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -107,6 +107,9 @@
 }
 
 @media (max-width: 640px) {
+  .admin-dash-grid {
+    grid-template-columns: 1fr !important;
+  }
   .admin-dash-grid-4 {
     grid-template-columns: 1fr !important;
   }
@@ -119,6 +122,10 @@
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   padding: 1.35rem 1.5rem;
   margin-bottom: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .admin-content-grid > .admin-card {
@@ -164,7 +171,11 @@
 
 /* TABLA DE PRÓXIMOS PACIENTES */
 .admin-table-wrap {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .admin-table {

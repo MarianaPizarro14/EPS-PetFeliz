@@ -15,6 +15,24 @@ export default function SidebarVet() {
   const navigate = useNavigate()
   const [showSupportModal, setShowSupportModal] = React.useState(false)
   const [copiedEmail, setCopiedEmail] = React.useState(false)
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    const handleToggle = () => setMobileOpen((prev) => !prev)
+    const handleClose = () => setMobileOpen(false)
+
+    window.addEventListener('toggle-mobile-sidebar', handleToggle)
+    window.addEventListener('close-mobile-sidebar', handleClose)
+    return () => {
+      window.removeEventListener('toggle-mobile-sidebar', handleToggle)
+      window.removeEventListener('close-mobile-sidebar', handleClose)
+    }
+  }, [])
+
+  // Cerrar al cambiar de ruta
+  React.useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   const handleLogout = async () => {
     const token = getStoredToken()
@@ -44,21 +62,10 @@ export default function SidebarVet() {
 
   return (
     <>
-      <aside
-        className="dash-side"
-        style={{
-          minHeight: '100vh',
-          height: '100vh',
-          position: 'sticky',
-          top: 0,
-          boxSizing: 'border-box',
-          overflowY: 'auto',
-          zIndex: 950,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-        }}
-      >
+      {mobileOpen && (
+        <div className="dash-side-backdrop" onClick={() => setMobileOpen(false)} />
+      )}
+      <aside className={`dash-side ${mobileOpen ? 'is-open' : ''}`}>
         <div>
           <div className="dash-side__logo">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

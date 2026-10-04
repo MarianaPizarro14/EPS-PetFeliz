@@ -728,9 +728,20 @@ export default function DashboardHeader({
 
   return (
     <header className="dash-header">
-      <div>
-        <h1 className="dash-header__title">{title}</h1>
-        {subtitle && <p className="dash-header__subtitle">{subtitle}</p>}
+      <div className="dash-header__left">
+        <button
+          type="button"
+          className="dash-header__mobile-toggle"
+          aria-label="Abrir navegación del panel"
+          title="Abrir menú de navegación"
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar'))}
+        >
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 className="dash-header__title">{title}</h1>
+          {subtitle && <p className="dash-header__subtitle">{subtitle}</p>}
+        </div>
       </div>
 
       <div className="dash-header__right">

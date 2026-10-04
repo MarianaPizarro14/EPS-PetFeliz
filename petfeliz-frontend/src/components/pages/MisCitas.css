@@ -351,8 +351,30 @@
   color: #0f172a;
 }
 
+.citas-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1.5px solid #f1f5f9;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.citas-tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  .citas-main {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+  .citas-card-box {
+    padding: 1rem 0.75rem;
+    border-radius: 14px;
+  }
   .cita-card {
     flex-direction: column;
     align-items: stretch;
@@ -362,16 +384,16 @@
   .cita-card__actions {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.4rem;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.5rem;
     border-top: 1px solid #f1f5f9;
     padding-top: 0.75rem;
   }
   .btn-action-sm {
     width: 100%;
-    height: 36px;
-    padding: 0 0.25rem;
-    font-size: 0.76rem;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
   }
   .modal-detail-grid {
     grid-template-columns: 1fr;
@@ -381,5 +403,10 @@
 @media (max-width: 480px) {
   .cita-card__actions {
     grid-template-columns: 1fr;
+  }
+  .btn-agendar-cita {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
   }
 }

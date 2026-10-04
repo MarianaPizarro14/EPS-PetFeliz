@@ -702,6 +702,18 @@
   .pet-form__row {
     grid-template-columns: 1fr;
   }
+  .pets-grid {
+    grid-template-columns: 1fr;
+  }
+  .pet-card-full {
+    padding: 1rem;
+  }
+  .btn-modal-primary,
+  .btn-modal-secondary,
+  .btn-modal-danger,
+  .btn-add-pet {
+    min-height: 44px;
+  }
 }
 
 /* ── TARJETA "AGREGAR NUEVA MASCOTA" EN LA CUADRÍCULA ── */

@@ -19,6 +19,24 @@ const adminMenuItems = [
 export default function SidebarAdmin() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    const handleToggle = () => setMobileOpen((prev) => !prev)
+    const handleClose = () => setMobileOpen(false)
+
+    window.addEventListener('toggle-mobile-sidebar', handleToggle)
+    window.addEventListener('close-mobile-sidebar', handleClose)
+    return () => {
+      window.removeEventListener('toggle-mobile-sidebar', handleToggle)
+      window.removeEventListener('close-mobile-sidebar', handleClose)
+    }
+  }, [])
+
+  // Cerrar al cambiar de ruta
+  React.useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   const handleLogout = async () => {
     const token = getStoredToken()
@@ -51,7 +69,10 @@ export default function SidebarAdmin() {
   return (
     <>
       <AdminCriticalAlert />
-      <aside className="dash-side">
+      {mobileOpen && (
+        <div className="dash-side-backdrop" onClick={() => setMobileOpen(false)} />
+      )}
+      <aside className={`dash-side ${mobileOpen ? 'is-open' : ''}`}>
       <div>
         <div className="dash-side__logo">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

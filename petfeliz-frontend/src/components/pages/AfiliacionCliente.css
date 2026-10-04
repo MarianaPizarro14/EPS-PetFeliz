@@ -577,3 +577,44 @@
   font-weight: 700;
   color: #004D40;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .afil-box {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+  .afil-status-card {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+  .afil-receipt-card {
+    padding: 1.25rem 1rem;
+  }
+  .afil-receipt-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .afil-receipt-total-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .afil-status-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .afil-code-badge {
+    align-items: flex-start;
+  }
+  .afil-status-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-receipt-action,
+  .btn-receipt-close {
+    min-height: 44px;
+  }
+}

@@ -486,14 +486,106 @@
   font-weight: 700;
 }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE Y MOBILE FIRST ── */
+
+.dash-side-backdrop {
+    display: none;
+}
+
+@media (min-width: 1921px) {
+    .dash-main {
+        max-width: 1600px;
+        margin-inline: auto;
+        width: 100%;
+    }
+}
 
 @media (max-width: 1024px) {
     .dash-top { grid-template-columns: 1fr; }
     .dash-pets__grid { grid-template-columns: 1fr; }
+    .dash-main { padding: 2rem 1.5rem; }
 }
 
 @media (max-width: 900px) {
-    .dash { grid-template-columns: 1fr; }
-    .dash-side { display: none; }
+    .dash { 
+        display: block; 
+        width: 100%;
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    .dash-side {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 85vw;
+        height: 100vh;
+        background: #ffffff;
+        z-index: 10000;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex !important;
+        overflow-y: auto;
+    }
+
+    .dash-side.is-open {
+        transform: translateX(0);
+    }
+
+    .dash-side-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        animation: navFadeIn 0.2s ease-out;
+    }
+    
+    .dash-main {
+        padding: 1.5rem 1rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .dash-pets__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .dash-cta {
+        padding: 1.5rem;
+    }
+    .dash-cta__body h3 {
+        font-size: 1.15rem;
+    }
+    .dash-appointment-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    .dash-appointment-row__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .dash-main {
+        padding: 1rem 0.75rem;
+    }
+    .dash-pets__card {
+        padding: 1rem;
+    }
+    .btn-agendar-cita,
+    .btn-primary-pet {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
 }

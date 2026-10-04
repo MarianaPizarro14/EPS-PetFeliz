@@ -1111,3 +1111,53 @@
     min-height: auto;
   }
 }
+
+@media (max-width: 640px) {
+  .agendar-flow-main {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+  .agendar-content-box {
+    padding: 1.1rem 1rem;
+    border-radius: 14px;
+  }
+  .agendar-stepper-box {
+    padding: 0.5rem 0.75rem;
+  }
+  .agendar-stepper {
+    gap: 0.5rem;
+  }
+  .agendar-step-item span {
+    display: none;
+  }
+  .agendar-step-item.agendar-step-item--active span {
+    display: inline;
+    font-size: 0.75rem;
+  }
+  .agendar-options-grid {
+    grid-template-columns: 1fr;
+  }
+  .agendar-form-actions {
+    flex-direction: column-reverse;
+    gap: 0.65rem;
+  }
+  .agendar-form-actions .btn-modal-secondary,
+  .agendar-form-actions .btn-primary-pet {
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .agendar-flow-page {
+    font-size: 14px;
+  }
+  .agendar-cal-day {
+    font-size: 0.78rem;
+    padding: 0.35rem;
+  }
+  .agendar-time-btn {
+    min-height: 44px;
+    font-size: 0.82rem;
+  }
+}

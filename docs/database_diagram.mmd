@@ -1,0 +1,272 @@
+erDiagram
+    CLIENTE ||--o{ CITA : "id_cliente"
+    ESTADO_CITA ||--o{ CITA : "id_estado"
+    MASCOTA ||--o{ CITA : "id_mascota"
+    SEDE ||--o{ CITA : "id_sede"
+    VETERINARIO ||--o{ CITA : "id_veterinario"
+    USUARIO ||--o{ CLIENTE : "id_usuario"
+    CLIENTE ||--o{ MASCOTA : "id_cliente"
+    USUARIO ||--o{ PAGOS : "recibido_por"
+    SEDE ||--o{ RECEPCIONISTA : "id_sede"
+    USUARIO ||--o{ RECEPCIONISTA : "id_usuario"
+    SEDE ||--o{ VETERINARIO : "id_sede"
+    USUARIO ||--o{ VETERINARIO : "id_usuario"
+
+    CACHE {
+        varchar key PK
+        mediumtext value 
+        bigint expiration FK
+    }
+    CACHE_LOCKS {
+        varchar key PK
+        varchar owner 
+        bigint expiration FK
+    }
+    CITA {
+        bigint id_cita PK
+        date fecha 
+        time hora 
+        text motivo 
+        int id_servicio 
+        bigint id_estado FK
+        text observacion 
+        json medicamentos 
+        varchar metodo_pago 
+        varchar estado_pago 
+        decimal monto_pago 
+        bigint id_cliente FK
+        bigint id_mascota FK
+        bigint id_veterinario FK
+        bigint id_sede FK
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+        varchar slot_activo UK
+    }
+    CLIENTE {
+        bigint id_cliente PK
+        bigint id_usuario UK
+        varchar nombre 
+        varchar cedula 
+        date fecha_nacimiento 
+        varchar telefono 
+        varchar direccion 
+        varchar departamento 
+        varchar ciudad 
+        varchar contacto_emergencia_nombre 
+        varchar contacto_emergencia_telefono 
+        tinyint notificaciones_email 
+        tinyint recordatorios_citas 
+        tinyint es_afiliado 
+        date fecha_afiliacion 
+        varchar foto_perfil 
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+    }
+    ESTADO_CITA {
+        bigint id_estado PK
+        varchar nombre UK
+    }
+    FAILED_JOBS {
+        bigint id PK
+        varchar uuid UK
+        varchar connection FK
+        varchar queue 
+        longtext payload 
+        longtext exception 
+        timestamp failed_at 
+    }
+    HISTORIAS_CUIDADORES {
+        bigint id PK
+        varchar nombre_cuidador 
+        varchar nombre_mascota 
+        varchar categoria 
+        text historia 
+        enum estado 
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    JOB_BATCHES {
+        varchar id PK
+        varchar name 
+        int total_jobs 
+        int pending_jobs 
+        int failed_jobs 
+        longtext failed_job_ids 
+        mediumtext options 
+        int cancelled_at 
+        int created_at 
+        int finished_at 
+    }
+    JOBS {
+        bigint id PK
+        varchar queue FK
+        longtext payload 
+        smallint attempts 
+        int reserved_at 
+        int available_at 
+        int created_at 
+    }
+    MASCOTA {
+        bigint id_mascota PK
+        varchar nombre 
+        varchar especie 
+        varchar raza 
+        varchar sexo 
+        date fecha_nacimiento 
+        decimal peso 
+        text alergias 
+        text vacunas 
+        varchar foto_mascota 
+        bigint id_cliente FK
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+    }
+    MIGRATIONS {
+        int id PK
+        varchar migration 
+        int batch 
+    }
+    NOTIFICACION {
+        bigint id_notificacion PK
+        int id_cliente 
+        bigint id_usuario FK
+        varchar titulo 
+        text mensaje 
+        tinyint leida 
+        varchar icono 
+        varchar tipo 
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    PAGOS {
+        bigint id_pago PK
+        int id_cita 
+        int id_cliente 
+        decimal monto 
+        decimal monto_recibido 
+        decimal cambio_devuelto 
+        bigint recibido_por FK
+        timestamp fecha_recepcion_pago 
+        varchar observacion_pago 
+        enum tipo_cobertura 
+        varchar metodo_pago 
+        enum estado 
+        varchar referencia_transaccion 
+        varchar wompi_transaction_id UK
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    PASSWORD_RESET_TOKENS {
+        varchar email PK
+        varchar token 
+        timestamp created_at 
+    }
+    PERSONAL_ACCESS_TOKENS {
+        bigint id PK
+        varchar tokenable_type FK
+        bigint tokenable_id 
+        text name 
+        varchar token UK
+        text abilities 
+        timestamp last_used_at 
+        timestamp expires_at FK
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    RECEPCIONISTA {
+        bigint id_recepcionista PK
+        bigint id_usuario FK
+        bigint id_sede FK
+        varchar nombre 
+        varchar telefono 
+        varchar foto_perfil 
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+    }
+    RESERVA_TEMPORAL {
+        bigint id_reserva PK
+        int id_veterinario FK
+        date fecha 
+        varchar hora 
+        bigint id_usuario 
+        bigint id_servicio 
+        bigint id_mascota 
+        bigint id_cliente 
+        bigint id_sede 
+        varchar motivo 
+        varchar referencia_pago FK
+        tinyint es_usada 
+        varchar token_reserva UK
+        timestamp expires_at 
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    SEDE {
+        bigint id_sede PK
+        varchar nombre UK
+        varchar direccion 
+        varchar telefono 
+        tinyint es_principal 
+        tinyint activo 
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    SERVICIO {
+        bigint id_servicio PK
+        varchar nombre 
+        text descripcion 
+        decimal precio_base 
+        tinyint activo 
+        decimal precio_afiliado 
+        tinyint incluido_en_plan 
+        int limite_mensual_incluido 
+    }
+    SESSIONS {
+        varchar id PK
+        bigint user_id FK
+        varchar ip_address 
+        text user_agent 
+        longtext payload 
+        int last_activity FK
+    }
+    USERS {
+        bigint id PK
+        varchar name 
+        varchar email UK
+        timestamp email_verified_at 
+        varchar password 
+        varchar remember_token 
+        timestamp created_at 
+        timestamp updated_at 
+    }
+    USUARIO {
+        bigint id_usuario PK
+        varchar email UK
+        varchar rol 
+        varchar contrasena_hash 
+        tinyint password_temporal 
+        tinyint activo 
+        varchar token_reset 
+        timestamp token_reset_expira 
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+    }
+    VETERINARIO {
+        bigint id_veterinario PK
+        bigint id_usuario UK
+        bigint id_sede FK
+        int id_sucursal 
+        varchar nombre 
+        varchar especialidad 
+        varchar telefono 
+        varchar numero_tarjeta 
+        varchar foto_perfil 
+        timestamp created_at 
+        timestamp updated_at 
+        timestamp deleted_at 
+    }

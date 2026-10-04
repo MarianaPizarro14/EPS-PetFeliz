@@ -1,0 +1,297 @@
+// EPS PetFeliz Database Schema (DBML)
+// Compatible con dbdiagram.io
+
+Table cache {
+  key varchar(255) [primary key]
+  value mediumtext [not null]
+  expiration bigint [not null]
+}
+
+Table cache_locks {
+  key varchar(255) [primary key]
+  owner varchar(255) [not null]
+  expiration bigint [not null]
+}
+
+Table cita {
+  id_cita bigint unsigned [primary key, increment]
+  fecha date [not null]
+  hora time [not null]
+  motivo text
+  id_servicio int
+  id_estado bigint unsigned [not null]
+  observacion text
+  medicamentos json
+  metodo_pago varchar(100) [default: `Pago en línea`]
+  estado_pago varchar(50) [not null, default: `pendiente`]
+  monto_pago decimal(10,2)
+  id_cliente bigint unsigned [not null]
+  id_mascota bigint unsigned [not null]
+  id_veterinario bigint unsigned [not null]
+  id_sede bigint unsigned
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  slot_activo varchar(150) [unique]
+}
+
+Table cliente {
+  id_cliente bigint unsigned [primary key, increment]
+  id_usuario bigint unsigned [not null, unique]
+  nombre varchar(100) [not null]
+  cedula varchar(50)
+  fecha_nacimiento date
+  telefono varchar(20)
+  direccion varchar(255)
+  departamento varchar(100)
+  ciudad varchar(100)
+  contacto_emergencia_nombre varchar(150)
+  contacto_emergencia_telefono varchar(50)
+  notificaciones_email tinyint(1) [not null, default: `1`]
+  recordatorios_citas tinyint(1) [not null, default: `1`]
+  es_afiliado tinyint(1) [not null, default: `1`]
+  fecha_afiliacion date
+  foto_perfil varchar(255)
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table estado_cita {
+  id_estado bigint unsigned [primary key, increment]
+  nombre varchar(30) [not null, unique]
+}
+
+Table failed_jobs {
+  id bigint unsigned [primary key, increment]
+  uuid varchar(255) [not null, unique]
+  connection varchar(255) [not null]
+  queue varchar(255) [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table historias_cuidadores {
+  id bigint unsigned [primary key, increment]
+  nombre_cuidador varchar(100) [not null]
+  nombre_mascota varchar(100) [not null]
+  categoria varchar(100) [not null]
+  historia text [not null]
+  estado enum('pendiente','aprobado','rechazado') [not null, default: `pendiente`]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table job_batches {
+  id varchar(255) [primary key]
+  name varchar(255) [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext
+  cancelled_at int
+  created_at int [not null]
+  finished_at int
+}
+
+Table jobs {
+  id bigint unsigned [primary key, increment]
+  queue varchar(255) [not null]
+  payload longtext [not null]
+  attempts smallint unsigned [not null]
+  reserved_at int unsigned
+  available_at int unsigned [not null]
+  created_at int unsigned [not null]
+}
+
+Table mascota {
+  id_mascota bigint unsigned [primary key, increment]
+  nombre varchar(100) [not null]
+  especie varchar(50)
+  raza varchar(50)
+  sexo varchar(20)
+  fecha_nacimiento date
+  peso decimal(5,2)
+  alergias text
+  vacunas text
+  foto_mascota varchar(255)
+  id_cliente bigint unsigned [not null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table migrations {
+  id int unsigned [primary key, increment]
+  migration varchar(255) [not null]
+  batch int [not null]
+}
+
+Table notificacion {
+  id_notificacion bigint unsigned [primary key, increment]
+  id_cliente int
+  id_usuario bigint unsigned
+  titulo varchar(150) [not null]
+  mensaje text [not null]
+  leida tinyint(1) [not null, default: `0`]
+  icono varchar(100) [not null, default: `fa-regular fa-bell`]
+  tipo varchar(50) [not null, default: `general`]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table pagos {
+  id_pago bigint unsigned [primary key, increment]
+  id_cita int
+  id_cliente int [not null]
+  monto decimal(10,2) [not null, default: `0.00`]
+  monto_recibido decimal(10,2)
+  cambio_devuelto decimal(10,2)
+  recibido_por bigint unsigned
+  fecha_recepcion_pago timestamp
+  observacion_pago varchar(255)
+  tipo_cobertura enum('eps','particular','copago') [not null, default: `eps`]
+  metodo_pago varchar(255) [not null, default: `tarjeta`]
+  estado enum('confirmado','fallido','reembolsado') [not null, default: `confirmado`]
+  referencia_transaccion varchar(255)
+  wompi_transaction_id varchar(255) [unique]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table password_reset_tokens {
+  email varchar(255) [primary key]
+  token varchar(255) [not null]
+  created_at timestamp
+}
+
+Table personal_access_tokens {
+  id bigint unsigned [primary key, increment]
+  tokenable_type varchar(255) [not null]
+  tokenable_id bigint unsigned [not null]
+  name text [not null]
+  token varchar(64) [not null, unique]
+  abilities text
+  last_used_at timestamp
+  expires_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table recepcionista {
+  id_recepcionista bigint unsigned [primary key, increment]
+  id_usuario bigint unsigned
+  id_sede bigint unsigned
+  nombre varchar(150) [not null]
+  telefono varchar(20)
+  foto_perfil varchar(255)
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table reserva_temporal {
+  id_reserva bigint unsigned [primary key, increment]
+  id_veterinario int [not null]
+  fecha date [not null]
+  hora varchar(20) [not null]
+  id_usuario bigint unsigned [not null]
+  id_servicio bigint unsigned
+  id_mascota bigint unsigned
+  id_cliente bigint unsigned
+  id_sede bigint unsigned
+  motivo varchar(255)
+  referencia_pago varchar(100)
+  es_usada tinyint(1) [not null, default: `0`]
+  token_reserva varchar(100) [not null, unique]
+  expires_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table sede {
+  id_sede bigint unsigned [primary key, increment]
+  nombre varchar(100) [not null, unique]
+  direccion varchar(255)
+  telefono varchar(20)
+  es_principal tinyint(1) [not null, default: `0`]
+  activo tinyint(1) [not null, default: `1`]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table servicio {
+  id_servicio bigint unsigned [primary key, increment]
+  nombre varchar(100) [not null]
+  descripcion text
+  precio_base decimal(10,2)
+  activo tinyint(1) [not null, default: `1`]
+  precio_afiliado decimal(10,2)
+  incluido_en_plan tinyint(1) [not null, default: `0`]
+  limite_mensual_incluido int
+}
+
+Table sessions {
+  id varchar(255) [primary key]
+  user_id bigint unsigned
+  ip_address varchar(45)
+  user_agent text
+  payload longtext [not null]
+  last_activity int [not null]
+}
+
+Table users {
+  id bigint unsigned [primary key, increment]
+  name varchar(255) [not null]
+  email varchar(255) [not null, unique]
+  email_verified_at timestamp
+  password varchar(255) [not null]
+  remember_token varchar(100)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table usuario {
+  id_usuario bigint unsigned [primary key, increment]
+  email varchar(100) [not null, unique]
+  rol varchar(50) [not null, default: `cliente`]
+  contrasena_hash varchar(255) [not null]
+  password_temporal tinyint(1) [not null, default: `0`]
+  activo tinyint(1) [default: `1`]
+  token_reset varchar(255)
+  token_reset_expira timestamp
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table veterinario {
+  id_veterinario bigint unsigned [primary key, increment]
+  id_usuario bigint unsigned [not null, unique]
+  id_sede bigint unsigned
+  id_sucursal int [not null, default: `1`]
+  nombre varchar(100) [not null]
+  especialidad varchar(150)
+  telefono varchar(20)
+  numero_tarjeta varchar(50)
+  foto_perfil varchar(255)
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+// Relaciones y Llaves Foraneas
+Ref: cita.id_cliente > cliente.id_cliente
+Ref: cita.id_estado > estado_cita.id_estado
+Ref: cita.id_mascota > mascota.id_mascota
+Ref: cita.id_sede > sede.id_sede
+Ref: cita.id_veterinario > veterinario.id_veterinario
+Ref: cliente.id_usuario > usuario.id_usuario
+Ref: mascota.id_cliente > cliente.id_cliente
+Ref: pagos.recibido_por > usuario.id_usuario
+Ref: recepcionista.id_sede > sede.id_sede
+Ref: recepcionista.id_usuario > usuario.id_usuario
+Ref: veterinario.id_sede > sede.id_sede
+Ref: veterinario.id_usuario > usuario.id_usuario
